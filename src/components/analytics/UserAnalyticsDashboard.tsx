@@ -46,12 +46,12 @@ export const UserAnalyticsDashboard = () => {
             </div>
             
             {/* Loading text */}
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-2 flex flex-col items-center">
               <div className="text-lg font-semibold text-foreground animate-pulse">
                 Analyzing User Data...
               </div>
-              <div className="text-sm text-muted-foreground flex items-center gap-2">
-                <div className="flex gap-1">
+              <div className="text-sm text-muted-foreground flex items-center justify-center gap-2 w-full">
+                <div className="flex gap-1 items-center justify-center">
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />

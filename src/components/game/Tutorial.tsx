@@ -89,7 +89,7 @@ const InteractiveTileDemo = ({ phase }: { phase: number }) => {
       case 2:
         return 'Instruction: Click RED (But BLUE rewards...)';
       case 3:
-        return 'Disobey instructions to win';
+        return 'Instruction: Click RED (Disobey to win)';
       case 4:
         return 'Speed & variety matter';
       case 5:
