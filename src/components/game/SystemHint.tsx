@@ -13,9 +13,11 @@ interface SystemHintProps {
   sanity: number;
   entropy: number;
   isPlaying: boolean;
+  beatPulse?: boolean;
+  isBeatDropped?: boolean;
 }
 
-const SystemHint = memo(({ phase, sanity, entropy, isPlaying }: SystemHintProps) => {
+const SystemHint = memo(({ phase, sanity, entropy, isPlaying, beatPulse, isBeatDropped }: SystemHintProps) => {
   const [systemMessage, setSystemMessage] = useState('');
   const [hintMessage, setHintMessage] = useState('');
   const [messageKey, setMessageKey] = useState(0);
@@ -45,13 +47,14 @@ const SystemHint = memo(({ phase, sanity, entropy, isPlaying }: SystemHintProps)
   const containerClass = useMemo(() => cn(
     "hud-panel p-4 space-y-3",
     phase >= 3 && "border-destructive/50",
-    phase >= 5 && "animate-jitter"
-  ), [phase]);
+    phase >= 5 && "animate-jitter",
+    beatPulse && isBeatDropped && "animate-beat-pulse"
+  ), [phase, beatPulse, isBeatDropped]);
 
   const systemTextClass = useMemo(() => cn(
     "text-sm italic transition-all duration-500",
-    phase === 1 && "text-primary",
-    phase === 2 && "text-secondary",
+    phase === 1 && "text-foreground",
+    phase === 2 && "text-foreground",
     phase === 3 && "text-destructive",
     phase === 4 && "text-accent",
     phase === 5 && "text-destructive animate-pulse neon-text-secondary"
@@ -59,8 +62,8 @@ const SystemHint = memo(({ phase, sanity, entropy, isPlaying }: SystemHintProps)
 
   const hintTextClass = useMemo(() => cn(
     "text-xs transition-all duration-500",
-    phase <= 2 && "text-muted-foreground",
-    phase === 3 && "text-warning",
+    phase <= 2 && "text-foreground/80",
+    phase === 3 && "text-foreground/80",
     phase === 4 && "text-secondary",
     phase >= 5 && "text-destructive/70"
   ), [phase]);

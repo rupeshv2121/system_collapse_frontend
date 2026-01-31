@@ -3,40 +3,41 @@
 @tailwind utilities;
 
 @layer base {
+  /* Light theme - used before beat drop */
   :root {
-    --background: 240 20% 6%;
-    --foreground: 180 100% 95%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 240 15% 10%;
-    --card-foreground: 180 100% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 240 15% 10%;
-    --popover-foreground: 180 100% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 180 100% 50%;
-    --primary-foreground: 240 20% 6%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 280 100% 60%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 240 10% 18%;
-    --muted-foreground: 240 10% 60%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 45 100% 55%;
-    --accent-foreground: 240 20% 6%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
 
-    --destructive: 0 85% 55%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 145 80% 45%;
+    --success: 145 70% 50%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 35 100% 55%;
-    --warning-foreground: 240 20% 6%;
+    --warning: 35 90% 60%;
+    --warning-foreground: 222 47% 11%;
 
-    --border: 240 15% 20%;
-    --input: 240 15% 15%;
-    --ring: 180 100% 50%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 50%;
 
     --radius: 0.5rem;
 
@@ -46,8 +47,8 @@
     --tile-green: 145 80% 45%;
     --tile-yellow: 50 100% 55%;
 
-    --glow-primary: 180 100% 50%;
-    --glow-secondary: 280 100% 60%;
+    --glow-primary: 210 100% 50%;
+    --glow-secondary: 280 80% 60%;
     --glow-accent: 45 100% 55%;
     --glow-danger: 0 85% 55%;
 
@@ -58,16 +59,17 @@
     --chaos-opacity: 1;
     --chaos-scale: 1;
 
-    --sidebar-background: 240 15% 8%;
-    --sidebar-foreground: 180 100% 95%;
-    --sidebar-primary: 180 100% 50%;
-    --sidebar-primary-foreground: 240 20% 6%;
-    --sidebar-accent: 280 100% 60%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 15% 20%;
-    --sidebar-ring: 180 100% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 210 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 210 100% 50%;
   }
 
+  /* Dark neon theme - activated after beat drop */
   .dark {
     --background: 240 20% 6%;
     --foreground: 180 100% 95%;
@@ -116,6 +118,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
@@ -234,7 +237,7 @@
   }
 
   .hud-value {
-    @apply font-bold text-primary;
+    @apply font-bold text-foreground;
     font-family: 'Orbitron', monospace;
   }
 
@@ -393,5 +396,99 @@
 
   .animate-desaturate {
     animation: desaturate-pulse 3s ease-in-out infinite;
+  }
+
+  /* Beat synchronization animations */
+  @keyframes beat-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes vibrate-light {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-1px, 1px); }
+    50% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, -1px); }
+  }
+
+  @keyframes vibrate-intense {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-2px, 2px) rotate(-1deg); }
+    20% { transform: translate(2px, -2px) rotate(1deg); }
+    30% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+    40% { transform: translate(2px, 2px) rotate(0.5deg); }
+    50% { transform: translate(-2px, 2px) rotate(-1deg); }
+    60% { transform: translate(2px, -2px) rotate(1deg); }
+    70% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+    80% { transform: translate(2px, 2px) rotate(0.5deg); }
+    90% { transform: translate(-1px, 1px) rotate(-0.25deg); }
+  }
+
+  @keyframes explosion-scatter {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+    100% { 
+      transform: translate(var(--scatter-x, 0), var(--scatter-y, 0)) rotate(var(--scatter-rotate, 0deg)) scale(0.8);
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes realign {
+    0% { 
+      transform: translate(var(--scatter-x, 0), var(--scatter-y, 0)) rotate(var(--scatter-rotate, 0deg)) scale(0.8);
+      opacity: 0.6;
+    }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  }
+
+  @keyframes flash-bang {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes neon-intensity {
+    0%, 100% { 
+      filter: brightness(1) saturate(1);
+      box-shadow: 
+        0 0 5px hsl(var(--glow-primary)),
+        0 0 10px hsl(var(--glow-primary) / 0.5),
+        0 0 20px hsl(var(--glow-primary) / 0.3);
+    }
+    50% { 
+      filter: brightness(1.3) saturate(1.5);
+      box-shadow: 
+        0 0 10px hsl(var(--glow-primary)),
+        0 0 20px hsl(var(--glow-primary) / 0.7),
+        0 0 40px hsl(var(--glow-primary) / 0.5),
+        0 0 60px hsl(var(--glow-primary) / 0.3);
+    }
+  }
+
+  .animate-beat-pulse {
+    animation: beat-pulse 0.15s ease-out;
+  }
+
+  .animate-explosion-scatter {
+    animation: explosion-scatter 0.5s ease-out forwards;
+  }
+
+  .animate-realign {
+    animation: realign 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+
+  .animate-flash-bang {
+    animation: flash-bang 0.3s ease-out;
+  }
+
+  .animate-neon-intensity {
+    animation: neon-intensity 0.5s ease-in-out infinite;
+  }
+
+  .animate-vibrate-light {
+    animation: vibrate-light 0.3s ease-in-out infinite;
+  }
+
+  .animate-vibrate-intense {
+    animation: vibrate-intense 0.2s ease-in-out infinite;
   }
 }

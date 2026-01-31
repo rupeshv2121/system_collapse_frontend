@@ -12,6 +12,8 @@ interface InstructionDisplayProps {
   phase: GamePhase;
   entropy: number;
   sanity: number;
+  beatPulse?: boolean;
+  isBeatDropped?: boolean;
 }
 
 // Glitch text generator
@@ -27,7 +29,7 @@ const glitchText = (text: string, intensity: number): string => {
   }).join('');
 };
 
-const InstructionDisplay = memo(({ instruction, phase, entropy, sanity }: InstructionDisplayProps) => {
+const InstructionDisplay = memo(({ instruction, phase, entropy, sanity, beatPulse, isBeatDropped }: InstructionDisplayProps) => {
   // Calculate glitch intensity
   const glitchIntensity = useMemo(() => {
     if (phase < 3) return 0;
@@ -54,7 +56,10 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity }: Instru
   }[instruction]), [instruction]);
 
   return (
-    <div className="relative">
+    <div className={cn(
+      "relative",
+      beatPulse && isBeatDropped && "animate-beat-pulse"
+    )}>
       {/* Background glow */}
       <div className={cn(
         "absolute inset-0 blur-xl opacity-30 rounded-lg",
@@ -66,7 +71,8 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity }: Instru
       {/* Main instruction container */}
       <div className={cn(
         "relative hud-panel py-3 lg:py-4 px-6 lg:px-8 text-center",
-        phase >= 5 && "animate-jitter"
+        phase >= 5 && "animate-jitter",
+        isBeatDropped && "neon-glow"
       )}>
         <span className="text-muted-foreground text-sm uppercase tracking-widest">Instruction</span>
         
@@ -75,7 +81,8 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity }: Instru
             "text-3xl md:text-4xl font-bold mt-2 font-game tracking-wider",
             colorClass,
             phase >= 4 && "neon-text",
-            phase >= 5 && "glitch-text animate-flicker"
+            phase >= 5 && "glitch-text animate-flicker",
+            isBeatDropped && "animate-neon-intensity"
           )}
           data-text={displayText}
           style={{

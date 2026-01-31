@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { Activity, Brain, ChevronDown, LogOut, Play, User } from "lucide-react";
+import { Activity, Brain, ChevronDown, LogOut, Play, Trophy, User } from "lucide-react";
 import { forwardRef, useState } from "react";
 import { Link, NavLinkProps, NavLink as RouterNavLink, useLocation } from "react-router-dom";
 
@@ -35,6 +35,7 @@ const Navbar = () => {
 
   const navLinks = [
     { to: "/", label: "Game", icon: Play },
+    { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { to: "/analytics", label: "Analytics", icon: Activity },
   ];
 
