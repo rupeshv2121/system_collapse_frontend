@@ -34,7 +34,7 @@ const GameScreen = () => {
   
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(true); // Start with dark theme
   
   const {
     isMuted,
@@ -87,15 +87,19 @@ const GameScreen = () => {
     }
   }, [isMuted]);
 
-  // Handle theme switching at beat drop
+  // Handle theme switching: light during gameplay, dark at beat drop
   useEffect(() => {
-    if (beatSync.isBeatDropped && !isDarkTheme) {
-      setIsDarkTheme(true);
-    } else if (!isPlaying && isDarkTheme) {
-      // Reset to light theme when game restarts
+    if (isPlaying && !beatSync.isBeatDropped) {
+      // Switch to light theme when game is playing (before beat drop)
       setIsDarkTheme(false);
+    } else if (beatSync.isBeatDropped) {
+      // Switch to dark theme at beat drop
+      setIsDarkTheme(true);
+    } else if (!isPlaying) {
+      // Dark theme when game is not playing (landing/game over)
+      setIsDarkTheme(true);
     }
-  }, [beatSync.isBeatDropped, isDarkTheme, isPlaying]);
+  }, [beatSync.isBeatDropped, isPlaying]);
 
   // Show tutorial on first visit
   useEffect(() => {

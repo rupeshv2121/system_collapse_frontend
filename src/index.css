@@ -237,7 +237,7 @@
   }
 
   .hud-value {
-    @apply font-bold text-primary;
+    @apply font-bold text-foreground;
     font-family: 'Orbitron', monospace;
   }
 

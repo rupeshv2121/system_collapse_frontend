@@ -53,8 +53,8 @@ const SystemHint = memo(({ phase, sanity, entropy, isPlaying, beatPulse, isBeatD
 
   const systemTextClass = useMemo(() => cn(
     "text-sm italic transition-all duration-500",
-    phase === 1 && "text-primary",
-    phase === 2 && "text-secondary",
+    phase === 1 && "text-foreground",
+    phase === 2 && "text-foreground",
     phase === 3 && "text-destructive",
     phase === 4 && "text-accent",
     phase === 5 && "text-destructive animate-pulse neon-text-secondary"
@@ -62,8 +62,8 @@ const SystemHint = memo(({ phase, sanity, entropy, isPlaying, beatPulse, isBeatD
 
   const hintTextClass = useMemo(() => cn(
     "text-xs transition-all duration-500",
-    phase <= 2 && "text-muted-foreground",
-    phase === 3 && "text-warning",
+    phase <= 2 && "text-foreground/80",
+    phase === 3 && "text-foreground/80",
     phase === 4 && "text-secondary",
     phase >= 5 && "text-destructive/70"
   ), [phase]);
