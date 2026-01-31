@@ -8,6 +8,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Line,
   LineChart,
   Pie,
@@ -61,6 +62,7 @@ const AnalyticsDashboard = () => {
     stats.sanityLossHistory.map((value, index) => ({
       game: index + 1,
       loss: value,
+      sanity: 100 - value,
     }))
   , [stats.sanityLossHistory]);
 
@@ -252,19 +254,43 @@ const AnalyticsDashboard = () => {
                     <XAxis dataKey="game" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} />
                     <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#ffffff',
-                        borderColor: 'hsl(var(--border))',
-                        borderRadius: '0.5rem'
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div style={{
+                              backgroundColor: 'hsl(var(--card))',
+                              border: '1px solid hsl(var(--border))',
+                              borderRadius: '0.5rem',
+                              padding: '8px 12px',
+                              color: 'hsl(var(--foreground))'
+                            }}>
+                              <div><strong>Game {data.game}</strong></div>
+                              <div style={{ color: '#ef4444' }}>Sanity Lost: {data.loss}%</div>
+                              <div style={{ color: data.sanity > 30 ? '#22c55e' : '#ef4444' }}>
+                                Final Sanity: {data.sanity}%
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
                       }}
-                      labelStyle={{ color: '#000000' }}
-                      itemStyle={{ color: '#ef4444' }}
                     />
                     <Bar 
                       dataKey="loss" 
                       fill="hsl(var(--destructive))"
                       radius={[4, 4, 0, 0]}
-                    />
+                    >
+                      <LabelList 
+                        dataKey="loss" 
+                        position="top" 
+                        style={{ 
+                          fill: 'hsl(var(--foreground))', 
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -288,20 +314,41 @@ const AnalyticsDashboard = () => {
                     <XAxis dataKey="game" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#ffffff',
-                        borderColor: 'hsl(var(--border))',
-                        borderRadius: '0.5rem'
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div style={{
+                              backgroundColor: 'hsl(var(--card))',
+                              border: '1px solid hsl(var(--border))',
+                              borderRadius: '0.5rem',
+                              padding: '8px 12px',
+                              color: 'hsl(var(--foreground))'
+                            }}>
+                              <div><strong>Game {data.game}</strong></div>
+                              <div style={{ color: data.won ? '#22c55e' : '#ef4444', fontWeight: 'bold' }}>
+                                {data.won ? '✓ Won' : '✗ Lost'}
+                              </div>
+                              <div>Score: {data.score}</div>
+                            </div>
+                          );
+                        }
+                        return null;
                       }}
-                      labelStyle={{ color: '#000000' }}
-                      formatter={(value, name, props) => [
-                        <span style={{ color: props.payload.won ? '#22c55e' : '#ef4444' }}>{props.payload.won ? '✓ Won' : '✗ Lost'}</span>
-                      ]}
                     />
                     <Bar 
                       dataKey="score" 
                       radius={[4, 4, 0, 0]}
                     >
+                      <LabelList 
+                        dataKey="score" 
+                        position="top" 
+                        style={{ 
+                          fill: 'hsl(var(--foreground))', 
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      />
                       {recentGames.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 

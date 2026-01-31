@@ -312,47 +312,30 @@ const GameScreen = () => {
 
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-4 lg:mb-3">
-          <h1 className={cn(
-            "text-xl md:text-2xl font-bold font-game tracking-wider text-foreground",
-            phase >= 5 && "glitch-text animate-flicker"
-          )} data-text="RULE COLLAPSE">
-            RULE COLLAPSE
-          </h1>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                initAudio();
-                toggleMute();
-              }}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </Button>
-            <Button 
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowTutorial(true)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </Button>
-            <Button 
-              asChild
-              variant="ghost"
-              size="sm"
-              className="gap-2 font-game"
-            >
-              <Link to="/analytics">
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Stats</span>
-              </Link>
-            </Button>
-          </div>
-        </header>
+        {/* Floating Control Buttons - Top Right */}
+        <div className="fixed top-20 right-4 z-50 flex flex-col gap-2">
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              initAudio();
+              toggleMute();
+            }}
+            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </Button>
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={() => setShowTutorial(true)}
+            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+            title="Guide"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </div>
 
         {/* HUD - Above instruction on mobile, right side on medium+ screens */}
         <div className="mb-4 md:hidden max-w-md mx-auto">

@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { userDataApi } from '@/lib/userDataApi';
 import { TileColor } from '@/types/game';
 import { BehaviorMetrics, DEFAULT_USER_DATA, DominantBehavior, GameSession, PlayStyle, PsychologicalArchetype, UserDataSchema } from '@/types/userData';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const USER_DATA_KEY = 'system-collapse-user-data';
 const MAX_SESSIONS = 10;
@@ -16,6 +16,7 @@ export const useUserData = () => {
   const [userData, setUserData] = useState<UserDataSchema>(DEFAULT_USER_DATA);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
+  const savedSessionsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const loadData = async () => {
@@ -269,7 +270,8 @@ export const useUserData = () => {
 
       saveUserData(updated);
 
-      if (user) {
+      if (user && !savedSessionsRef.current.has(sessionId)) {
+        savedSessionsRef.current.add(sessionId);
         userDataApi.saveGameSession({
           ...newSession,
           behaviorMetrics: sessionData.behaviorMetrics,

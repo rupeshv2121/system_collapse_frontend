@@ -250,14 +250,27 @@ export const userDataApi = {
           };
         }
 
+        // Calculate analytics from actual game data
+        const entropyResistance = stats.length > 0
+          ? Math.min(100, Math.max(0, 100 - (stats.reduce((sum: number, s: any) => sum + s.final_entropy, 0) / stats.length)))
+          : 50;
+        
+        const sanityManagement = stats.length > 0
+          ? Math.round(stats.reduce((sum: number, s: any) => sum + s.final_sanity, 0) / stats.length)
+          : 50;
+        
+        const recoveryAbility = stats.length > 0
+          ? Math.min(100, Math.max(0, (stats.filter((s: any) => s.won).length / stats.length) * 100))
+          : 50;
+
         userData.analytics = {
-          entropyResistance: 50,
-          sanityManagement: 50,
+          entropyResistance,
+          sanityManagement,
           phaseTransitionSuccess: 50,
           colorBias: { red: 25, blue: 25, green: 25, yellow: 25 },
           timeOfDayPerformance: {},
           decisionFatigue: 50,
-          recoveryAbility: 50,
+          recoveryAbility,
         };
       }
 
