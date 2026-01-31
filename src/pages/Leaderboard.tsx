@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/NavLink";
+import { Skeleton } from "@/components/ui/skeleton";
 import { userDataApi } from "@/lib/userDataApi";
 import { Award, Crown, Medal, TrendingUp, Trophy, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -57,6 +58,30 @@ const Leaderboard = () => {
     return "bg-gray-800/40 border-gray-700/50";
   };
 
+  const LeaderboardEntrySkeleton = () => (
+    <div className="flex items-center gap-4 p-4 rounded-lg border bg-gray-800/40 border-gray-700/50">
+      <Skeleton className="w-12 h-12 rounded-full" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="space-y-2 text-right">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+  );
+
+  const StatCardSkeleton = () => (
+    <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
+      <div className="flex items-center gap-3 mb-2">
+        <Skeleton className="w-8 h-8 rounded" />
+        <Skeleton className="h-6 w-24" />
+      </div>
+      <Skeleton className="h-10 w-12" />
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950/20 to-gray-950">
       <Navbar />
@@ -103,8 +128,12 @@ const Leaderboard = () => {
 
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-3 mb-8">
+              {[...Array(5)].map((_, index) => (
+                <LeaderboardEntrySkeleton key={index} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
@@ -215,35 +244,45 @@ const Leaderboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 max-w-4xl mx-auto">
-          <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Trophy className="w-8 h-8 text-yellow-400" />
-              <h3 className="text-white font-bold text-lg">Total Players</h3>
-            </div>
-            <p className="text-3xl font-bold text-purple-400">
-              {globalLeaderboard.length}
-            </p>
-          </div>
+          {loading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Trophy className="w-8 h-8 text-yellow-400" />
+                  <h3 className="text-white font-bold text-lg">Total Players</h3>
+                </div>
+                <p className="text-3xl font-bold text-purple-400">
+                  {globalLeaderboard.length}
+                </p>
+              </div>
 
-          <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Award className="w-8 h-8 text-green-400" />
-              <h3 className="text-white font-bold text-lg">Total Wins</h3>
-            </div>
-            <p className="text-3xl font-bold text-green-400">
-              {globalLeaderboard.filter((e) => e.won).length}
-            </p>
-          </div>
+              <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Award className="w-8 h-8 text-green-400" />
+                  <h3 className="text-white font-bold text-lg">Total Wins</h3>
+                </div>
+                <p className="text-3xl font-bold text-green-400">
+                  {globalLeaderboard.filter((e) => e.won).length}
+                </p>
+              </div>
 
-          <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Zap className="w-8 h-8 text-pink-400" />
-              <h3 className="text-white font-bold text-lg">Highest Score</h3>
-            </div>
-            <p className="text-3xl font-bold text-pink-400">
-              {globalLeaderboard[0]?.score.toLocaleString() || "0"}
-            </p>
-          </div>
+              <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="w-8 h-8 text-pink-400" />
+                  <h3 className="text-white font-bold text-lg">Highest Score</h3>
+                </div>
+                <p className="text-3xl font-bold text-pink-400">
+                  {globalLeaderboard[0]?.score.toLocaleString() || "0"}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
