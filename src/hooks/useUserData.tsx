@@ -18,53 +18,53 @@ export const useUserData = () => {
   const { user } = useAuth();
   const savedSessionsRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        if (user) {
-          const dbData = await userDataApi.loadUserData();
-          if (dbData && dbData.userId) {
-            setUserData({
-              ...DEFAULT_USER_DATA,
-              ...dbData,
-              userId: user.id,
-              lastPlayedAt: Date.now(),
-            } as UserDataSchema);
-          } else {
-            const newUserData: UserDataSchema = {
-              ...DEFAULT_USER_DATA,
-              userId: user.id,
-              createdAt: Date.now(),
-              lastPlayedAt: Date.now(),
-            };
-            setUserData(newUserData);
-            await userDataApi.saveUserData(newUserData);
-          }
+  const loadData = useCallback(async () => {
+    try {
+      if (user) {
+        const dbData = await userDataApi.loadUserData();
+        if (dbData && dbData.userId) {
+          setUserData({
+            ...DEFAULT_USER_DATA,
+            ...dbData,
+            userId: user.id,
+            lastPlayedAt: Date.now(),
+          } as UserDataSchema);
         } else {
-          const saved = localStorage.getItem(USER_DATA_KEY);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            setUserData(parsed);
-          } else {
-            const newUserData: UserDataSchema = {
-              ...DEFAULT_USER_DATA,
-              userId: generateUserId(),
-              createdAt: Date.now(),
-              lastPlayedAt: Date.now(),
-            };
-            setUserData(newUserData);
-            localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUserData));
-          }
+          const newUserData: UserDataSchema = {
+            ...DEFAULT_USER_DATA,
+            userId: user.id,
+            createdAt: Date.now(),
+            lastPlayedAt: Date.now(),
+          };
+          setUserData(newUserData);
+          await userDataApi.saveUserData(newUserData);
         }
-      } catch (error) {
-        console.error('Failed to load user data:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        const saved = localStorage.getItem(USER_DATA_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setUserData(parsed);
+        } else {
+          const newUserData: UserDataSchema = {
+            ...DEFAULT_USER_DATA,
+            userId: generateUserId(),
+            createdAt: Date.now(),
+            lastPlayedAt: Date.now(),
+          };
+          setUserData(newUserData);
+          localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUserData));
+        }
       }
-    };
-
-    loadData();
+    } catch (error) {
+      console.error('Failed to load user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    loadData();
+  }, [user, loadData]);
 
   const saveUserData = useCallback(async (data: UserDataSchema) => {
     try {
@@ -314,5 +314,6 @@ export const useUserData = () => {
     updateCurrentState,
     resetUserData,
     saveUserData,
+    refetch: loadData,
   };
 };

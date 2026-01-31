@@ -34,7 +34,6 @@ const GameScreen = () => {
   
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
-  const [isDarkTheme, setIsDarkTheme] = useState(true); // Start with dark theme
   
   const {
     isMuted,
@@ -86,20 +85,6 @@ const GameScreen = () => {
       bgMusicRef.current.muted = isMuted;
     }
   }, [isMuted]);
-
-  // Handle theme switching: light during gameplay, dark at beat drop
-  useEffect(() => {
-    if (isPlaying && !beatSync.isBeatDropped) {
-      // Switch to light theme when game is playing (before beat drop)
-      setIsDarkTheme(false);
-    } else if (beatSync.isBeatDropped) {
-      // Switch to dark theme at beat drop
-      setIsDarkTheme(true);
-    } else if (!isPlaying) {
-      // Dark theme when game is not playing (landing/game over)
-      setIsDarkTheme(true);
-    }
-  }, [beatSync.isBeatDropped, isPlaying]);
 
   // Show tutorial on first visit
   useEffect(() => {
@@ -184,10 +169,10 @@ const GameScreen = () => {
           {score === 0 && entropy === 0 ? (
             // Start screen
             <>
-              <h1 className="text-4xl md:text-6xl font-bold font-game neon-text tracking-wider">
+              <h1 className="text-4xl md:text-6xl font-bold font-game neon-text tracking-wider text-gray-900">
                 SYSTEM COLLAPSE
               </h1>
-              <p className="text-muted-foreground max-w-md mx-auto">
+              <p className="text-gray-700 max-w-md mx-auto">
                 An experimental game where rules intentionally collapse over time.
                 The system starts stable — then becomes chaotic.
               </p>
@@ -227,28 +212,28 @@ const GameScreen = () => {
             <>
               <h2 className={cn(
                 "text-4xl md:text-5xl font-bold font-game tracking-wider",
-                won ? "text-success neon-text" : "text-destructive neon-glow-danger"
+                won ? "text-green-600" : "text-red-600"
               )}>
                 {won ? 'SYSTEM SURVIVED' : 'COLLAPSE COMPLETE'}
               </h2>
               <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                <div className="hud-panel p-4">
-                  <div className="text-xs text-muted-foreground">Final Score</div>
-                  <div className="text-2xl font-bold hud-value">{score}</div>
+                <div className="hud-panel p-4 bg-blue-50 border-blue-200">
+                  <div className="text-xs text-gray-700">Final Score</div>
+                  <div className="text-2xl font-bold hud-value text-gray-900">{score}</div>
                 </div>
-                <div className="hud-panel p-4">
-                  <div className="text-xs text-muted-foreground">Phase Reached</div>
-                  <div className="text-2xl font-bold text-secondary">{phaseConfig.name}</div>
+                <div className="hud-panel p-4 bg-blue-50 border-blue-200">
+                  <div className="text-xs text-gray-700">Phase Reached</div>
+                  <div className="text-2xl font-bold text-blue-600">{phaseConfig.name}</div>
                 </div>
-                <div className="hud-panel p-4">
-                  <div className="text-xs text-muted-foreground">Final Entropy</div>
-                  <div className="text-2xl font-bold text-accent">{Math.round(entropy)}%</div>
+                <div className="hud-panel p-4 bg-blue-50 border-blue-200">
+                  <div className="text-xs text-gray-700">Final Entropy</div>
+                  <div className="text-2xl font-bold text-orange-600">{Math.round(entropy)}%</div>
                 </div>
-                <div className="hud-panel p-4">
-                  <div className="text-xs text-muted-foreground">Remaining Sanity</div>
+                <div className="hud-panel p-4 bg-blue-50 border-blue-200">
+                  <div className="text-xs text-gray-700">Remaining Sanity</div>
                   <div className={cn(
                     "text-2xl font-bold",
-                    sanity > 30 ? "text-primary" : "text-destructive"
+                    sanity > 30 ? "text-blue-600" : "text-red-600"
                   )}>
                     {Math.round(sanity)}%
                   </div>
@@ -286,8 +271,7 @@ const GameScreen = () => {
     <div 
       className={cn(
         "min-h-screen bg-background grid-pattern relative",
-        isPlaying ? "overflow-auto" : "overflow-hidden",
-        isDarkTheme && "dark"
+        isPlaying ? "overflow-auto" : "overflow-hidden"
       )}
       style={backgroundStyle}
     >
