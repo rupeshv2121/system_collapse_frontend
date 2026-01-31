@@ -1,8 +1,3 @@
-/**
- * User Data Management Hook
- * Handles all user data operations with database and localStorage sync
- */
-
 import { useAuth } from '@/contexts/AuthContext';
 import { userDataApi } from '@/lib/userDataApi';
 import { TileColor } from '@/types/game';
@@ -13,7 +8,6 @@ const USER_DATA_KEY = 'system-collapse-user-data';
 const MAX_SESSIONS = 10;
 const MAX_HISTORY = 20;
 
-// Generate unique user ID
 const generateUserId = (): string => {
   return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
@@ -23,12 +17,10 @@ export const useUserData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
-  // Load user data from database or localStorage
   useEffect(() => {
     const loadData = async () => {
       try {
         if (user) {
-          // Load from database if user is authenticated
           const dbData = await userDataApi.loadUserData();
           if (dbData && dbData.userId) {
             setUserData({
@@ -38,7 +30,6 @@ export const useUserData = () => {
               lastPlayedAt: Date.now(),
             } as UserDataSchema);
           } else {
-            // Initialize new user in database
             const newUserData: UserDataSchema = {
               ...DEFAULT_USER_DATA,
               userId: user.id,
@@ -49,13 +40,11 @@ export const useUserData = () => {
             await userDataApi.saveUserData(newUserData);
           }
         } else {
-          // Load from localStorage if not authenticated
           const saved = localStorage.getItem(USER_DATA_KEY);
           if (saved) {
             const parsed = JSON.parse(saved);
             setUserData(parsed);
           } else {
-            // Initialize new guest user
             const newUserData: UserDataSchema = {
               ...DEFAULT_USER_DATA,
               userId: generateUserId(),
@@ -76,7 +65,6 @@ export const useUserData = () => {
     loadData();
   }, [user]);
 
-  // Save user data to database and/or localStorage
   const saveUserData = useCallback(async (data: UserDataSchema) => {
     try {
       const updated = {
@@ -86,10 +74,8 @@ export const useUserData = () => {
       };
       
       if (user) {
-        // Save to database if authenticated
         await userDataApi.saveUserData(updated);
       } else {
-        // Save to localStorage if not authenticated
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(updated));
       }
       
@@ -99,7 +85,6 @@ export const useUserData = () => {
     }
   }, [user]);
 
-  // Analyze play style based on behavior
   const analyzePlayStyle = useCallback((behavior: BehaviorMetrics, systemMemory: any): PlayStyle => {
     const { varietyScore, patternAdherence, impulsivityScore } = behavior;
     const { rebellionCount, complianceCount, trustLevel } = systemMemory;
@@ -121,7 +106,6 @@ export const useUserData = () => {
     }
   }, []);
 
-  // Determine psychological archetype
   const determinePsychologicalArchetype = useCallback((
     playStyle: PlayStyle,
     behavior: BehaviorMetrics,
@@ -146,7 +130,6 @@ export const useUserData = () => {
     }
   }, []);
 
-  // Determine dominant behavior for session
   const determineDominantBehavior = useCallback((
     clickSequence: TileColor[],
     rulesFollowed: number,
@@ -155,7 +138,6 @@ export const useUserData = () => {
     const totalRules = rulesFollowed + rulesBroken;
     const complianceRate = totalRules > 0 ? rulesFollowed / totalRules : 0.5;
 
-    // Check for patterns
     const uniqueColors = new Set(clickSequence).size;
     const varietyRate = clickSequence.length > 0 ? uniqueColors / clickSequence.length : 0;
 
@@ -215,10 +197,8 @@ export const useUserData = () => {
     };
 
     setUserData((prev) => {
-      // Update sessions (keep last 10)
       const updatedSessions = [newSession, ...prev.sessions].slice(0, MAX_SESSIONS);
 
-      // Update stats
       const newStats = {
         ...prev.stats,
         totalGames: prev.stats.totalGames + 1,
@@ -238,7 +218,6 @@ export const useUserData = () => {
         lowestScore: prev.stats.totalGames === 0 ? sessionData.finalScore : Math.min(prev.stats.lowestScore, sessionData.finalScore),
       };
 
-      // Update trends
       const newTrends = {
         entropyHistory: [...prev.trends.entropyHistory, sessionData.maxEntropyReached].slice(-MAX_HISTORY),
         sanityHistory: [...prev.trends.sanityHistory, sessionData.sanityRemaining].slice(-MAX_HISTORY),
@@ -254,7 +233,6 @@ export const useUserData = () => {
           : 'stable') as 'improving' | 'declining' | 'stable',
       };
 
-      // Update system memory
       const newSystemMemory = {
         ...prev.systemMemory,
         ignoredHintCount: prev.systemMemory.ignoredHintCount + sessionData.hintsIgnored,
@@ -266,7 +244,6 @@ export const useUserData = () => {
           (sessionData.hintsIgnored > 2 ? 1 : 0))),
       };
 
-      // Update player profile
       const playStyle = analyzePlayStyle(sessionData.behaviorMetrics, newSystemMemory);
       const psychologicalArchetype = determinePsychologicalArchetype(playStyle, sessionData.behaviorMetrics, newSystemMemory);
 
@@ -290,10 +267,8 @@ export const useUserData = () => {
         behaviorMetrics: sessionData.behaviorMetrics,
       };
 
-      // Save to database or localStorage
       saveUserData(updated);
 
-      // Save session to database if authenticated
       if (user) {
         userDataApi.saveGameSession({
           ...newSession,
@@ -306,7 +281,6 @@ export const useUserData = () => {
     });
   }, [analyzePlayStyle, determinePsychologicalArchetype, determineDominantBehavior, saveUserData, user]);
 
-  // Update current game state
   const updateCurrentState = useCallback((state: Partial<UserDataSchema['currentState']>) => {
     setUserData((prev) => {
       const updated = {
@@ -321,7 +295,6 @@ export const useUserData = () => {
     });
   }, [saveUserData]);
 
-  // Reset user data (for testing or user request)
   const resetUserData = useCallback(() => {
     const newUserData: UserDataSchema = {
       ...DEFAULT_USER_DATA,

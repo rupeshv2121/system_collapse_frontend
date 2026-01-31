@@ -267,4 +267,24 @@ export const userDataApi = {
       return null;
     }
   },
+
+  // Get global leaderboard
+  async getGlobalLeaderboard() {
+    try {
+      return await apiCall<any[]>("/api/leaderboard/global");
+    } catch (error) {
+      console.error("Error fetching global leaderboard:", error);
+      return [];
+    }
+  },
+
+  // Get top winners
+  async getTopWinners() {
+    try {
+      return await apiCall<any[]>("/api/leaderboard/top-winners");
+    } catch (error) {
+      console.error("Error fetching top winners:", error);
+      return [];
+    }
+  },
 };

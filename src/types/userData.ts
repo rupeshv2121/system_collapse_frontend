@@ -1,8 +1,3 @@
-/**
- * Comprehensive User Data Schema for System Collapse
- * Tracks gameplay, behavior, psychology, and system interaction
- */
-
 export interface UserId {
   userId: string;
   createdAt: number;
@@ -183,10 +178,10 @@ export const DEFAULT_USER_DATA: UserDataSchema = {
     averageClickSpeed: 0,
     mostClickedColor: "red",
     repetitionCount: 0,
-    varietyScore: 50,
-    hesitationScore: 50,
-    impulsivityScore: 50,
-    patternAdherence: 50,
+    varietyScore: 0,
+    hesitationScore: 0,
+    impulsivityScore: 0,
+    patternAdherence: 0,
   },
 
   sessions: [],
@@ -218,39 +213,38 @@ export const DEFAULT_USER_DATA: UserDataSchema = {
     hintExposureCount: 0,
     misleadingHintCount: 0,
     ignoredHintCount: 0,
-    trustLevel: 50,
+    trustLevel: 0,
     rebellionCount: 0,
     complianceCount: 0,
     systemSuspicionLevel: 0,
-    manipulationResistance: 50,
+    manipulationResistance: 0,
   },
 
   playerProfile: {
     playStyle: "The Adaptive",
-    riskTolerance: 50,
-    adaptabilityScore: 50,
-    patienceScore: 50,
-    chaosAffinity: 50,
-    orderAffinity: 50,
-    learningRate: 50,
+    riskTolerance: 0,
+    adaptabilityScore: 0,
+    patienceScore: 0,
+    chaosAffinity: 0,
+    orderAffinity: 0,
+    learningRate: 0,
     stressResponse: "strategic",
     psychologicalArchetype: "intuitive-player",
   },
 
   analytics: {
-    entropyResistance: 50,
-    sanityManagement: 50,
-    phaseTransitionSuccess: 50,
+    entropyResistance: 0,
+    sanityManagement: 0,
+    phaseTransitionSuccess: 0,
     colorBias: { red: 25, blue: 25, green: 25, yellow: 25 },
     timeOfDayPerformance: {},
     decisionFatigue: 0,
-    recoveryAbility: 50,
+    recoveryAbility: 0,
   },
 
   version: "1.0.0",
   lastUpdated: 0,
 };
 
-// Import and re-export types from game.ts
 import type { GamePhase, TileColor } from "./game";
 export type { GamePhase, TileColor };
