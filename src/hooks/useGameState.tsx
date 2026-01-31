@@ -4,16 +4,18 @@
  */
 
 import {
-    ClickRecord,
-    COLORS,
-    GamePhase,
-    GameState,
-    PHASE_CONFIGS,
-    TileColor,
-    TileState,
+  ClickRecord,
+  COLORS,
+  GamePhase,
+  GameState,
+  PHASE_CONFIGS,
+  TileColor,
+  TileState,
 } from '@/types/game';
+import { BehaviorMetrics } from '@/types/userData';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGameStats } from './useGameStats';
+import { useUserData } from './useUserData';
 
 const GRID_SIZE = 4;
 const INITIAL_SANITY = 100;
@@ -64,6 +66,9 @@ export const useGameState = () => {
   const [gameState, setGameState] = useState<GameState>(getInitialState);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { recordGameEnd } = useGameStats();
+  const { recordSession } = useUserData();
+  const gameStartTimeRef = useRef<number>(Date.now());
+  const hintsIgnoredRef = useRef<number>(0);
 
   // Determine current phase based on entropy
   const calculatePhase = useCallback((entropy: number): GamePhase => {
@@ -218,6 +223,8 @@ export const useGameState = () => {
 
   // Start game
   const startGame = useCallback(() => {
+    gameStartTimeRef.current = Date.now();
+    hintsIgnoredRef.current = 0;
     setGameState({
       ...getInitialState(),
       isPlaying: true,
@@ -229,6 +236,67 @@ export const useGameState = () => {
   const endGame = useCallback(
     (won: boolean) => {
       setGameState((prev) => {
+        const gameDuration = Math.floor((Date.now() - gameStartTimeRef.current) / 1000);
+        
+        // Extract click sequence colors
+        const clickSequence = prev.clickHistory.map(click => click.color);
+        
+        // Calculate behavior metrics
+        const totalClicks = prev.clickHistory.length;
+        const clickTimes = prev.clickHistory.map(c => c.responseTime);
+        const averageClickSpeed = clickTimes.length > 0 
+          ? clickTimes.reduce((a, b) => a + b, 0) / clickTimes.length 
+          : 0;
+        
+        // Count color frequencies
+        const colorCounts: Record<TileColor, number> = { red: 0, blue: 0, green: 0, yellow: 0 };
+        clickSequence.forEach(color => colorCounts[color]++);
+        const mostClickedColor = Object.entries(colorCounts).reduce((a, b) => 
+          b[1] > a[1] ? b : a
+        )[0] as TileColor;
+        
+        // Calculate repetition (consecutive same color)
+        let maxRepetition = 0;
+        let currentRepetition = 1;
+        for (let i = 1; i < clickSequence.length; i++) {
+          if (clickSequence[i] === clickSequence[i - 1]) {
+            currentRepetition++;
+            maxRepetition = Math.max(maxRepetition, currentRepetition);
+          } else {
+            currentRepetition = 1;
+          }
+        }
+        
+        // Calculate variety score (unique colors / total clicks)
+        const uniqueColors = new Set(clickSequence).size;
+        const varietyScore = totalClicks > 0 ? (uniqueColors / totalClicks) * 100 : 50;
+        
+        // Calculate hesitation (slower clicks) vs impulsivity (faster clicks)
+        const fastClicks = clickTimes.filter(t => t < 1000).length;
+        const slowClicks = clickTimes.filter(t => t > 3000).length;
+        const hesitationScore = totalClicks > 0 ? (slowClicks / totalClicks) * 100 : 50;
+        const impulsivityScore = totalClicks > 0 ? (fastClicks / totalClicks) * 100 : 50;
+        
+        // Pattern adherence (how often they follow patterns)
+        const correctClicks = prev.clickHistory.filter(c => c.wasCorrect).length;
+        const patternAdherence = totalClicks > 0 ? (correctClicks / totalClicks) * 100 : 50;
+        
+        // Rules followed/broken (based on score changes)
+        const rulesFollowed = prev.clickHistory.filter(c => c.wasCorrect).length;
+        const rulesBroken = totalClicks - rulesFollowed;
+        
+        const behaviorMetrics: BehaviorMetrics = {
+          totalClicks,
+          averageClickSpeed,
+          mostClickedColor,
+          repetitionCount: maxRepetition,
+          varietyScore: Math.round(varietyScore),
+          hesitationScore: Math.round(hesitationScore),
+          impulsivityScore: Math.round(impulsivityScore),
+          patternAdherence: Math.round(patternAdherence),
+        };
+        
+        // Record to game stats (for charts)
         recordGameEnd({
           won,
           finalScore: prev.score,
@@ -236,10 +304,30 @@ export const useGameState = () => {
           finalSanity: prev.sanity,
           phaseReached: prev.phase,
         });
+        
+        // Record to user data (for psychological profiling)
+        recordSession({
+          finalScore: prev.score,
+          finalPhase: prev.phase,
+          maxEntropyReached: prev.entropy,
+          sanityRemaining: prev.sanity,
+          duration: gameDuration,
+          win: won,
+          clickSequence,
+          rulesFollowed,
+          rulesBroken,
+          hintsIgnored: hintsIgnoredRef.current,
+          behaviorMetrics,
+        });
+        
+        // Reset tracking refs for next game
+        gameStartTimeRef.current = Date.now();
+        hintsIgnoredRef.current = 0;
+        
         return { ...prev, isPlaying: false };
       });
     },
-    [recordGameEnd]
+    [recordGameEnd, recordSession]
   );
 
   // Timer effect

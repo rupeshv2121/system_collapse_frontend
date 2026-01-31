@@ -1,5 +1,6 @@
 /**
  * Game statistics management with localStorage persistence
+ * Game data is now saved to backend via userDataApi
  */
 
 import { GamePhase, GameStats, INITIAL_STATS } from '@/types/game';
@@ -23,7 +24,7 @@ export const useGameStats = () => {
     }
   }, []);
 
-  // Save stats to localStorage whenever they change
+  // Save stats to localStorage
   const saveStats = useCallback((newStats: GameStats) => {
     try {
       localStorage.setItem(STATS_KEY, JSON.stringify(newStats));

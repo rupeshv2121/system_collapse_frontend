@@ -1,26 +1,27 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStats } from '@/hooks/useGameStats';
-import { ArrowLeft, Brain, Flame, RotateCcw, Skull, Trophy } from 'lucide-react';
-import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Brain, Flame, RotateCcw, Skull, Trophy, User } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
+import { UserAnalyticsDashboard } from './UserAnalyticsDashboard';
 
 const AnalyticsDashboard = () => {
   const { stats, resetStats } = useGameStats();
+  const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
 
   // Prepare chart data
   const winLossData = useMemo(() => [
@@ -64,18 +65,11 @@ const AnalyticsDashboard = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
-        {/* Header */}
+        {/* Header with Title and Reset */}
         <header className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button asChild variant="ghost" size="icon">
-              <Link to="/">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Button>
-            <h1 className="text-2xl md:text-3xl font-bold font-game tracking-wider neon-text">
-              ANALYTICS
-            </h1>
-          </div>
+          <h1 className="text-2xl md:text-3xl font-bold font-game tracking-wider neon-text">
+            ANALYTICS
+          </h1>
           <Button 
             variant="outline" 
             size="sm"
@@ -87,6 +81,29 @@ const AnalyticsDashboard = () => {
           </Button>
         </header>
 
+        {/* Tab Navigation */}
+        <div className="flex gap-2 mb-6">
+          <Button
+            variant={activeTab === 'game-stats' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('game-stats')}
+            className="flex-1"
+          >
+            <Trophy className="w-4 h-4 mr-2" />
+            Game Statistics
+          </Button>
+          <Button
+            variant={activeTab === 'user-profile' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('user-profile')}
+            className="flex-1"
+          >
+            <User className="w-4 h-4 mr-2" />
+            User Profile
+          </Button>
+        </div>
+
+        {/* Conditional Content */}
+        {activeTab === 'game-stats' ? (
+          <>
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="hud-panel border-primary/30">
@@ -306,6 +323,10 @@ const AnalyticsDashboard = () => {
             </CardContent>
           </Card>
         </div>
+          </>
+        ) : (
+          <UserAnalyticsDashboard />
+        )}
       </div>
     </div>
   );
