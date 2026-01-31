@@ -13,9 +13,11 @@ interface SystemHintProps {
   sanity: number;
   entropy: number;
   isPlaying: boolean;
+  beatPulse?: boolean;
+  isBeatDropped?: boolean;
 }
 
-const SystemHint = memo(({ phase, sanity, entropy, isPlaying }: SystemHintProps) => {
+const SystemHint = memo(({ phase, sanity, entropy, isPlaying, beatPulse, isBeatDropped }: SystemHintProps) => {
   const [systemMessage, setSystemMessage] = useState('');
   const [hintMessage, setHintMessage] = useState('');
   const [messageKey, setMessageKey] = useState(0);
@@ -45,8 +47,9 @@ const SystemHint = memo(({ phase, sanity, entropy, isPlaying }: SystemHintProps)
   const containerClass = useMemo(() => cn(
     "hud-panel p-4 space-y-3",
     phase >= 3 && "border-destructive/50",
-    phase >= 5 && "animate-jitter"
-  ), [phase]);
+    phase >= 5 && "animate-jitter",
+    beatPulse && isBeatDropped && "animate-beat-pulse"
+  ), [phase, beatPulse, isBeatDropped]);
 
   const systemTextClass = useMemo(() => cn(
     "text-sm italic transition-all duration-500",

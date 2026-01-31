@@ -14,9 +14,11 @@ interface HUDProps {
   entropy: number;
   sanity: number;
   timeRemaining: number;
+  beatPulse?: boolean;
+  isBeatDropped?: boolean;
 }
 
-const HUD = memo(({ score, phase, entropy, sanity, timeRemaining }: HUDProps) => {
+const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, beatPulse, isBeatDropped }: HUDProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
   const maxTime = phaseConfig.timerDuration;
   const timerPercent = (timeRemaining / maxTime) * 100;
@@ -43,7 +45,10 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining }: HUDProps) =>
   }, [entropy]);
 
   return (
-    <div className="grid gap-3">
+    <div className={cn(
+      "grid gap-3",
+      beatPulse && isBeatDropped && "animate-beat-pulse"
+    )}>
       {/* Score */}
       <div className="hud-panel p-3 text-center">
         <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Score</div>
