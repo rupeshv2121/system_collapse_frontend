@@ -27,12 +27,6 @@ const COLOR_FREQUENCIES: Record<TileColor, number> = {
 export const useGameAudio = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
-  const bgMusicRef = useRef<{
-    oscillators: OscillatorNode[];
-    gainNode: GainNode;
-    filterNode: BiquadFilterNode;
-    distortionNode: WaveShaperNode;
-  } | null>(null);
   const currentPhaseRef = useRef<GamePhase>(1);
 
   // Initialize audio on first user interaction
@@ -194,105 +188,22 @@ export const useGameAudio = () => {
 
   // Start background music
   const startBackgroundMusic = useCallback(() => {
-    if (!isAudioEnabled || bgMusicRef.current) return;
-
-    try {
-      const ctx = getAudioContext();
-      const now = ctx.currentTime;
-
-      const masterGain = ctx.createGain();
-      // Start with volume 0 if muted, otherwise normal volume
-      masterGain.gain.setValueAtTime(isMuted ? 0 : 0.08, now);
-      masterGain.connect(ctx.destination);
-
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(800, now);
-      filter.connect(masterGain);
-
-      const distortion = ctx.createWaveShaper();
-      distortion.curve = createDistortionCurve(0);
-      distortion.connect(filter);
-
-      // Create drone oscillators
-      const oscillators: OscillatorNode[] = [];
-      const baseFreqs = [55, 82.5, 110]; // A1, E2, A2 - dark ambient drone
-
-      baseFreqs.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-        
-        // Slow LFO for movement
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.frequency.setValueAtTime(0.1 + i * 0.05, now);
-        lfoGain.gain.setValueAtTime(2, now);
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        lfo.start(now);
-
-        const oscGain = ctx.createGain();
-        oscGain.gain.setValueAtTime(0.3, now);
-        osc.connect(oscGain);
-        oscGain.connect(distortion);
-        osc.start(now);
-        oscillators.push(osc);
-      });
-
-      bgMusicRef.current = {
-        oscillators,
-        gainNode: masterGain,
-        filterNode: filter,
-        distortionNode: distortion,
-      };
-    } catch (error) {
-      console.warn('Background music failed:', error);
-    }
-  }, [isMuted, isAudioEnabled, createDistortionCurve]);
+    // Background music is now handled by audio element in GameScreen
+    // This function is kept for compatibility but does nothing
+  }, []);
 
   // Stop background music
   const stopBackgroundMusic = useCallback(() => {
-    if (bgMusicRef.current) {
-      const ctx = getAudioContext();
-      const now = ctx.currentTime;
-
-      bgMusicRef.current.gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
-      bgMusicRef.current.oscillators.forEach((osc) => {
-        try {
-          osc.stop(now + 0.6);
-        } catch (e) {
-          // Oscillator might already be stopped
-        }
-      });
-      bgMusicRef.current = null;
-    }
+    // Background music is now handled by audio element in GameScreen
+    // This function is kept for compatibility but does nothing
   }, []);
 
   // Update background music based on phase
-  const updateMusicForPhase = useCallback((phase: GamePhase, entropy: number, sanity: number) => {
-    if (!bgMusicRef.current) return;
+  const updateMusicForPhase = useCallback((phase: GamePhase, _entropy: number, _sanity: number) => {
+    // Background music is now handled by audio element in GameScreen
+    // This function is kept for compatibility but does nothing
     currentPhaseRef.current = phase;
-
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-    const { filterNode, distortionNode, gainNode } = bgMusicRef.current;
-
-    // Modulate filter based on chaos
-    const chaosLevel = (entropy + (100 - sanity)) / 200;
-    const filterFreq = 300 + chaosLevel * 1500 + phase * 200;
-    filterNode.frequency.linearRampToValueAtTime(filterFreq, now + 0.1);
-    filterNode.Q.linearRampToValueAtTime(phase * 3, now + 0.1);
-
-    // Increase distortion with phase
-    distortionNode.curve = createDistortionCurve(phase * 100);
-
-    // Volume dynamics - but respect mute state
-    if (!isMuted) {
-      const volume = 0.06 + phase * 0.02 + chaosLevel * 0.04;
-      gainNode.gain.linearRampToValueAtTime(Math.min(volume, 0.2), now + 0.1);
-    }
-  }, [isMuted, createDistortionCurve]);
+  }, []);
 
   // Play game over sound
   const playGameOver = useCallback((won: boolean) => {
@@ -346,26 +257,7 @@ export const useGameAudio = () => {
 
   // Toggle mute
   const toggleMute = useCallback(() => {
-    setIsMuted((prev) => {
-      const newMutedState = !prev;
-      
-      // Mute or unmute background music immediately
-      if (bgMusicRef.current) {
-        const ctx = getAudioContext();
-        const now = ctx.currentTime;
-        if (newMutedState) {
-          // Mute: fade out quickly
-          bgMusicRef.current.gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
-        } else {
-          // Unmute: fade in to current phase volume
-          const phase = currentPhaseRef.current;
-          const volume = 0.06 + phase * 0.02;
-          bgMusicRef.current.gainNode.gain.linearRampToValueAtTime(volume, now + 0.1);
-        }
-      }
-      
-      return newMutedState;
-    });
+    setIsMuted((prev) => !prev);
   }, []);
 
   // Cleanup on unmount

@@ -14,9 +14,14 @@ interface GameGridProps {
   entropy: number;
   sanity: number;
   onTileClick: (tileId: number) => void;
+  beatPulse?: boolean;
+  isExploding?: boolean;
+  scatterAmount?: number;
+  isBeatDropped?: boolean;
+  isPreDrop?: boolean;
 }
 
-const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick }: GameGridProps) => {
+const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, isExploding, scatterAmount, isBeatDropped, isPreDrop }: GameGridProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
 
   // Grid chaos effects
@@ -25,18 +30,35 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick }: GameGridP
     const blur = phaseConfig.visualEffects.blur * chaosLevel;
     const hueShift = phaseConfig.visualEffects.hueShift * chaosLevel;
     
-    return {
+    const styles: React.CSSProperties = {
       filter: `blur(${blur}px) hue-rotate(${hueShift}deg)`,
       opacity: phaseConfig.visualEffects.opacity,
-    } as React.CSSProperties;
-  }, [phase, entropy, sanity, phaseConfig]);
+    };
+
+    // Add scatter variables for explosion effect
+    if (isExploding && scatterAmount) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = scatterAmount * 0.5; // Grid moves less than tiles
+      styles['--scatter-x' as any] = `${Math.cos(angle) * distance}px`;
+      styles['--scatter-y' as any] = `${Math.sin(angle) * distance}px`;
+      styles['--scatter-rotate' as any] = `${(Math.random() - 0.5) * 15}deg`;
+    }
+    
+    return styles;
+  }, [phase, entropy, sanity, phaseConfig, isExploding, scatterAmount]);
 
   const gridAnimationClass = useMemo(() => {
-    if (phase >= 5) return 'animate-warp';
-    if (phase >= 4 && entropy > 80) return 'animate-jitter';
-    if (sanity < 20) return 'animate-shake';
-    return '';
-  }, [phase, entropy, sanity]);
+    const classes = [];
+    
+    if (beatPulse && isBeatDropped) classes.push('animate-beat-pulse');
+    if (isExploding) classes.push('animate-explosion-scatter');
+    if (phase >= 5) classes.push('animate-warp');
+    if (phase >= 4 && entropy > 80) classes.push('animate-jitter');
+    if (sanity < 20) classes.push('animate-shake');
+    if (isBeatDropped) classes.push('animate-neon-intensity');
+    
+    return classes.join(' ');
+  }, [phase, entropy, sanity, beatPulse, isExploding, isBeatDropped]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -70,6 +92,11 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick }: GameGridP
             entropy={entropy}
             sanity={sanity}
             onClick={onTileClick}
+            beatPulse={beatPulse}
+            isExploding={isExploding}
+            scatterAmount={scatterAmount}
+            isBeatDropped={isBeatDropped}
+            isPreDrop={isPreDrop}
           />
         ))}
 

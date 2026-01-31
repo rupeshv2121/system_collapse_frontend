@@ -4,6 +4,7 @@
  */
 
 import { Button } from '@/components/ui/button';
+import { useBeatSync } from '@/hooks/useBeatSync';
 import { useGameAudio } from '@/hooks/useGameAudio';
 import { useGameState } from '@/hooks/useGameState.tsx';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,12 @@ const GameScreen = () => {
   });
   
   const prevPhaseRef = useRef(phase);
+  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
+  const hasPlayedFirstTile = useRef(false);
+  
+  // Beat synchronization
+  const beatSync = useBeatSync(bgMusicRef);
+  const [isDarkTheme, setIsDarkTheme] = useState(true); // Start with dark theme
   
   const {
     isMuted,
@@ -60,12 +67,39 @@ const GameScreen = () => {
       startBackgroundMusic();
     } else {
       stopBackgroundMusic();
+      // Stop background music when game ends
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current.currentTime = 0;
+      }
+      hasPlayedFirstTile.current = false;
       if (score !== 0 || entropy !== 0) {
         const won = score > 50 && entropy >= 100;
         playGameOver(won);
       }
     }
   }, [isPlaying, score, entropy, startBackgroundMusic, stopBackgroundMusic, playGameOver]);
+
+  // Handle muting the background music
+  useEffect(() => {
+    if (bgMusicRef.current) {
+      bgMusicRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  // Handle theme switching: light during gameplay, dark at beat drop
+  useEffect(() => {
+    if (isPlaying && !beatSync.isBeatDropped) {
+      // Switch to light theme when game is playing (before beat drop)
+      setIsDarkTheme(false);
+    } else if (beatSync.isBeatDropped) {
+      // Switch to dark theme at beat drop
+      setIsDarkTheme(true);
+    } else if (!isPlaying) {
+      // Dark theme when game is not playing (landing/game over)
+      setIsDarkTheme(true);
+    }
+  }, [beatSync.isBeatDropped, isPlaying]);
 
   // Show tutorial on first visit
   useEffect(() => {
@@ -100,6 +134,12 @@ const GameScreen = () => {
   }, [initAudio, startGame]);
 
   const handleTileClickWithSound = useCallback((tileId: number) => {
+    // Start background music on first tile click
+    if (!hasPlayedFirstTile.current && bgMusicRef.current) {
+      bgMusicRef.current.play().catch(err => console.warn('Audio play failed:', err));
+      hasPlayedFirstTile.current = true;
+    }
+
     const tile = tiles.find(t => t.id === tileId);
     if (tile) {
       const wasCorrect = tile.color === gameState.secretCorrectColor;
@@ -115,6 +155,22 @@ const GameScreen = () => {
       opacity: phaseConfig.visualEffects.opacity,
     };
   }, [phase, entropy, phaseConfig]);
+
+  // Container style for explosion/scatter effects
+  const containerStyle = useMemo(() => {
+    const scatterStyles: React.CSSProperties = {};
+    
+    if (beatSync.isExploding) {
+      // Generate random scatter values for explosion effect
+      const angle = Math.random() * Math.PI * 2;
+      const distance = beatSync.scatterAmount;
+      scatterStyles['--scatter-x' as any] = `${Math.cos(angle) * distance}px`;
+      scatterStyles['--scatter-y' as any] = `${Math.sin(angle) * distance}px`;
+      scatterStyles['--scatter-rotate' as any] = `${(Math.random() - 0.5) * 180}deg`;
+    }
+    
+    return scatterStyles;
+  }, [beatSync.isExploding, beatSync.scatterAmount]);
 
   // Game over screen
   const GameOverOverlay = useCallback(() => {
@@ -230,7 +286,8 @@ const GameScreen = () => {
     <div 
       className={cn(
         "min-h-screen bg-background grid-pattern relative",
-        isPlaying ? "overflow-auto" : "overflow-hidden"
+        isPlaying ? "overflow-auto" : "overflow-hidden",
+        isDarkTheme && "dark"
       )}
       style={backgroundStyle}
     >
@@ -305,6 +362,8 @@ const GameScreen = () => {
             entropy={entropy}
             sanity={sanity}
             timeRemaining={timeRemaining}
+            beatPulse={beatSync.beatPulse}
+            isBeatDropped={beatSync.isBeatDropped}
           />
         </div>
 
@@ -315,6 +374,8 @@ const GameScreen = () => {
             phase={phase}
             entropy={entropy}
             sanity={sanity}
+            beatPulse={beatSync.beatPulse}
+            isBeatDropped={beatSync.isBeatDropped}
           />
         </div>
 
@@ -327,6 +388,8 @@ const GameScreen = () => {
               sanity={sanity}
               entropy={entropy}
               isPlaying={isPlaying}
+              beatPulse={beatSync.beatPulse}
+              isBeatDropped={beatSync.isBeatDropped}
             />
           </div>
 
@@ -339,6 +402,11 @@ const GameScreen = () => {
                 entropy={entropy}
                 sanity={sanity}
                 onTileClick={handleTileClickWithSound}
+                beatPulse={beatSync.beatPulse}
+                isExploding={beatSync.isExploding}
+                scatterAmount={beatSync.scatterAmount}
+                isBeatDropped={beatSync.isBeatDropped}
+                isPreDrop={beatSync.isPreDrop}
               />
             </div>
           </div>
@@ -351,6 +419,8 @@ const GameScreen = () => {
               entropy={entropy}
               sanity={sanity}
               timeRemaining={timeRemaining}
+              beatPulse={beatSync.beatPulse}
+              isBeatDropped={beatSync.isBeatDropped}
             />
           </div>
         </div>
@@ -364,6 +434,22 @@ const GameScreen = () => {
         <Tutorial 
           onComplete={handleTutorialComplete}
           onSkip={handleTutorialComplete}
+        />
+      )}
+
+      {/* Background Music */}
+      <audio 
+        ref={bgMusicRef}
+        src="/audio/bg.webm"
+        loop
+        preload="auto"
+      />
+
+      {/* Flash effect at beat drop */}
+      {beatSync.flashIntensity > 0 && isPlaying && (
+        <div 
+          className="fixed inset-0 pointer-events-none z-[100] bg-white animate-flash-bang"
+          style={{ opacity: beatSync.flashIntensity }}
         />
       )}
     </div>
