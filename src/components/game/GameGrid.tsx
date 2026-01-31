@@ -39,7 +39,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick }: GameGridP
   }, [phase, entropy, sanity]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-2xl mx-auto">
       {/* Background glow effect */}
       <div 
         className={cn(
@@ -56,7 +56,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick }: GameGridP
       <div
         style={gridStyles}
         className={cn(
-          "relative grid grid-cols-4 gap-3 p-4",
+          "relative grid grid-cols-4 gap-4 p-5 min-w-[280px] w-full",
           "bg-card/50 backdrop-blur-sm rounded-xl border border-border",
           "neon-glow",
           gridAnimationClass

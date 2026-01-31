@@ -194,14 +194,15 @@ export const useGameAudio = () => {
 
   // Start background music
   const startBackgroundMusic = useCallback(() => {
-    if (isMuted || !isAudioEnabled || bgMusicRef.current) return;
+    if (!isAudioEnabled || bgMusicRef.current) return;
 
     try {
       const ctx = getAudioContext();
       const now = ctx.currentTime;
 
       const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.08, now);
+      // Start with volume 0 if muted, otherwise normal volume
+      masterGain.gain.setValueAtTime(isMuted ? 0 : 0.08, now);
       masterGain.connect(ctx.destination);
 
       const filter = ctx.createBiquadFilter();
@@ -270,7 +271,7 @@ export const useGameAudio = () => {
 
   // Update background music based on phase
   const updateMusicForPhase = useCallback((phase: GamePhase, entropy: number, sanity: number) => {
-    if (!bgMusicRef.current || isMuted) return;
+    if (!bgMusicRef.current) return;
     currentPhaseRef.current = phase;
 
     const ctx = getAudioContext();
@@ -286,9 +287,11 @@ export const useGameAudio = () => {
     // Increase distortion with phase
     distortionNode.curve = createDistortionCurve(phase * 100);
 
-    // Volume dynamics
-    const volume = 0.06 + phase * 0.02 + chaosLevel * 0.04;
-    gainNode.gain.linearRampToValueAtTime(Math.min(volume, 0.2), now + 0.1);
+    // Volume dynamics - but respect mute state
+    if (!isMuted) {
+      const volume = 0.06 + phase * 0.02 + chaosLevel * 0.04;
+      gainNode.gain.linearRampToValueAtTime(Math.min(volume, 0.2), now + 0.1);
+    }
   }, [isMuted, createDistortionCurve]);
 
   // Play game over sound
@@ -343,7 +346,26 @@ export const useGameAudio = () => {
 
   // Toggle mute
   const toggleMute = useCallback(() => {
-    setIsMuted((prev) => !prev);
+    setIsMuted((prev) => {
+      const newMutedState = !prev;
+      
+      // Mute or unmute background music immediately
+      if (bgMusicRef.current) {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        if (newMutedState) {
+          // Mute: fade out quickly
+          bgMusicRef.current.gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
+        } else {
+          // Unmute: fade in to current phase volume
+          const phase = currentPhaseRef.current;
+          const volume = 0.06 + phase * 0.02;
+          bgMusicRef.current.gainNode.gain.linearRampToValueAtTime(volume, now + 0.1);
+        }
+      }
+      
+      return newMutedState;
+    });
   }, []);
 
   // Cleanup on unmount

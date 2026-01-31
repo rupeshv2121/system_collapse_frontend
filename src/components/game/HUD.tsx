@@ -43,7 +43,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining }: HUDProps) =>
   }, [entropy]);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div className="grid gap-3">
       {/* Score */}
       <div className="hud-panel p-3 text-center">
         <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Score</div>

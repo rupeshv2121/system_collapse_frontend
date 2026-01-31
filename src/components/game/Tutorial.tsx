@@ -152,7 +152,7 @@ const Tutorial = ({ onComplete, onSkip }: TutorialProps) => {
   }, []);
 
   return (
-    <div className="absolute inset-0 bg-background/95 backdrop-blur-lg flex items-center justify-center z-50 animate-fade-in">
+    <div className="fixed inset-0 bg-background/95 backdrop-blur-lg flex items-center justify-center z-50 animate-fade-in">
       <div className="max-w-lg w-full mx-4 p-6 bg-card rounded-xl border border-border neon-glow">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
