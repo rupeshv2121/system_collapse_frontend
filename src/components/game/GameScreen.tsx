@@ -129,7 +129,7 @@ const GameScreen = () => {
             // Start screen
             <>
               <h1 className="text-4xl md:text-6xl font-bold font-game neon-text tracking-wider">
-                RULE COLLAPSE
+                SYSTEM COLLAPSE
               </h1>
               <p className="text-muted-foreground max-w-md mx-auto">
                 An experimental game where rules intentionally collapse over time.

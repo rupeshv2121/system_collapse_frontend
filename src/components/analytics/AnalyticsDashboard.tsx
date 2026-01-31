@@ -19,6 +19,27 @@ import {
 } from 'recharts';
 import { UserAnalyticsDashboard } from './UserAnalyticsDashboard';
 
+// Custom label renderer for pie chart
+const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, value }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = outerRadius + 30;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text 
+      x={x} 
+      y={y} 
+      fill={name === 'Wins' ? '#22c55e' : '#ef4444'} 
+      textAnchor={x > cx ? 'start' : 'end'} 
+      dominantBaseline="central"
+      style={{ fontSize: '14px', fontWeight: 'bold' }}
+    >
+      {`${name}: ${value}`}
+    </text>
+  );
+};
+
 const AnalyticsDashboard = () => {
   const { stats, resetStats } = useGameStats();
   const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
@@ -166,9 +187,10 @@ const AnalyticsDashboard = () => {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))',
+                        backgroundColor: '#ffffff',
                         borderColor: 'hsl(var(--border))',
-                        borderRadius: '0.5rem'
+                        borderRadius: '0.5rem',
+                        color: '#000000'
                       }}
                     />
                   </PieChart>
@@ -231,14 +253,16 @@ const AnalyticsDashboard = () => {
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))',
+                        backgroundColor: '#ffffff',
                         borderColor: 'hsl(var(--border))',
                         borderRadius: '0.5rem'
                       }}
+                      labelStyle={{ color: '#000000' }}
+                      itemStyle={{ color: '#ef4444' }}
                     />
                     <Bar 
                       dataKey="loss" 
-                      fill="hsl(var(--destructive))" 
+                      fill="hsl(var(--destructive))"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
@@ -265,13 +289,13 @@ const AnalyticsDashboard = () => {
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))',
+                        backgroundColor: '#ffffff',
                         borderColor: 'hsl(var(--border))',
                         borderRadius: '0.5rem'
                       }}
+                      labelStyle={{ color: '#000000' }}
                       formatter={(value, name, props) => [
-                        value,
-                        props.payload.won ? '✓ Won' : '✗ Lost'
+                        <span style={{ color: props.payload.won ? '#22c55e' : '#ef4444' }}>{props.payload.won ? '✓ Won' : '✗ Lost'}</span>
                       ]}
                     />
                     <Bar 
