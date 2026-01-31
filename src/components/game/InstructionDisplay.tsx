@@ -65,7 +65,7 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity }: Instru
 
       {/* Main instruction container */}
       <div className={cn(
-        "relative hud-panel py-4 px-8 text-center",
+        "relative hud-panel py-3 lg:py-4 px-6 lg:px-8 text-center",
         phase >= 5 && "animate-jitter"
       )}>
         <span className="text-muted-foreground text-sm uppercase tracking-widest">Instruction</span>

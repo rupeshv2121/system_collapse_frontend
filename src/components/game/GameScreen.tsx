@@ -74,6 +74,20 @@ const GameScreen = () => {
     }
   }, [hasSeenTutorial, isPlaying]);
 
+  // Control body overflow to hide scrollbar when overlay is visible
+  useEffect(() => {
+    if (!isPlaying) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isPlaying]);
+
   const handleTutorialComplete = useCallback(() => {
     setShowTutorial(false);
     setHasSeenTutorial(true);
@@ -109,8 +123,8 @@ const GameScreen = () => {
     const won = score > 50 && entropy >= 100;
     
     return (
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-md flex items-center justify-center z-50 animate-fade-in">
-        <div className="text-center space-y-6 p-8">
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center">
+        <div className="text-center space-y-6 p-8 max-w-2xl w-full">
           {score === 0 && entropy === 0 ? (
             // Start screen
             <>
@@ -214,7 +228,10 @@ const GameScreen = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background grid-pattern relative overflow-hidden"
+      className={cn(
+        "min-h-screen bg-background grid-pattern relative",
+        isPlaying ? "overflow-auto" : "overflow-hidden"
+      )}
       style={backgroundStyle}
     >
       {/* Animated background elements */}
@@ -237,9 +254,9 @@ const GameScreen = () => {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 py-6 max-w-4xl">
+      <div className="relative z-10 container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
         {/* Header */}
-        <header className="flex items-center justify-between mb-6">
+        <header className="flex items-center justify-between mb-4 lg:mb-3">
           <h1 className={cn(
             "text-xl md:text-2xl font-bold font-game tracking-wider text-foreground",
             phase >= 5 && "glitch-text animate-flicker"
@@ -280,8 +297,8 @@ const GameScreen = () => {
           </div>
         </header>
 
-        {/* HUD */}
-        <div className="mb-6">
+        {/* HUD - Above instruction on mobile, right side on medium+ screens */}
+        <div className="mb-4 md:hidden max-w-md mx-auto">
           <HUD 
             score={score}
             phase={phase}
@@ -291,8 +308,8 @@ const GameScreen = () => {
           />
         </div>
 
-        {/* Instruction */}
-        <div className="mb-6">
+        {/* Instruction - stays at top */}
+        <div className="mb-4 lg:mb-3 max-w-lg mx-auto">
           <InstructionDisplay 
             instruction={currentInstruction}
             phase={phase}
@@ -301,27 +318,41 @@ const GameScreen = () => {
           />
         </div>
 
-        {/* Game Grid */}
-        <div className="mb-6 flex justify-center">
-          <div className="w-full max-w-md">
-            <GameGrid 
-              tiles={tiles}
+        {/* Game Layout - Grid with Hint on left and HUD on right for large screens */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-evenly gap-4 md:gap-4 lg:gap-6">
+          {/* System Hint - Left side on medium+ screens, below grid on mobile */}
+          <div className="md:order-1 md:w-48 lg:w-64 xl:w-72 order-2 w-full md:mx-0">
+            <SystemHint 
+              phase={phase}
+              sanity={sanity}
+              entropy={entropy}
+              isPlaying={isPlaying}
+            />
+          </div>
+
+          {/* Game Grid - Center */}
+          <div className="md:order-2 flex justify-center order-1 w-full md:w-auto">
+            <div className="w-full max-w-md md:w-[350px] lg:w-[400px]">
+              <GameGrid 
+                tiles={tiles}
+                phase={phase}
+                entropy={entropy}
+                sanity={sanity}
+                onTileClick={handleTileClickWithSound}
+              />
+            </div>
+          </div>
+
+          {/* HUD - Right side on medium+ screens, hidden on mobile (shown above instruction) */}
+          <div className="hidden md:block md:order-3 md:w-48 lg:w-64 xl:w-72">
+            <HUD 
+              score={score}
               phase={phase}
               entropy={entropy}
               sanity={sanity}
-              onTileClick={handleTileClickWithSound}
+              timeRemaining={timeRemaining}
             />
           </div>
-        </div>
-
-        {/* System Hint */}
-        <div className="max-w-md mx-auto">
-          <SystemHint 
-            phase={phase}
-            sanity={sanity}
-            entropy={entropy}
-            isPlaying={isPlaying}
-          />
         </div>
       </div>
 
