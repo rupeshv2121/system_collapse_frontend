@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { userDataApi } from '@/lib/userDataApi';
+import { ApiError, userDataApi } from '@/lib/userDataApi';
 import { TileColor } from '@/types/game';
 import { BehaviorMetrics, DEFAULT_USER_DATA, DominantBehavior, GameSession, PlayStyle, PsychologicalArchetype, UserDataSchema } from '@/types/userData';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -15,12 +15,14 @@ const generateUserId = (): string => {
 export const useUserData = () => {
   const [userData, setUserData] = useState<UserDataSchema>(DEFAULT_USER_DATA);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<{ message: string; type: "network" | "server" | "auth" | "generic" } | null>(null);
   const { user } = useAuth();
   const savedSessionsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        setError(null);
         if (user) {
           const dbData = await userDataApi.loadUserData();
           if (dbData && dbData.userId) {
@@ -56,8 +58,13 @@ export const useUserData = () => {
             localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUserData));
           }
         }
-      } catch (error) {
-        console.error('Failed to load user data:', error);
+      } catch (err) {
+        console.error('Failed to load user data:', err);
+        if (err instanceof ApiError) {
+          setError({ message: err.message, type: err.type });
+        } else {
+          setError({ message: "Failed to load user data", type: "generic" });
+        }
       } finally {
         setIsLoading(false);
       }
@@ -310,6 +317,7 @@ export const useUserData = () => {
   return {
     userData,
     isLoading,
+    error,
     recordSession,
     updateCurrentState,
     resetUserData,

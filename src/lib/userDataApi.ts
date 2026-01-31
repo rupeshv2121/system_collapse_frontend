@@ -7,6 +7,18 @@ import { supabase } from "./supabase";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
+// Error types for better error handling
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public type: "network" | "server" | "auth" | "generic" = "generic",
+    public statusCode?: number
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 // Helper to get auth token
 async function getAuthToken(): Promise<string | null> {
   const {
@@ -23,26 +35,61 @@ async function apiCall<T>(
   const token = await getAuthToken();
 
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new ApiError("Not authenticated", "auth");
   }
 
-  const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  try {
+    const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        ...options.headers,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ error: response.statusText }));
-    throw new Error(error.error || `API call failed: ${response.statusText}`);
+    if (!response.ok) {
+      // Check for specific status codes
+      if (response.status === 401 || response.status === 403) {
+        throw new ApiError("Authentication failed", "auth", response.status);
+      }
+      
+      if (response.status >= 500) {
+        throw new ApiError("Server error - please try again later", "server", response.status);
+      }
+
+      const error = await response
+        .json()
+        .catch(() => ({ error: response.statusText }));
+      
+      throw new ApiError(
+        error.error || `API call failed: ${response.statusText}`,
+        "generic",
+        response.status
+      );
+    }
+
+    return response.json();
+  } catch (error) {
+    // Network errors (no response from server)
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new ApiError(
+        "Unable to connect to server - please check your connection",
+        "network"
+      );
+    }
+    
+    // Re-throw ApiError instances
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    // Generic errors
+    throw new ApiError(
+      error instanceof Error ? error.message : "An unexpected error occurred",
+      "generic"
+    );
   }
-
-  return response.json();
 }
 
 export const userDataApi = {

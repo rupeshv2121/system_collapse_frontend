@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/NavLink";
+import { ErrorDisplay } from "@/components/ui/error-display";
 import { Skeleton } from "@/components/ui/skeleton";
-import { userDataApi } from "@/lib/userDataApi";
+import { ApiError, userDataApi } from "@/lib/userDataApi";
 import { Award, Crown, Medal, TrendingUp, Trophy, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -22,6 +23,7 @@ const Leaderboard = () => {
   const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [topWinners, setTopWinners] = useState<TopWinner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<{ message: string; type: "network" | "server" | "auth" | "generic" } | null>(null);
   const [activeTab, setActiveTab] = useState<"score" | "wins">("score");
 
   useEffect(() => {
@@ -31,14 +33,20 @@ const Leaderboard = () => {
   const loadLeaderboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const [global, winners] = await Promise.all([
         userDataApi.getGlobalLeaderboard(),
         userDataApi.getTopWinners(),
       ]);
       setGlobalLeaderboard(global);
       setTopWinners(winners);
-    } catch (error) {
-      console.error("Error loading leaderboard:", error);
+    } catch (err) {
+      console.error("Error loading leaderboard:", err);
+      if (err instanceof ApiError) {
+        setError({ message: err.message, type: err.type });
+      } else {
+        setError({ message: "Failed to load leaderboard data", type: "generic" });
+      }
     } finally {
       setLoading(false);
     }
@@ -127,7 +135,13 @@ const Leaderboard = () => {
         </div>
 
         {/* Content */}
-        {loading ? (
+        {error ? (
+          <ErrorDisplay
+            message={error.message}
+            type={error.type}
+            onRetry={loadLeaderboardData}
+          />
+        ) : loading ? (
           <div className="max-w-4xl mx-auto">
             <div className="space-y-3 mb-8">
               {[...Array(5)].map((_, index) => (
