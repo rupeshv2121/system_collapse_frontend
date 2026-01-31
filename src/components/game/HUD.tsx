@@ -14,14 +14,22 @@ interface HUDProps {
   entropy: number;
   sanity: number;
   timeRemaining: number;
+  playTimeSeconds: number;
   beatPulse?: boolean;
   isBeatDropped?: boolean;
+  showPhase?: boolean;
 }
 
-const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, beatPulse, isBeatDropped }: HUDProps) => {
+const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true }: HUDProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
   const maxTime = phaseConfig.timerDuration;
   const timerPercent = (timeRemaining / maxTime) * 100;
+
+  const formattedPlayTime = useMemo(() => {
+    const minutes = Math.floor(playTimeSeconds / 60);
+    const seconds = Math.floor(playTimeSeconds % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }, [playTimeSeconds]);
 
   // Determine timer color based on remaining time
   const timerColor = useMemo(() => {
@@ -49,6 +57,14 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, beatPulse, isB
       "grid gap-3",
       beatPulse && isBeatDropped && "animate-beat-pulse"
     )}>
+      {/* Play Time */}
+      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300">
+        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Play Time</div>
+        <div className="text-center">
+          <span className="hud-value text-lg text-gray-900">{formattedPlayTime}</span>
+        </div>
+      </div>
+
       {/* Score */}
       <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300">
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Score</div>
@@ -61,20 +77,21 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, beatPulse, isB
         </div>
       </div>
 
-      {/* Phase */}
-      <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300">
-        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Phase</div>
-        <div className={cn(
-          "font-bold text-sm",
-          phase === 1 && "text-blue-600",
-          phase === 2 && "text-orange-600",
-          phase === 3 && "text-red-600",
-          phase === 4 && "text-purple-600",
-          phase === 5 && "text-red-600 animate-pulse"
-        )}>
-          {phaseConfig.name}
+      {showPhase && (
+        <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300">
+          <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Phase</div>
+          <div className={cn(
+            "font-bold text-sm",
+            phase === 1 && "text-blue-600",
+            phase === 2 && "text-orange-600",
+            phase === 3 && "text-red-600",
+            phase === 4 && "text-purple-600",
+            phase === 5 && "text-red-600 animate-pulse"
+          )}>
+            {phaseConfig.name}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Entropy */}
       <div className="hud-panel p-3 bg-blue-50 border-blue-300">
@@ -124,6 +141,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, beatPulse, isB
           </span>
         </div>
       </div>
+
     </div>
   );
 });

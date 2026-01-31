@@ -138,6 +138,9 @@ export const useGameState = () => {
         const clickedTile = prev.tiles.find((t) => t.id === tileId);
         if (!clickedTile) return prev;
 
+        // Start timer on first tile click
+        const newTimerStarted = prev.timerStarted || true;
+
         const clickedColor = clickedTile.color;
         const responseTime = Date.now() - prev.roundStartTime;
         const scoreChange = calculateScoreChange(clickedColor, prev);
@@ -215,6 +218,7 @@ export const useGameState = () => {
           currentInstruction: newInstruction,
           timeRemaining: PHASE_CONFIGS[newPhase].timerDuration,
           roundStartTime: Date.now(),
+          timerStarted: newTimerStarted,
         };
       });
     },
@@ -332,7 +336,7 @@ export const useGameState = () => {
 
   // Timer effect
   useEffect(() => {
-    if (!gameState.isPlaying) {
+    if (!gameState.isPlaying || !gameState.timerStarted) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -376,7 +380,7 @@ export const useGameState = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameState.isPlaying, calculatePhase]);
+  }, [gameState.isPlaying, gameState.timerStarted, calculatePhase]);
 
   // Check for game over conditions
   useEffect(() => {

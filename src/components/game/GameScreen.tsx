@@ -27,10 +27,13 @@ const GameScreen = () => {
   const [hasSeenTutorial, setHasSeenTutorial] = useState(() => {
     return localStorage.getItem(TUTORIAL_SEEN_KEY) === 'true';
   });
+  const [playTimeSeconds, setPlayTimeSeconds] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
   
   const prevPhaseRef = useRef(phase);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const hasPlayedFirstTile = useRef(false);
+  const playStartRef = useRef<number | null>(null);
   
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
@@ -115,14 +118,56 @@ const GameScreen = () => {
 
   const handleStartGame = useCallback(() => {
     initAudio();
+    setPlayTimeSeconds(0);
+    playStartRef.current = null;
+    setTimerActive(false);
     startGame();
   }, [initAudio, startGame]);
+
+  // Global playtime tracker (starts on first tile click)
+  useEffect(() => {
+    let intervalId: number | undefined;
+
+    if (isPlaying && timerActive) {
+      intervalId = window.setInterval(() => {
+        if (playStartRef.current) {
+          const elapsed = (Date.now() - playStartRef.current) / 1000;
+          setPlayTimeSeconds(elapsed);
+        }
+      }, 500);
+    } else {
+      if (playStartRef.current) {
+        const elapsed = (Date.now() - playStartRef.current) / 1000;
+        setPlayTimeSeconds(elapsed);
+        playStartRef.current = null;
+        setTimerActive(false);
+      }
+    }
+
+    return () => {
+      if (intervalId) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [isPlaying, timerActive]);
+
+  const formatPlayTime = useCallback((seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  }, []);
 
   const handleTileClickWithSound = useCallback((tileId: number) => {
     // Start background music on first tile click
     if (!hasPlayedFirstTile.current && bgMusicRef.current) {
       bgMusicRef.current.play().catch(err => console.warn('Audio play failed:', err));
       hasPlayedFirstTile.current = true;
+    }
+    // Start playtime on first tile click
+    if (!playStartRef.current) {
+      playStartRef.current = Date.now();
+      setPlayTimeSeconds(0);
+      setTimerActive(true);
     }
 
     const tile = tiles.find(t => t.id === tileId);
@@ -238,6 +283,12 @@ const GameScreen = () => {
                     {Math.round(sanity)}%
                   </div>
                 </div>
+                <div className="hud-panel p-4 bg-blue-50 border-blue-200 col-span-2">
+                  <div className="text-xs text-gray-700">Total Play Time</div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatPlayTime(playTimeSeconds)}
+                  </div>
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
@@ -329,6 +380,7 @@ const GameScreen = () => {
             entropy={entropy}
             sanity={sanity}
             timeRemaining={timeRemaining}
+            playTimeSeconds={playTimeSeconds}
             beatPulse={beatSync.beatPulse}
             isBeatDropped={beatSync.isBeatDropped}
           />
@@ -346,10 +398,23 @@ const GameScreen = () => {
           />
         </div>
 
-        {/* Game Layout - Grid with Hint on left and HUD on right for large screens */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-evenly gap-4 md:gap-4 lg:gap-6">
-          {/* System Hint - Left side on medium+ screens, below grid on mobile */}
-          <div className="md:order-1 md:w-48 lg:w-64 xl:w-72 order-2 w-full md:mx-0">
+        {/* Game Layout - Phase + Hint left, Grid center, HUD right for large screens */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-center gap-4 md:gap-6 lg:gap-8">
+          {/* Left column - Phase box above System Hint */}
+          <div className="md:order-1 md:w-56 lg:w-64 xl:w-72 order-2 w-full space-y-4">
+            <div className="hidden md:block hud-panel p-3 text-center bg-blue-50 border-blue-300">
+              <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Phase</div>
+              <div className={cn(
+                "font-bold text-sm",
+                phase === 1 && "text-blue-600",
+                phase === 2 && "text-orange-600",
+                phase === 3 && "text-red-600",
+                phase === 4 && "text-purple-600",
+                phase === 5 && "text-red-600 animate-pulse"
+              )}>
+                {phaseConfig.name}
+              </div>
+            </div>
             <SystemHint 
               phase={phase}
               sanity={sanity}
@@ -378,16 +443,18 @@ const GameScreen = () => {
             </div>
           </div>
 
-          {/* HUD - Right side on medium+ screens, hidden on mobile (shown above instruction) */}
-          <div className="hidden md:block md:order-3 md:w-48 lg:w-64 xl:w-72">
+          {/* Right column - HUD (excluding Phase) */}
+          <div className="hidden md:block md:order-3 md:w-56 lg:w-64 xl:w-72">
             <HUD 
               score={score}
               phase={phase}
               entropy={entropy}
               sanity={sanity}
               timeRemaining={timeRemaining}
+              playTimeSeconds={playTimeSeconds}
               beatPulse={beatSync.beatPulse}
               isBeatDropped={beatSync.isBeatDropped}
+              showPhase={false}
             />
           </div>
         </div>
