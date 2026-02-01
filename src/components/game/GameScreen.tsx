@@ -9,7 +9,7 @@ import { useBeatSync } from '@/hooks/useBeatSync';
 import { useGameAudio } from '@/hooks/useGameAudio';
 import { useGameState } from '@/hooks/useGameState.tsx';
 import { cn } from '@/lib/utils';
-import { BarChart3, HelpCircle, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { BarChart3, HelpCircle, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import GameGrid from './GameGrid';
@@ -364,12 +364,15 @@ export const GameScreen = () => {
     }
   }, [isMuted]);
 
-  // Show tutorial on first visit
+  // Auto-start game on mount
   useEffect(() => {
-    if (!hasSeenTutorial && !isPlaying) {
-      setShowTutorial(true);
+    if (!isPlaying && score === 0 && entropy === 0) {
+      // Auto-start the game directly
+      handleStartGame();
+      setHasSeenTutorial(true);
+      localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
     }
-  }, [hasSeenTutorial, isPlaying]);
+  }, []); // Run only once on mount
 
   // Control body overflow to hide scrollbar when overlay is visible
   useEffect(() => {
@@ -438,13 +441,12 @@ export const GameScreen = () => {
           setPlayTimeSeconds(elapsed);
         }
       }, 500);
-    } else {
-      if (playStartRef.current) {
-        const elapsed = (Date.now() - playStartRef.current) / 1000;
-        setPlayTimeSeconds(elapsed);
-        playStartRef.current = null;
-        setTimerActive(false);
-      }
+    } else if (!isPlaying && playStartRef.current) {
+      // Game ended - capture final time and preserve it
+      const elapsed = (Date.now() - playStartRef.current) / 1000;
+      setPlayTimeSeconds(elapsed);
+      playStartRef.current = null;
+      setTimerActive(false);
     }
 
     return () => {
@@ -535,43 +537,7 @@ export const GameScreen = () => {
           {score === 0 && entropy === 0 ? (
             // Start screen
             <>
-              <h1 className="text-4xl md:text-6xl font-bold font-game neon-text tracking-wider text-gray-900">
-                SYSTEM COLLAPSE
-              </h1>
-              <p className="text-gray-700 max-w-md mx-auto">
-                An experimental game where rules intentionally collapse over time.
-                The system starts stable — then becomes chaotic.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={handleStartGame}
-                  size="lg"
-                  className="gap-2 font-game tracking-wider neon-glow"
-                >
-                  <Play className="w-5 h-5" />
-                  START GAME
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="gap-2 font-game tracking-wider"
-                  onClick={() => setShowTutorial(true)}
-                >
-                  <HelpCircle className="w-5 h-5" />
-                  TUTORIAL
-                </Button>
-                <Button 
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="gap-2 font-game tracking-wider"
-                >
-                  <Link to="/analytics">
-                    <BarChart3 className="w-5 h-5" />
-                    ANALYTICS
-                  </Link>
-                </Button>
-              </div>
+              
             </>
           ) : (
             // Game over screen
