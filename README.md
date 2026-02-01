@@ -2,27 +2,6 @@
 
 A psychological puzzle game that challenges players' adaptability and pattern recognition through evolving rule systems. Built with React, TypeScript, and modern web technologies.
 
-## 🆕 Recent Updates (February 2026)
-
-### ✨ New Features
-- **Dedicated Error Pages**: Full-page network and server error screens with auto-recovery
-- **Global Error Context**: Centralized error handling with automatic navigation
-- **Email Sharing**: Share user statistics via email powered by Nodemailer backend
-- **Enhanced Error Detection**: 10-second timeouts, network monitoring, and connection status tracking
-
-### 🔧 Improvements
-- **Compact Error UI**: Streamlined error pages (max-w-md) for better UX
-- **Real-time Connection Status**: Auto-refresh when network restores
-- **Comprehensive Integration**: Error handling across all pages (Leaderboard, Analytics, Profile)
-- **Psychological Trait Evolution**: 6-trait line graph showing development over last 20 games
-
-### 🐛 Bug Fixes
-- Fixed JSX syntax errors in App.tsx routing
-- Improved API timeout handling with AbortController
-- Enhanced error type detection (network vs server vs auth)
-
----
-
 ## 📖 Table of Contents
 
 - [Overview](#-overview)
@@ -102,13 +81,12 @@ The game measures 6 behavioral traits:
 ### 📊 Analytics & Leaderboards
 - **User Analytics Dashboard**:
   - Game statistics (total games, win rate, average score)
-  - Psychological trait evolution graphs (6 traits over time)
+  - Psychological trait evolution graphs with 6-trait line chart
   - Achievement tracking with progress indicators
-  - Email sharing feature (powered by Nodemailer)
-  - Real-time error handling with dedicated error pages
-- **Global Leaderboard**: Top players by score with skeleton loaders
-- **Game Statistics Charts**: Entropy, sanity loss, score trends with labeled axes
-- **Automatic Error Recovery**: Redirects to error pages when backend is down
+  - Email sharing for user statistics
+- **Global Leaderboard**: Top players by score with skeleton loading states
+- **Game Statistics Charts**: Entropy, sanity loss, and score trends with axis labels
+- **Performance Tracking**: Historical data visualization
 
 ### 🎯 Game Features
 - **Interactive Tutorial**: First-time user onboarding
@@ -118,10 +96,9 @@ The game measures 6 behavioral traits:
 - **Audio Controls**: Volume management
 
 ### 🛠️ Developer Features
-- **Dedicated Error Pages**: Full-page network and server error screens
-- **Global Error Handling**: ErrorContext with automatic navigation
-- **Error Detection**: Network vs server error distinction with timeout handling
-- **Loading States**: Skeleton loaders for async data
+- **Error Handling System**: Network and server error detection with dedicated pages
+- **Global Error Context**: Centralized error management with automatic navigation
+- **Loading States**: Skeleton loaders for asynchronous operations
 - **Type Safety**: Full TypeScript coverage
 - **Code Splitting**: Optimized bundle size
 
