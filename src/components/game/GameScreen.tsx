@@ -533,30 +533,32 @@ export const GameScreen = () => {
 
   return (
     <>
-      {/* Floating Control Buttons - MUST be outside filtered container to maintain fixed position */}
-      <div className="fixed top-20 right-4 z-[60] flex flex-col gap-2">
-        <Button 
-          variant="outline"
-          size="icon"
-          onClick={() => {
-            initAudio();
-            toggleMute();
-          }}
-          className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-          title={isMuted ? "Unmute" : "Mute"}
-        >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </Button>
-        <Button 
-          variant="outline"
-          size="icon"
-          onClick={isPlaying ? handleStartGameTour : () => setShowTutorial(true)}
-          className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-          title={isPlaying ? "Game Guide" : "Tutorial"}
-        >
-          <HelpCircle className="w-5 h-5" />
-        </Button>
-      </div>
+      {/* Floating Control Buttons - Only show when game is playing */}
+      {isPlaying && (
+        <div className="fixed top-20 right-4 z-[60] flex flex-col gap-2">
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              initAudio();
+              toggleMute();
+            }}
+            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </Button>
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={handleStartGameTour}
+            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+            title="Game Guide"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
 
       <div 
         className={cn(
