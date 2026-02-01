@@ -21,6 +21,15 @@ import {
   Users,
   Zap
 } from 'lucide-react';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 
 export const UserAnalyticsDashboard = () => {
   const { userData, isLoading, error } = useUserData();
@@ -390,16 +399,164 @@ export const UserAnalyticsDashboard = () => {
       <Card className="bg-purple-50 border-purple-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Brain className="w-5 h-5 text-purple-600" />
-          Psychological Traits
+          Psychological Traits Development
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <TraitBar label="Risk Tolerance" value={playerProfile.riskTolerance} icon="🎲" />
-          <TraitBar label="Adaptability" value={playerProfile.adaptabilityScore} icon="🔄" />
-          <TraitBar label="Patience" value={playerProfile.patienceScore} icon="⏳" />
-          <TraitBar label="Chaos Affinity" value={playerProfile.chaosAffinity} icon="🌀" />
-          <TraitBar label="Order Affinity" value={playerProfile.orderAffinity} icon="📐" />
-          <TraitBar label="Learning Rate" value={playerProfile.learningRate} icon="📚" />
+        
+        {/* Development Graph and Stats Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Development Graph - Takes 2 columns */}
+          <div className="lg:col-span-2 bg-white p-4 rounded-lg border border-purple-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Trait Evolution Over Games</h4>
+            {userData.sessions.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={userData.sessions.slice(-20).map((session, index, array) => {
+                  // Calculate cumulative metrics up to this point
+                  const sessionsUpToNow = array.slice(0, index + 1);
+                  
+                  // Performance: Cumulative win rate
+                  const winsUpToNow = sessionsUpToNow.filter(s => s.win).length;
+                  const performance = (winsUpToNow / sessionsUpToNow.length) * 100;
+                  
+                  // Risk Tolerance: Based on average entropy reached
+                  const avgEntropyUpToNow = sessionsUpToNow.reduce((sum, s) => sum + s.maxEntropyReached, 0) / sessionsUpToNow.length;
+                  const riskTolerance = avgEntropyUpToNow;
+                  
+                  // Adaptability: Based on behavior variety and learning
+                  const uniqueBehaviors = new Set(sessionsUpToNow.map(s => s.dominantBehavior)).size;
+                  const maxBehaviors = 7; // Total possible dominant behaviors
+                  const behaviorVariety = (uniqueBehaviors / maxBehaviors) * 100;
+                  
+                  // Factor in rules followed vs broken ratio for adaptability
+                  const totalRules = sessionsUpToNow.reduce((sum, s) => sum + s.rulesFollowed + s.rulesBroken, 0);
+                  const rulesFollowed = sessionsUpToNow.reduce((sum, s) => sum + s.rulesFollowed, 0);
+                  const ruleAdaptation = totalRules > 0 ? (rulesFollowed / totalRules) * 100 : 50;
+                  
+                  const adaptability = (behaviorVariety * 0.6 + ruleAdaptation * 0.4);
+                  
+                  // Patience: Based on average game duration and phase reached
+                  const avgDuration = sessionsUpToNow.reduce((sum, s) => sum + s.duration, 0) / sessionsUpToNow.length;
+                  const avgPhase = sessionsUpToNow.reduce((sum, s) => sum + s.finalPhase, 0) / sessionsUpToNow.length;
+                  const patience = Math.min(100, (avgDuration / 300) * 50 + (avgPhase / 10) * 50); // Max 5 min duration & phase 10
+                  
+                  // Chaos Affinity: Based on entropy and rule breaking
+                  const avgRulesBroken = sessionsUpToNow.reduce((sum, s) => sum + s.rulesBroken, 0) / sessionsUpToNow.length;
+                  const chaosAffinity = Math.min(100, avgEntropyUpToNow * 0.6 + (avgRulesBroken / 10) * 40);
+                  
+                  // Order Affinity: Inverse of chaos, based on rules followed
+                  const avgRulesFollowedRatio = totalRules > 0 ? (rulesFollowed / totalRules) : 0.5;
+                  const orderAffinity = avgRulesFollowedRatio * 100;
+                  
+                  // Learning Rate: Based on performance improvement trend
+                  let learningRate = 50;
+                  if (index > 0) {
+                    const recentWins = sessionsUpToNow.slice(-Math.min(5, sessionsUpToNow.length)).filter(s => s.win).length;
+                    const recentGames = Math.min(5, sessionsUpToNow.length);
+                    learningRate = (recentWins / recentGames) * 100;
+                  }
+                  
+                  return {
+                    game: index + 1,
+                    riskTolerance: Math.round(riskTolerance),
+                    adaptability: Math.round(adaptability),
+                    patience: Math.round(patience),
+                    chaosAffinity: Math.round(chaosAffinity),
+                    orderAffinity: Math.round(orderAffinity),
+                    learningRate: Math.round(learningRate),
+                  };
+                })}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="game" 
+                    stroke="#6b7280" 
+                    fontSize={12}
+                    height={50}
+                    label={{ value: 'No. of games', position: 'insideBottom', offset: 0, fill: '#6b7280' }}
+                  />
+                  <YAxis 
+                    stroke="#6b7280" 
+                    fontSize={12}
+                    domain={[0, 100]}
+                    label={{ value: 'Percentage', angle: -90, position: 'insideLeft', fill: '#6b7280' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#ffffff',
+                      borderColor: '#d1d5db',
+                      borderRadius: '0.5rem',
+                      fontSize: '12px'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="riskTolerance" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    name="Risk Tolerance"
+                    dot={{ fill: '#3b82f6', r: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="adaptability" 
+                    stroke="#10b981" 
+                    strokeWidth={2}
+                    name="Adaptability"
+                    dot={{ fill: '#10b981', r: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="patience" 
+                    stroke="#f59e0b" 
+                    strokeWidth={2}
+                    name="Patience"
+                    dot={{ fill: '#f59e0b', r: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="chaosAffinity" 
+                    stroke="#ef4444" 
+                    strokeWidth={2}
+                    name="Chaos Affinity"
+                    dot={{ fill: '#ef4444', r: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="orderAffinity" 
+                    stroke="#8b5cf6" 
+                    strokeWidth={2}
+                    name="Order Affinity"
+                    dot={{ fill: '#8b5cf6', r: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="learningRate" 
+                    stroke="#ec4899" 
+                    strokeWidth={2}
+                    name="Learning Rate"
+                    dot={{ fill: '#ec4899', r: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500">
+                Play more games to see trait development
+              </div>
+            )}
+          </div>
+
+          {/* Overall Stats - Takes 1 column on right */}
+          <div className="bg-white p-4 rounded-lg border border-purple-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Overall Stats</h4>
+            <div className="space-y-3">
+              <TraitBar label="Risk Tolerance" value={playerProfile.riskTolerance} icon="🎲" compact />
+              <TraitBar label="Adaptability" value={playerProfile.adaptabilityScore} icon="🔄" compact />
+              <TraitBar label="Patience" value={playerProfile.patienceScore} icon="⏳" compact />
+              <TraitBar label="Chaos Affinity" value={playerProfile.chaosAffinity} icon="🌀" compact />
+              <TraitBar label="Order Affinity" value={playerProfile.orderAffinity} icon="📐" compact />
+              <TraitBar label="Learning Rate" value={playerProfile.learningRate} icon="📚" compact />
+            </div>
+          </div>
         </div>
+
         <div className="mt-4 p-3 bg-purple-100 rounded-lg">
           <div className="text-sm text-gray-700">Stress Response:</div>
           <div className="text-lg font-semibold text-purple-700">{playerProfile.stressResponse}</div>
@@ -535,7 +692,7 @@ const StatCard = ({ icon, label, value, color }: any) => (
   </Card>
 );
 
-const TraitBar = ({ label, value, icon, compact }: any) => (
+const TraitBar = ({ label, value, icon, compact, color }: any) => (
   <div className={compact ? 'space-y-1' : 'space-y-2'}>
     <div className="flex justify-between text-sm">
       <span className="text-gray-700 flex items-center gap-1">
