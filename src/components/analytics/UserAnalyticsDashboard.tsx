@@ -15,7 +15,6 @@ import {
   Flame,
   Skull,
   Shield,
-  Target,
   TrendingUp,
   Trophy,
   Users,
@@ -87,8 +86,6 @@ export const UserAnalyticsDashboard = () => {
   }
 
   const { stats, trends, playerProfile, systemMemory, behaviorMetrics, analytics } = userData;
-
-  const winRate = stats.totalGames > 0 ? (stats.wins / stats.totalGames) * 100 : 0;
 
   const achievements = [
     {
@@ -218,17 +215,12 @@ export const UserAnalyticsDashboard = () => {
         <Card className="bg-green-50 border-green-300 p-6">
           <div className="flex items-center gap-3 mb-4">
             <Activity className="w-6 h-6 text-green-600" />
-            <h3 className="text-xl font-semibold text-gray-900">Performance</h3>
+            <h3 className="text-xl font-semibold text-gray-900">Performance Trend</h3>
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Win Rate</span>
-              <span className="text-gray-900 font-semibold">{winRate.toFixed(1)}%</span>
-            </div>
-            <Progress value={winRate} className="h-2 bg-gray-200 border border-gray-300" />
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Trend</span>
-              <span className={`font-semibold ${
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 text-sm">Performance Trend</span>
+              <span className={`font-semibold text-2xl ${
                 trends.performanceTrend === 'improving' ? 'text-green-600' :
                 trends.performanceTrend === 'declining' ? 'text-red-600' : 'text-amber-600'
               }`}>
@@ -241,33 +233,7 @@ export const UserAnalyticsDashboard = () => {
         </Card>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard
-          icon={<Target className="w-5 h-5" />}
-          label="Total Games"
-          value={stats.totalGames}
-          color="text-blue-600"
-        />
-        <StatCard
-          icon={<TrendingUp className="w-5 h-5" />}
-          label="Highest Score"
-          value={stats.highestScore}
-          color="text-green-600"
-        />
-        <StatCard
-          icon={<Flame className="w-5 h-5" />}
-          label="Win Streak"
-          value={stats.currentWinStreak}
-          color="text-orange-600"
-        />
-        <StatCard
-          icon={<Zap className="w-5 h-5" />}
-          label="Collapses"
-          value={stats.collapseCount}
-          color="text-red-600"
-        />
-      </div>
+
 
       {/* Achievements */}
       <Card className="bg-blue-50 border-blue-300 p-6">
