@@ -29,7 +29,7 @@ export const AuthForm = () => {
           toast.error(errorMsg);
         } else {
           toast.success('Successfully signed in!');
-          navigate('/game');
+          navigate('/dashboard');
         }
       } else {
         if (!username.trim()) {
