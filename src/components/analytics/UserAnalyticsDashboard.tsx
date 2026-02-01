@@ -557,11 +557,7 @@ export const UserAnalyticsDashboard = () => {
           </div>
         </div>
 
-<<<<<<< HEAD
         <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-=======
-        <div className="mt-4 p-3 bg-purple-100 rounded-lg flex flex-row md:flex-row gap-4 justify-between items-center">
->>>>>>> 08d7b57ad331ebefbf1a4a9cd2255ddc360b0ddc
           <div className="text-sm text-gray-700">Stress Response:</div>
           <div className="text-lg font-semibold text-blue-700">{playerProfile.stressResponse}</div>
         </div>
