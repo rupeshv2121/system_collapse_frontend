@@ -6,15 +6,15 @@ export const handleApiError = (error: unknown, customMessage?: string) => {
 
   if (error instanceof ApiError) {
     const errorTitles = {
-      network: "Connection Error",
-      server: "Server Error",
+      network: "No Internet Connection",
+      server: "Backend Server Down",
       auth: "Authentication Error",
       generic: "Error"
     };
 
     const errorDescriptions = {
-      network: "Unable to connect to the server. Please check your internet connection.",
-      server: "The server is currently unavailable. Please try again later.",
+      network: "No internet connection detected. Please check your network and try again.",
+      server: "Unable to connect to backend server. Please ensure the server is running.",
       auth: "Your session has expired. Please sign in again.",
       generic: "Something went wrong. Please try again."
     };

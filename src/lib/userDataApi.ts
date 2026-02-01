@@ -39,44 +39,85 @@ async function apiCall<T>(
   }
 
   try {
-    const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...options.headers,
-      },
-    });
+    // Create abort controller for timeout
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 10000); // 10 second timeout
 
-    if (!response.ok) {
-      // Check for specific status codes
-      if (response.status === 401 || response.status === 403) {
-        throw new ApiError("Authentication failed", "auth", response.status);
-      }
-      
-      if (response.status >= 500) {
-        throw new ApiError("Server error - please try again later", "server", response.status);
+    try {
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        ...options,
+        signal: abortController.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Check for specific status codes
+        if (response.status === 401 || response.status === 403) {
+          throw new ApiError("Authentication failed", "auth", response.status);
+        }
+        
+        if (response.status >= 500) {
+          throw new ApiError("Server error - please try again later", "server", response.status);
+        }
+
+        const error = await response
+          .json()
+          .catch(() => ({ error: response.statusText }));
+        
+        throw new ApiError(
+          error.error || `API call failed: ${response.statusText}`,
+          "generic",
+          response.status
+        );
       }
 
-      const error = await response
-        .json()
-        .catch(() => ({ error: response.statusText }));
-      
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  } catch (error) {
+    // Handle abort/timeout errors - likely backend is down but not responding
+    if (error instanceof Error && error.name === "AbortError") {
       throw new ApiError(
-        error.error || `API call failed: ${response.statusText}`,
-        "generic",
-        response.status
+        "Backend server is not responding - please check if the server is running.",
+        "server"
       );
     }
 
-    return response.json();
-  } catch (error) {
     // Network errors (no response from server)
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new ApiError(
-        "Unable to connect to server - please check your connection",
-        "network"
-      );
+    if (error instanceof TypeError) {
+      // Common network error messages
+      const errorMessage = error.message.toLowerCase();
+      if (
+        errorMessage.includes("fetch") ||
+        errorMessage.includes("failed to fetch") ||
+        errorMessage.includes("network") ||
+        errorMessage.includes("cors") ||
+        errorMessage.includes("connection") ||
+        errorMessage.includes("refused") ||
+        errorMessage.includes("unreachable")
+      ) {
+        // Check if user has internet connection
+        if (!navigator.onLine) {
+          throw new ApiError(
+            "No internet connection detected. Please check your network connection and try again.",
+            "network"
+          );
+        }
+        
+        // User has internet but can't reach backend - backend is down
+        throw new ApiError(
+          "Unable to connect to backend server. The server may be offline or unreachable.",
+          "server"
+        );
+      }
     }
     
     // Re-throw ApiError instances
@@ -330,21 +371,11 @@ export const userDataApi = {
 
   // Get global leaderboard
   async getGlobalLeaderboard() {
-    try {
-      return await apiCall<any[]>("/api/leaderboard/global");
-    } catch (error) {
-      console.error("Error fetching global leaderboard:", error);
-      return [];
-    }
+    return await apiCall<any[]>("/api/leaderboard/global");
   },
 
   // Get top winners
   async getTopWinners() {
-    try {
-      return await apiCall<any[]>("/api/leaderboard/top-winners");
-    } catch (error) {
-      console.error("Error fetching top winners:", error);
-      return [];
-    }
+    return await apiCall<any[]>("/api/leaderboard/top-winners");
   },
 };

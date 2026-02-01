@@ -30,9 +30,9 @@ export const ErrorDisplay = ({
   const getDefaultTitle = () => {
     switch (type) {
       case "network":
-        return "Connection Lost";
+        return "No Internet Connection";
       case "server":
-        return "Server Unavailable";
+        return "Backend Server Unavailable";
       case "auth":
         return "Authentication Error";
       default:
@@ -43,9 +43,9 @@ export const ErrorDisplay = ({
   const getDefaultMessage = () => {
     switch (type) {
       case "network":
-        return "Unable to connect to the server. Please check your internet connection and try again.";
+        return "No internet connection detected. Please check your network connection and try again.";
       case "server":
-        return "The server is currently unavailable. Our team has been notified and is working on it.";
+        return "The backend server is currently unavailable or not running. Please start the server and try again.";
       case "auth":
         return "Your session has expired. Please sign in again to continue.";
       default:
@@ -71,7 +71,7 @@ export const ErrorDisplay = ({
             <div className="mb-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
               <div className="flex items-center justify-center gap-2 text-orange-400 text-sm">
                 <Server className="w-4 h-4" />
-                <span>Backend services are offline</span>
+                <span>Backend server is not running or unreachable</span>
               </div>
             </div>
           )}
@@ -80,7 +80,7 @@ export const ErrorDisplay = ({
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
               <div className="flex items-center justify-center gap-2 text-red-400 text-sm">
                 <WifiOff className="w-4 h-4" />
-                <span>No internet connection detected</span>
+                <span>Please check your internet connection</span>
               </div>
             </div>
           )}
