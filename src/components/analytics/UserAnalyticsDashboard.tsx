@@ -212,10 +212,10 @@ export const UserAnalyticsDashboard = () => {
           </div>
         </Card>
 
-        <Card className="bg-green-50 border-green-300 p-6">
+        <Card className="bg-blue-50 border-blue-300 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Activity className="w-6 h-6 text-green-600" />
-            <h3 className="text-xl font-semibold text-gray-900">Performance Trend</h3>
+            <Activity className="w-6 h-6 text-blue-600" />
+            <h3 className="text-xl font-semibold text-gray-900">Performance</h3>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -248,8 +248,8 @@ export const UserAnalyticsDashboard = () => {
               className={cn(
                 'relative group p-3 rounded-lg border transition-all',
                 achievement.achieved
-                  ? 'bg-white border-green-300 shadow-sm'
-                  : 'bg-white/70 border-gray-200'
+                  ? 'bg-blue-50 border-blue-200 shadow-sm'
+                  : 'bg-blue-50/70 border-blue-200'
               )}
               title={achievement.description}
             >
@@ -275,9 +275,9 @@ export const UserAnalyticsDashboard = () => {
       </Card>
 
       {/* Badges */}
-      <Card className="bg-emerald-50 border-emerald-300 p-6">
+      <Card className="bg-blue-50 border-blue-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-emerald-600" />
+          <Shield className="w-5 h-5 text-blue-600" />
           Badges
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -362,16 +362,16 @@ export const UserAnalyticsDashboard = () => {
       </Card>
 
       {/* Psychological Traits */}
-      <Card className="bg-purple-50 border-purple-300 p-6">
+      <Card className="bg-blue-50 border-blue-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Brain className="w-5 h-5 text-purple-600" />
+          <Brain className="w-5 h-5 text-blue-600" />
           Psychological Traits Development
         </h3>
         
         {/* Development Graph and Stats Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Development Graph - Takes 2 columns */}
-          <div className="lg:col-span-2 bg-white p-4 rounded-lg border border-purple-200">
+          <div className="lg:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Trait Evolution Over Games</h4>
             {userData.sessions.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
@@ -510,7 +510,7 @@ export const UserAnalyticsDashboard = () => {
           </div>
 
           {/* Overall Stats - Takes 1 column on right */}
-          <div className="bg-white p-4 rounded-lg border border-purple-200">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Overall Stats</h4>
             <div className="space-y-3">
               <TraitBar label="Risk Tolerance" value={playerProfile.riskTolerance} icon="🎲" compact />
@@ -523,32 +523,32 @@ export const UserAnalyticsDashboard = () => {
           </div>
         </div>
 
-        <div className="mt-4 p-3 bg-purple-100 rounded-lg flex flex-row md:flex-row gap-4 justify-between items-center">
+        <div className="mt-4 p-3 bg-blue-100 rounded-lg">
           <div className="text-sm text-gray-700">Stress Response:</div>
-          <div className="text-lg font-semibold text-purple-700">{playerProfile.stressResponse}</div>
+          <div className="text-lg font-semibold text-blue-700">{playerProfile.stressResponse}</div>
         </div>
       </Card>
 
       {/* Behavior Metrics */}
-      <Card className="bg-orange-50 border-orange-300 p-6">
+      <Card className="bg-blue-50 border-blue-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-orange-600" />
+          <Activity className="w-5 h-5 text-blue-600" />
           Behavioral Analysis
         </h3>
         
         {/* Click Statistics */}
-        <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-orange-100 rounded-lg">
+        <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-blue-100 rounded-lg">
           <div className="text-center">
             <div className="text-xs text-gray-700 mb-1">Total Clicks</div>
-            <div className="text-2xl font-bold text-orange-700">{behaviorMetrics.totalClicks}</div>
+            <div className="text-2xl font-bold text-blue-700">{behaviorMetrics.totalClicks}</div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-700 mb-1">Avg Click Speed</div>
-            <div className="text-2xl font-bold text-orange-700">{behaviorMetrics.averageClickSpeed.toFixed(0)}<span className="text-sm">ms</span></div>
+            <div className="text-2xl font-bold text-blue-700">{behaviorMetrics.averageClickSpeed.toFixed(0)}<span className="text-sm">ms</span></div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-700 mb-1">Most Clicked</div>
-            <div className="text-2xl font-bold text-orange-700 capitalize">{behaviorMetrics.mostClickedColor}</div>
+            <div className="text-2xl font-bold text-blue-700 capitalize">{behaviorMetrics.mostClickedColor}</div>
           </div>
         </div>
 
@@ -562,9 +562,9 @@ export const UserAnalyticsDashboard = () => {
       </Card>
 
       {/* System Interaction */}
-      <Card className="bg-red-50 border-red-300 p-6">
+      <Card className="bg-blue-50 border-blue-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Eye className="w-5 h-5 text-red-600" />
+          <Eye className="w-5 h-5 text-blue-600" />
           System Observation
         </h3>
         <div className="space-y-3">
@@ -582,23 +582,23 @@ export const UserAnalyticsDashboard = () => {
             </div>
             <Progress value={systemMemory.manipulationResistance} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-red-100 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-blue-100 rounded-lg">
             <div>
               <div className="text-xs text-gray-700">Rebellion Events</div>
-              <div className="text-lg font-semibold text-red-600">{systemMemory.rebellionCount}</div>
+              <div className="text-lg font-semibold text-blue-700">{systemMemory.rebellionCount}</div>
             </div>
             <div>
               <div className="text-xs text-gray-700">Compliance Events</div>
-              <div className="text-lg font-semibold text-green-600">{systemMemory.complianceCount}</div>
+              <div className="text-lg font-semibold text-blue-600">{systemMemory.complianceCount}</div>
             </div>
           </div>
         </div>
       </Card>
 
       {/* Advanced Analytics */}
-      <Card className="bg-cyan-50 border-cyan-300 p-6">
+      <Card className="bg-blue-50 border-blue-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-cyan-600" />
+          <Shield className="w-5 h-5 text-blue-600" />
           Advanced Metrics
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -622,14 +622,14 @@ export const UserAnalyticsDashboard = () => {
 
       {/* Recent Sessions */}
       {userData.sessions.length > 0 && (
-        <Card className="bg-purple-50 border-purple-300 p-6">
+        <Card className="bg-blue-50 border-blue-300 p-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-600" />
+            <Users className="w-5 h-5 text-blue-600" />
             Recent Sessions
           </h3>
           <div className="space-y-2">
             {userData.sessions.slice(0, 5).map((session) => (
-              <div key={session.sessionId} className="flex items-center justify-between p-3 bg-purple-100 rounded-lg">
+              <div key={session.sessionId} className="flex items-center justify-between p-3 bg-blue-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${session.win ? 'bg-green-600' : 'bg-red-600'}`} />
                   <div>
