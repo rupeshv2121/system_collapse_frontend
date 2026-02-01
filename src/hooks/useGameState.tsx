@@ -311,6 +311,7 @@ export const useGameState = () => {
           finalEntropy: prev.entropy,
           finalSanity: prev.sanity,
           phaseReached: prev.phase,
+          duration: gameDuration,
         });
         
         // Record to user data (for psychological profiling)

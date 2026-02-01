@@ -60,14 +60,12 @@ const AnalyticsDashboard = () => {
     }))
   , [stats.entropyHistory]);
 
-  const durationData = useMemo(() => {
-    // Use real duration data from userData.trends.durationHistory
-    const durations = userData.trends.durationHistory || [];
-    return durations.map((duration, index) => ({
+  const durationData = useMemo(() => 
+    (stats.durationHistory || []).map((value, index) => ({
       game: index + 1,
-      duration: duration,
-    }));
-  }, [userData.trends.durationHistory]);
+      duration: value,
+    }))
+  , [stats.durationHistory]);
 
   const sanityLossData = useMemo(() => 
     stats.sanityLossHistory.map((value, index) => ({
