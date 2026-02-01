@@ -142,7 +142,7 @@ const Demo = () => {
   // Left sidebar stats configuration
   const leftStats = useMemo(() => [
     { icon: Trophy, label: 'High Score', value: userData.stats.highestScore, color: 'blue' },
-    { icon: Target, label: 'Win Rate', value: `${winRate}%`, color: 'purple' },
+    { icon: Target, label: 'Win Rate', value: `${winRate.toFixed(2)}%`, color: 'purple' },
     { icon: Activity, label: 'Total Games', value: userData.stats.totalGames, color: 'green' },
   ], [userData.stats.highestScore, userData.stats.totalGames, winRate]);
 

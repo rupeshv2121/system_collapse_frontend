@@ -4,9 +4,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ErrorDisplay } from '@/components/ui/error-display';
 import { Progress } from '@/components/ui/progress';
-import { useError } from '@/contexts/ErrorContext';
 import { useUserData } from '@/hooks/useUserData';
 import { cn } from '@/lib/utils';
 import {
@@ -22,7 +20,6 @@ import {
   Users,
   Zap
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -34,38 +31,7 @@ import {
 } from 'recharts';
 
 export const UserAnalyticsDashboard = () => {
-  const { userData, isLoading, error } = useUserData();
-  const { showNetworkError, showServerError } = useError();
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [shareEmail, setShareEmail] = useState('');
-  const [shareError, setShareError] = useState('');
-  const [isShareSending, setIsShareSending] = useState(false);
-  const [shareSuccess, setShareSuccess] = useState('');
-
-  // Redirect to dedicated error pages for network/server errors
-  useEffect(() => {
-    if (error) {
-      if (error.type === 'network') {
-        showNetworkError();
-      } else if (error.type === 'server') {
-        showServerError();
-      }
-    }
-  }, [error, showNetworkError, showServerError]);
-
-  if (error) {
-    // Only show inline error for non-network/server errors
-    if (error.type !== 'network' && error.type !== 'server') {
-      return (
-        <ErrorDisplay
-          message={error.message}
-          type={error.type}
-        />
-      );
-    }
-    // For network/server errors, return null as useEffect will navigate
-    return null;
-  }
+  const { userData, isLoading } = useUserData();
 
   if (isLoading) {
     return (
@@ -113,115 +79,6 @@ export const UserAnalyticsDashboard = () => {
   const { stats, trends, playerProfile, systemMemory, behaviorMetrics, analytics } = userData;
 
   const winRate = stats.totalGames > 0 ? (stats.wins / stats.totalGames) * 100 : 0;
-
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const buildShareBody = () => {
-    const lines = [
-      'System Collapse - User Profile Statistics',
-      '----------------------------------------',
-      `Play Style: ${playerProfile.playStyle}`,
-      `Psychological Archetype: ${playerProfile.psychologicalArchetype}`,
-      '',
-      `Total Games: ${stats.totalGames}`,
-      `Win Rate: ${winRate.toFixed(1)}%`,
-      `Highest Score: ${stats.highestScore}`,
-      `Current Win Streak: ${stats.currentWinStreak}`,
-      '',
-      'Psychological Traits:',
-      `- Risk Tolerance: ${playerProfile.riskTolerance}%`,
-      `- Adaptability: ${playerProfile.adaptabilityScore}%`,
-      `- Patience: ${playerProfile.patienceScore}%`,
-      `- Chaos Affinity: ${playerProfile.chaosAffinity}%`,
-      `- Order Affinity: ${playerProfile.orderAffinity}%`,
-      `- Learning Rate: ${playerProfile.learningRate}%`,
-      '',
-      `Stress Response: ${playerProfile.stressResponse}`,
-    ];
-
-    return lines.join('\n');
-  };
-
-  const handleShareSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmedEmail = shareEmail.trim();
-
-    if (!trimmedEmail) {
-      setShareError('Please enter an email address.');
-      return;
-    }
-
-    if (!isValidEmail(trimmedEmail)) {
-      setShareError('Please enter a valid email address.');
-      return;
-    }
-
-    const subject = 'System Collapse - User Profile Statistics';
-    const body = buildShareBody();
-
-    try {
-      setIsShareSending(true);
-      setShareError('');
-      setShareSuccess('');
-
-      // Check network connection
-      if (!navigator.onLine) {
-        showNetworkError();
-        return;
-      }
-
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-      
-      // Create abort controller for timeout
-      const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 10000);
-
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/email/share-profile`, {
-          method: 'POST',
-          signal: abortController.signal,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: trimmedEmail,
-            subject,
-            content: body,
-          }),
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          if (response.status >= 500) {
-            showServerError();
-            return;
-          }
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to send email');
-        }
-
-        setShareSuccess('Email sent successfully.');
-        setShareEmail('');
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        throw fetchError;
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        showServerError();
-        return;
-      }
-      if (err instanceof TypeError) {
-        showServerError();
-        return;
-      }
-      setShareError('Failed to send email. Please try again.');
-    } finally {
-      setIsShareSending(false);
-    }
-  };
 
   const achievements = [
     {
@@ -327,87 +184,6 @@ export const UserAnalyticsDashboard = () => {
 
   return (
     <div className="space-y-6 p-6">
-      {isShareOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md bg-blue-50 border border-blue-300 rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Share Profile via Email</h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsShareOpen(false);
-                  setShareError('');
-                }}
-                className="text-gray-500 hover:text-gray-700"
-                aria-label="Close share dialog"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleShareSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="share-email">
-                  Recipient Email
-                </label>
-                <input
-                  id="share-email"
-                  type="email"
-                  value={shareEmail}
-                  onChange={(event) => {
-                    setShareEmail(event.target.value);
-                    setShareError('');
-                  }}
-                  placeholder="name@example.com"
-                  className="w-full rounded-md border border-blue-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                />
-                {shareError && (
-                  <p className="mt-2 text-sm text-red-600">{shareError}</p>
-                )}
-                {shareSuccess && (
-                  <p className="mt-2 text-sm text-green-600">{shareSuccess}</p>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsShareOpen(false);
-                    setShareError('');
-                  }}
-                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
-                  disabled={isShareSending}
-                >
-                  {isShareSending ? 'Sending...' : 'Share'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold text-gray-900">Your Psychological Profile</h2>
-        <p className="text-gray-600">The system has been observing you...</p>
-        <div>
-          <button
-            type="button"
-            onClick={() => setIsShareOpen(true)}
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
-          >
-            Share score to email
-          </button>
-        </div>
-      </div>
-
       {/* Play Style & Archetype */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-blue-50 border-blue-300 p-6">
@@ -423,15 +199,15 @@ export const UserAnalyticsDashboard = () => {
           </div>
         </Card>
 
-        <Card className="bg-blue-50 border-blue-300 p-6">
+        <Card className="bg-green-50 border-green-300 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Activity className="w-6 h-6 text-blue-600" />
+            <Activity className="w-6 h-6 text-green-600" />
             <h3 className="text-xl font-semibold text-gray-900">Performance</h3>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Win Rate</span>
-              <span className="text-gray-900 font-semibold">{winRate.toFixed(2)}%</span>
+              <span className="text-gray-900 font-semibold">{winRate.toFixed(1)}%</span>
             </div>
             <Progress value={winRate} className="h-2 bg-gray-200 border border-gray-300" />
             <div className="flex justify-between text-sm">
@@ -483,15 +259,15 @@ export const UserAnalyticsDashboard = () => {
           <Trophy className="w-5 h-5 text-blue-600" />
           Achievements
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {achievements.map((achievement) => (
             <div
               key={achievement.id}
               className={cn(
                 'relative group p-3 rounded-lg border transition-all',
                 achievement.achieved
-                  ? 'bg-blue-50 border-blue-200 shadow-sm'
-                  : 'bg-blue-50/70 border-blue-200'
+                  ? 'bg-white border-green-300 shadow-sm'
+                  : 'bg-white/70 border-gray-200'
               )}
               title={achievement.description}
             >
@@ -517,9 +293,9 @@ export const UserAnalyticsDashboard = () => {
       </Card>
 
       {/* Badges */}
-      <Card className="bg-blue-50 border-blue-300 p-6">
+      <Card className="bg-emerald-50 border-emerald-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-blue-600" />
+          <Shield className="w-5 h-5 text-emerald-600" />
           Badges
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -767,7 +543,7 @@ export const UserAnalyticsDashboard = () => {
         </div>
       </Card>
 
-      {/* Behavior Metrics */}
+     {/* Behavior Metrics */}
       <Card className="bg-white/90 backdrop-blur-sm border-cyan-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -819,43 +595,43 @@ export const UserAnalyticsDashboard = () => {
       </Card>
 
       {/* System Interaction */}
-      <Card className="bg-blue-50 border-blue-300 p-6">
+      <Card className="bg-red-50 border-red-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Eye className="w-5 h-5 text-blue-600" />
+          <Eye className="w-5 h-5 text-red-600" />
           System Observation
         </h3>
         <div className="space-y-3">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Trust Level</span>
-              <span className="text-gray-900 font-semibold">{typeof systemMemory.trustLevel === 'number' ? systemMemory.trustLevel.toFixed(2) : systemMemory.trustLevel}%</span>
+              <span className="text-gray-900 font-semibold">{systemMemory.trustLevel}%</span>
             </div>
             <Progress value={systemMemory.trustLevel} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Manipulation Resistance</span>
-              <span className="text-gray-900 font-semibold">{typeof systemMemory.manipulationResistance === 'number' ? systemMemory.manipulationResistance.toFixed(2) : systemMemory.manipulationResistance}%</span>
+              <span className="text-gray-900 font-semibold">{systemMemory.manipulationResistance}%</span>
             </div>
             <Progress value={systemMemory.manipulationResistance} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-blue-100 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-red-100 rounded-lg">
             <div>
               <div className="text-xs text-gray-700">Rebellion Events</div>
-              <div className="text-lg font-semibold text-blue-700">{systemMemory.rebellionCount}</div>
+              <div className="text-lg font-semibold text-red-600">{systemMemory.rebellionCount}</div>
             </div>
             <div>
               <div className="text-xs text-gray-700">Compliance Events</div>
-              <div className="text-lg font-semibold text-blue-600">{systemMemory.complianceCount}</div>
+              <div className="text-lg font-semibold text-green-600">{systemMemory.complianceCount}</div>
             </div>
           </div>
         </div>
       </Card>
 
       {/* Advanced Analytics */}
-      <Card className="bg-blue-50 border-blue-300 p-6">
+      <Card className="bg-cyan-50 border-cyan-300 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-blue-600" />
+          <Shield className="w-5 h-5 text-cyan-600" />
           Advanced Metrics
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -879,14 +655,14 @@ export const UserAnalyticsDashboard = () => {
 
       {/* Recent Sessions */}
       {userData.sessions.length > 0 && (
-        <Card className="bg-blue-50 border-blue-300 p-6">
+        <Card className="bg-purple-50 border-purple-300 p-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-blue-600" />
+            <Users className="w-5 h-5 text-purple-600" />
             Recent Sessions
           </h3>
           <div className="space-y-2">
             {userData.sessions.slice(0, 5).map((session) => (
-              <div key={session.sessionId} className="flex items-center justify-between p-3 bg-blue-100 rounded-lg">
+              <div key={session.sessionId} className="flex items-center justify-between p-3 bg-purple-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${session.win ? 'bg-green-600' : 'bg-red-600'}`} />
                   <div>
@@ -917,14 +693,14 @@ const StatCard = ({ icon, label, value, color }: any) => (
   </Card>
 );
 
-const TraitBar = ({ label, value, icon, compact, color: _color }: any) => (
+const TraitBar = ({ label, value, icon, compact }: any) => (
   <div className={compact ? 'space-y-1' : 'space-y-2'}>
     <div className="flex justify-between text-sm">
       <span className="text-gray-700 flex items-center gap-1">
         {icon && <span>{icon}</span>}
         {label}
       </span>
-      <span className="text-gray-900 font-semibold">{typeof value === 'number' ? value.toFixed(2) : value}%</span>
+      <span className="text-gray-900 font-semibold">{value}%</span>
     </div>
     <Progress value={value} className={cn(compact ? 'h-1' : 'h-2', 'bg-gray-200 border border-gray-300')} />
   </div>
@@ -933,7 +709,7 @@ const TraitBar = ({ label, value, icon, compact, color: _color }: any) => (
 const MetricCard = ({ label, value, description }: any) => (
   <div className="p-4 bg-gray-100 rounded-lg">
     <div className="text-sm text-gray-700 mb-1">{label}</div>
-    <div className="text-2xl font-bold text-gray-900 mb-1">{typeof value === 'number' ? value.toFixed(2) : value}%</div>
+    <div className="text-2xl font-bold text-gray-900 mb-1">{value}%</div>
     <div className="text-xs text-gray-600">{description}</div>
   </div>
 );
