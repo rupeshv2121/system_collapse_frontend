@@ -389,7 +389,7 @@ const AnalyticsDashboard = () => {
                       {recentGames.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
-                          fill={entry.won ? 'hsl(var(--success))' : 'hsl(var(--secondary))'} 
+                          fill={entry.won ? 'hsl(var(--success))' : 'hsl(var(--destructive))'} 
                         />
                       ))}
                     </Bar>
