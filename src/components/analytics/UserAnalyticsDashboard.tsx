@@ -8,13 +8,15 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { Progress } from '@/components/ui/progress';
 import { useUserData } from '@/hooks/useUserData';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import {
   Activity,
   Brain,
   Eye,
   Flame,
-  Skull,
   Shield,
+  Skull,
+  Target,
   TrendingUp,
   Trophy,
   Users,
@@ -32,6 +34,11 @@ import {
 
 export const UserAnalyticsDashboard = () => {
   const { userData, isLoading, error } = useUserData();
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareError, setShareError] = useState('');
+  const [isShareSending, setIsShareSending] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState('');
 
   if (error) {
     return (
@@ -86,6 +93,87 @@ export const UserAnalyticsDashboard = () => {
   }
 
   const { stats, trends, playerProfile, systemMemory, behaviorMetrics, analytics } = userData;
+
+  const winRate = stats.totalGames > 0 ? (stats.wins / stats.totalGames) * 100 : 0;
+
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const buildShareBody = () => {
+    const lines = [
+      'System Collapse - User Profile Statistics',
+      '----------------------------------------',
+      `Play Style: ${playerProfile.playStyle}`,
+      `Psychological Archetype: ${playerProfile.psychologicalArchetype}`,
+      '',
+      `Total Games: ${stats.totalGames}`,
+      `Win Rate: ${winRate.toFixed(1)}%`,
+      `Highest Score: ${stats.highestScore}`,
+      `Current Win Streak: ${stats.currentWinStreak}`,
+      '',
+      'Psychological Traits:',
+      `- Risk Tolerance: ${playerProfile.riskTolerance}%`,
+      `- Adaptability: ${playerProfile.adaptabilityScore}%`,
+      `- Patience: ${playerProfile.patienceScore}%`,
+      `- Chaos Affinity: ${playerProfile.chaosAffinity}%`,
+      `- Order Affinity: ${playerProfile.orderAffinity}%`,
+      `- Learning Rate: ${playerProfile.learningRate}%`,
+      '',
+      `Stress Response: ${playerProfile.stressResponse}`,
+    ];
+
+    return lines.join('\n');
+  };
+
+  const handleShareSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedEmail = shareEmail.trim();
+
+    if (!trimmedEmail) {
+      setShareError('Please enter an email address.');
+      return;
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setShareError('Please enter a valid email address.');
+      return;
+    }
+
+    const subject = 'System Collapse - User Profile Statistics';
+    const body = buildShareBody();
+
+    try {
+      setIsShareSending(true);
+      setShareError('');
+      setShareSuccess('');
+
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      
+      const response = await fetch(`${BACKEND_URL}/api/email/share-profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: trimmedEmail,
+          subject,
+          content: body,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to send email');
+      }
+
+      setShareSuccess('Email sent successfully.');
+      setShareEmail('');
+    } catch (err) {
+      setShareError('Failed to send email. Please try again.');
+    } finally {
+      setIsShareSending(false);
+    }
+  };
 
   const achievements = [
     {
@@ -191,10 +279,85 @@ export const UserAnalyticsDashboard = () => {
 
   return (
     <div className="space-y-6 p-6">
+      {isShareOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md bg-blue-50 border border-blue-300 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Share Profile via Email</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsShareOpen(false);
+                  setShareError('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+                aria-label="Close share dialog"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleShareSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="share-email">
+                  Recipient Email
+                </label>
+                <input
+                  id="share-email"
+                  type="email"
+                  value={shareEmail}
+                  onChange={(event) => {
+                    setShareEmail(event.target.value);
+                    setShareError('');
+                  }}
+                  placeholder="name@example.com"
+                  className="w-full rounded-md border border-blue-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  required
+                />
+                {shareError && (
+                  <p className="mt-2 text-sm text-red-600">{shareError}</p>
+                )}
+                {shareSuccess && (
+                  <p className="mt-2 text-sm text-green-600">{shareSuccess}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsShareOpen(false);
+                    setShareError('');
+                  }}
+                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={isShareSending}
+                >
+                  {isShareSending ? 'Sending...' : 'Share'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-3">
         <h2 className="text-3xl font-bold text-gray-900">Your Psychological Profile</h2>
         <p className="text-gray-600">The system has been observing you...</p>
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsShareOpen(true)}
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+          >
+            Share score to email
+          </button>
+        </div>
       </div>
 
       {/* Play Style & Archetype */}
@@ -218,9 +381,14 @@ export const UserAnalyticsDashboard = () => {
             <h3 className="text-xl font-semibold text-gray-900">Performance</h3>
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700 text-sm">Performance Trend</span>
-              <span className={`font-semibold text-2xl ${
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Win Rate</span>
+              <span className="text-gray-900 font-semibold">{winRate.toFixed(2)}%</span>
+            </div>
+            <Progress value={winRate} className="h-2 bg-gray-200 border border-gray-300" />
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Trend</span>
+              <span className={`font-semibold ${
                 trends.performanceTrend === 'improving' ? 'text-green-600' :
                 trends.performanceTrend === 'declining' ? 'text-red-600' : 'text-amber-600'
               }`}>
@@ -233,7 +401,33 @@ export const UserAnalyticsDashboard = () => {
         </Card>
       </div>
 
-
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          icon={<Target className="w-5 h-5" />}
+          label="Total Games"
+          value={stats.totalGames}
+          color="text-blue-600"
+        />
+        <StatCard
+          icon={<TrendingUp className="w-5 h-5" />}
+          label="Highest Score"
+          value={stats.highestScore}
+          color="text-green-600"
+        />
+        <StatCard
+          icon={<Flame className="w-5 h-5" />}
+          label="Win Streak"
+          value={stats.currentWinStreak}
+          color="text-orange-600"
+        />
+        <StatCard
+          icon={<Zap className="w-5 h-5" />}
+          label="Collapses"
+          value={stats.collapseCount}
+          color="text-red-600"
+        />
+      </div>
 
       {/* Achievements */}
       <Card className="bg-blue-50 border-blue-300 p-6">
@@ -535,29 +729,27 @@ export const UserAnalyticsDashboard = () => {
           <Activity className="w-5 h-5 text-blue-600" />
           Behavioral Analysis
         </h3>
-        
-        {/* Click Statistics */}
-        <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-blue-100 rounded-lg">
-          <div className="text-center">
-            <div className="text-xs text-gray-700 mb-1">Total Clicks</div>
-            <div className="text-2xl font-bold text-blue-700">{behaviorMetrics.totalClicks}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Total Clicks</span>
+              <span className="text-gray-900 font-semibold">{behaviorMetrics.totalClicks}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Avg Click Speed</span>
+              <span className="text-gray-900 font-semibold">{behaviorMetrics.averageClickSpeed.toFixed(2)}ms</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Most Clicked</span>
+              <span className="text-gray-900 font-semibold capitalize">{behaviorMetrics.mostClickedColor}</span>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-xs text-gray-700 mb-1">Avg Click Speed</div>
-            <div className="text-2xl font-bold text-blue-700">{behaviorMetrics.averageClickSpeed.toFixed(0)}<span className="text-sm">ms</span></div>
+          <div className="space-y-2">
+            <TraitBar label="Variety" value={behaviorMetrics.varietyScore} compact />
+            <TraitBar label="Hesitation" value={behaviorMetrics.hesitationScore} compact />
+            <TraitBar label="Impulsivity" value={behaviorMetrics.impulsivityScore} compact />
+            <TraitBar label="Pattern Adherence" value={behaviorMetrics.patternAdherence} compact />
           </div>
-          <div className="text-center">
-            <div className="text-xs text-gray-700 mb-1">Most Clicked</div>
-            <div className="text-2xl font-bold text-blue-700 capitalize">{behaviorMetrics.mostClickedColor}</div>
-          </div>
-        </div>
-
-        {/* Behavioral Traits */}
-        <div className="space-y-3">
-          <TraitBar label="Variety Score" value={behaviorMetrics.varietyScore} icon="🎨" />
-          <TraitBar label="Hesitation Score" value={behaviorMetrics.hesitationScore} icon="⏸️" />
-          <TraitBar label="Impulsivity Score" value={behaviorMetrics.impulsivityScore} icon="⚡" />
-          <TraitBar label="Pattern Adherence" value={behaviorMetrics.patternAdherence} icon="🔄" />
         </div>
       </Card>
 

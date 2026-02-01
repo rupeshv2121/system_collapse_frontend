@@ -33,23 +33,40 @@ export interface TourStep {
 interface GuidedTourProps {
   steps: TourStep[];
   storageKey: string; // localStorage key to track if tour was completed
+  isOpen?: boolean; // Manual control - when true, tour is forced open
   onComplete?: () => void;
   onSkip?: () => void;
+  onClose?: () => void;
 }
 
-export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTourProps) => {
+export const GuidedTour = ({ steps, storageKey, isOpen = false, onComplete, onSkip, onClose }: GuidedTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
-  // Check if tour should be shown on mount
+  // Check if tour should be shown on mount (only first time)
   useEffect(() => {
     const hasCompletedTour = localStorage.getItem(storageKey);
-    if (!hasCompletedTour) {
+    // Only auto-show if never completed AND not manually controlled
+    if (!hasCompletedTour && isOpen === false) {
       // Small delay to ensure DOM is ready
       setTimeout(() => setIsActive(true), 500);
     }
-  }, [storageKey]);
+  }, [storageKey]); // Remove isOpen from dependencies to prevent re-triggering
+
+  // Handle manual open via isOpen prop (independent of auto-show)
+  useEffect(() => {
+    if (isOpen === true) {
+      setCurrentStep(0);
+      setIsActive(true);
+    } else if (isOpen === false && isActive) {
+      // Only close if it was manually opened (not auto-shown)
+      const hasCompletedTour = localStorage.getItem(storageKey);
+      if (hasCompletedTour) {
+        setIsActive(false);
+      }
+    }
+  }, [isOpen, storageKey]);
 
   // Update target element position when step changes
   useEffect(() => {
@@ -61,8 +78,34 @@ export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTour
         const rect = element.getBoundingClientRect();
         setTargetRect(rect);
         
-        // Scroll element into view smoothly
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Scroll element into view smoothly with better mobile handling
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'center'
+        });
+        
+        // Additional scroll adjustment for mobile to ensure element is fully visible
+        setTimeout(() => {
+          const elementRect = element.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const viewportWidth = window.innerWidth;
+          
+          // Check if element is too close to edges
+          if (elementRect.top < 100 || elementRect.bottom > viewportHeight - 100) {
+            window.scrollBy({
+              top: elementRect.top - viewportHeight / 2 + elementRect.height / 2,
+              behavior: 'smooth'
+            });
+          }
+          
+          if (elementRect.left < 20 || elementRect.right > viewportWidth - 20) {
+            window.scrollBy({
+              left: elementRect.left - viewportWidth / 2 + elementRect.width / 2,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     };
 
@@ -93,13 +136,17 @@ export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTour
   const handleComplete = () => {
     localStorage.setItem(storageKey, 'true');
     setIsActive(false);
+    setCurrentStep(0);
     onComplete?.();
+    onClose?.();
   };
 
   const handleSkip = () => {
     localStorage.setItem(storageKey, 'true');
     setIsActive(false);
+    setCurrentStep(0);
     onSkip?.();
+    onClose?.();
   };
 
   if (!isActive || !targetRect) return null;
@@ -110,31 +157,112 @@ export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTour
   // Calculate tooltip position based on target and preferred position
   const getTooltipStyle = (): React.CSSProperties => {
     const offset = 20; // Distance from target element
+    const tooltipWidth = 380; // Max width of tooltip
+    const tooltipHeight = 280; // Estimated height with padding
+    const padding = 20; // Padding from viewport edges
+    
     const style: React.CSSProperties = {
       position: 'fixed',
       zIndex: 10002,
-      maxWidth: '400px',
+      maxWidth: `${tooltipWidth}px`,
     };
 
-    switch (position) {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate available space in each direction
+    const spaceTop = targetRect.top;
+    const spaceBottom = viewportHeight - targetRect.bottom;
+    const spaceLeft = targetRect.left;
+    const spaceRight = viewportWidth - targetRect.right;
+
+    // Determine best position based on available space
+    let calculatedPosition = position;
+    
+    // On mobile (< 768px), prefer top or bottom positions
+    if (viewportWidth < 768) {
+      calculatedPosition = spaceBottom > spaceTop ? 'bottom' : 'top';
+    } else {
+      // On desktop, use preferred position but validate it has enough space
+      switch (position) {
+        case 'top':
+          if (spaceTop < tooltipHeight + offset + padding) {
+            calculatedPosition = spaceBottom > tooltipHeight + offset + padding ? 'bottom' : 
+                                spaceRight > spaceLeft ? 'right' : 'left';
+          }
+          break;
+        case 'bottom':
+          if (spaceBottom < tooltipHeight + offset + padding) {
+            calculatedPosition = spaceTop > tooltipHeight + offset + padding ? 'top' : 
+                                spaceRight > spaceLeft ? 'right' : 'left';
+          }
+          break;
+        case 'left':
+          if (spaceLeft < tooltipWidth + offset + padding) {
+            calculatedPosition = spaceRight > tooltipWidth + offset + padding ? 'right' : 
+                                spaceBottom > spaceTop ? 'bottom' : 'top';
+          }
+          break;
+        case 'right':
+          if (spaceRight < tooltipWidth + offset + padding) {
+            calculatedPosition = spaceLeft > tooltipWidth + offset + padding ? 'left' : 
+                                spaceBottom > spaceTop ? 'bottom' : 'top';
+          }
+          break;
+      }
+    }
+
+    // Calculate position based on chosen placement
+    switch (calculatedPosition) {
       case 'top':
-        style.left = targetRect.left + targetRect.width / 2;
-        style.bottom = window.innerHeight - targetRect.top + offset;
+        const topCenterX = targetRect.left + targetRect.width / 2;
+        style.left = Math.max(
+          tooltipWidth / 2 + padding,
+          Math.min(topCenterX, viewportWidth - tooltipWidth / 2 - padding)
+        );
+        style.bottom = viewportHeight - targetRect.top + offset;
         style.transform = 'translateX(-50%)';
         break;
+        
       case 'bottom':
-        style.left = targetRect.left + targetRect.width / 2;
-        style.top = targetRect.bottom + offset;
+        const bottomCenterX = targetRect.left + targetRect.width / 2;
+        style.left = Math.max(
+          tooltipWidth / 2 + padding,
+          Math.min(bottomCenterX, viewportWidth - tooltipWidth / 2 - padding)
+        );
+        style.top = Math.min(
+          targetRect.bottom + offset,
+          viewportHeight - tooltipHeight - padding
+        );
         style.transform = 'translateX(-50%)';
         break;
+        
       case 'left':
-        style.right = window.innerWidth - targetRect.left + offset;
-        style.top = targetRect.top + targetRect.height / 2;
+        const leftCenterY = targetRect.top + targetRect.height / 2;
+        style.right = viewportWidth - targetRect.left + offset;
+        style.top = Math.max(
+          tooltipHeight / 2 + padding,
+          Math.min(leftCenterY, viewportHeight - tooltipHeight / 2 - padding)
+        );
         style.transform = 'translateY(-50%)';
+        // Ensure doesn't overflow left edge
+        const rightEdge = viewportWidth - (style.right as number);
+        if (rightEdge < padding) {
+          style.right = viewportWidth - padding;
+          style.transform = 'translateY(-50%)';
+        }
         break;
+        
       case 'right':
-        style.left = targetRect.right + offset;
-        style.top = targetRect.top + targetRect.height / 2;
+        const rightCenterY = targetRect.top + targetRect.height / 2;
+        style.left = Math.min(
+          targetRect.right + offset,
+          viewportWidth - tooltipWidth - padding
+        );
+        style.top = Math.max(
+          tooltipHeight / 2 + padding,
+          Math.min(rightCenterY, viewportHeight - tooltipHeight / 2 - padding)
+        );
         style.transform = 'translateY(-50%)';
         break;
     }
@@ -142,30 +270,89 @@ export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTour
     return style;
   };
 
+  // Clamp highlight to viewport bounds
+  const getClampedRect = () => {
+    const padding = 16; // Increased padding for mobile
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate clamped position
+    const left = Math.max(padding, Math.min(targetRect.left - 8, viewportWidth - targetRect.width - padding));
+    const top = Math.max(padding, Math.min(targetRect.top - 8, viewportHeight - targetRect.height - padding));
+    
+    // Calculate clamped size
+    const maxWidth = viewportWidth - (padding * 2);
+    const maxHeight = viewportHeight - (padding * 2);
+    
+    const width = Math.min(targetRect.width + 16, maxWidth);
+    const height = Math.min(targetRect.height + 16, maxHeight);
+    
+    return {
+      left,
+      top,
+      width,
+      height,
+    };
+  };
+
+  const clampedRect = getClampedRect();
+
   return createPortal(
     <div className="guided-tour-overlay">
-      {/* Dark overlay that dims everything */}
-      <div 
-        className="fixed inset-0 bg-black/70 transition-opacity duration-300"
-        style={{ zIndex: 10000 }}
-      />
+      {/* Dark overlay with cutout for highlighted element */}
+      <svg
+        className="fixed inset-0 w-full h-full pointer-events-none transition-opacity duration-300"
+        style={{ 
+          zIndex: 10000,
+          width: '100vw',
+          height: '100vh',
+        }}
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <mask id="spotlight-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            <rect
+              x={clampedRect.left}
+              y={clampedRect.top}
+              width={clampedRect.width}
+              height={clampedRect.height}
+              rx="8"
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="rgba(0, 0, 0, 0.75)"
+          mask="url(#spotlight-mask)"
+        />
+      </svg>
 
-      {/* Spotlight effect - highlights the target element */}
+      {/* Border highlight for the target element */}
       <div
-        className="fixed bg-transparent border-4 border-blue-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] transition-all duration-500 ease-in-out pointer-events-none"
+        className="fixed bg-transparent border-4 border-blue-500 rounded-lg transition-all duration-500 ease-in-out pointer-events-none animate-pulse"
         style={{
           zIndex: 10001,
-          left: targetRect.left - 8,
-          top: targetRect.top - 8,
-          width: targetRect.width + 16,
-          height: targetRect.height + 16,
+          left: clampedRect.left,
+          top: clampedRect.top,
+          width: clampedRect.width,
+          height: clampedRect.height,
+          boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.5)',
         }}
       />
 
       {/* Tooltip with step content */}
       <Card 
         className="animate-in fade-in slide-in-from-top-4 duration-300"
-        style={getTooltipStyle()}
+        style={{
+          ...getTooltipStyle(),
+          maxWidth: window.innerWidth < 768 ? '95vw' : '380px',
+          minWidth: window.innerWidth < 768 ? '320px' : 'auto',
+        }}
       >
         <CardContent className="p-4">
           {/* Header */}
