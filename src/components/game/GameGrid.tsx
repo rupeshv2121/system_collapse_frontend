@@ -55,22 +55,21 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
     if (phase >= 5) classes.push('animate-warp');
     if (phase >= 4 && entropy > 80) classes.push('animate-jitter');
     if (sanity < 20) classes.push('animate-shake');
-    if (isBeatDropped) classes.push('animate-neon-intensity');
     
     return classes.join(' ');
-  }, [phase, entropy, sanity, beatPulse, isExploding, isBeatDropped]);
+  }, [phase, entropy, sanity, beatPulse, isExploding]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       {/* Background glow effect */}
       <div 
         className={cn(
-          "absolute -inset-4 rounded-2xl opacity-50 blur-xl transition-colors duration-1000",
-          phase === 1 && "bg-primary/20",
-          phase === 2 && "bg-secondary/30",
-          phase === 3 && "bg-destructive/30",
-          phase === 4 && "bg-accent/30",
-          phase === 5 && "bg-gradient-to-r from-destructive/40 via-secondary/40 to-primary/40 animate-color-drift"
+          "absolute -inset-4 rounded-2xl opacity-40 blur-xl transition-colors duration-1000",
+          phase === 1 && "bg-blue-400/20",
+          phase === 2 && "bg-orange-400/30",
+          phase === 3 && "bg-red-400/30",
+          phase === 4 && "bg-purple-400/30",
+          phase === 5 && "bg-gradient-to-r from-red-400/40 via-purple-400/40 to-blue-400/40 animate-color-drift"
         )}
       />
       
@@ -79,8 +78,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
         style={gridStyles}
         className={cn(
           "relative grid grid-cols-4 gap-4 p-5 min-w-[280px] w-full",
-          "bg-card/50 backdrop-blur-sm rounded-xl border border-border",
-          "neon-glow",
+          "bg-white/50 backdrop-blur-sm rounded-xl border border-blue-300",
           gridAnimationClass
         )}
       >

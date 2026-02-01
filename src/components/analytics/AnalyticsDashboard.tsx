@@ -129,35 +129,35 @@ const AnalyticsDashboard = () => {
           <>
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="hud-panel border-primary/30">
+          <Card className="hud-panel border-blue-300 bg-blue-50">
             <CardContent className="pt-6 text-center">
-              <Trophy className="w-8 h-8 mx-auto mb-2 text-primary" />
-              <div className="text-3xl font-bold hud-value">{stats.totalGamesPlayed}</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">Total Games</div>
+              <Trophy className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+              <div className="text-3xl font-bold text-blue-700 hud-value">{stats.totalGamesPlayed}</div>
+              <div className="text-xs text-gray-700 uppercase tracking-wider">Total Games</div>
             </CardContent>
           </Card>
 
-          <Card className="hud-panel border-success/30">
+          <Card className="hud-panel border-green-300 bg-green-50">
             <CardContent className="pt-6 text-center">
-              <Flame className="w-8 h-8 mx-auto mb-2 text-success" />
-              <div className="text-3xl font-bold text-success">{winRate}%</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">Win Rate</div>
+              <Flame className="w-8 h-8 mx-auto mb-2 text-green-600" />
+              <div className="text-3xl font-bold text-green-700">{winRate}%</div>
+              <div className="text-xs text-gray-700 uppercase tracking-wider">Win Rate</div>
             </CardContent>
           </Card>
 
-          <Card className="hud-panel border-accent/30">
+          <Card className="hud-panel border-orange-300 bg-orange-50">
             <CardContent className="pt-6 text-center">
-              <Brain className="w-8 h-8 mx-auto mb-2 text-accent" />
-              <div className="text-3xl font-bold text-accent">{stats.averageEntropyReached.toFixed(1)}</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">Avg Entropy</div>
+              <Brain className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+              <div className="text-3xl font-bold text-orange-700">{stats.averageEntropyReached.toFixed(1)}</div>
+              <div className="text-xs text-gray-700 uppercase tracking-wider">Avg Entropy</div>
             </CardContent>
           </Card>
 
-          <Card className="hud-panel border-secondary/30">
+          <Card className="hud-panel border-red-300 bg-red-50">
             <CardContent className="pt-6 text-center">
-              <Skull className="w-8 h-8 mx-auto mb-2 text-secondary" />
-              <div className="text-3xl font-bold text-secondary">{stats.maxWinStreak}</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">Best Streak</div>
+              <Skull className="w-8 h-8 mx-auto mb-2 text-red-600" />
+              <div className="text-3xl font-bold text-red-700">{stats.maxWinStreak}</div>
+              <div className="text-xs text-gray-700 uppercase tracking-wider">Best Streak</div>
             </CardContent>
           </Card>
         </div>
@@ -389,8 +389,8 @@ const AnalyticsDashboard = () => {
           </Card>
           <Card className="hud-panel">
             <CardContent className="pt-4 text-center">
-              <div className="text-lg font-bold text-secondary">{stats.maxLossStreak}</div>
-              <div className="text-xs text-muted-foreground">Worst Loss Streak</div>
+              <div className="text-lg font-bold text-red-600">{stats.maxLossStreak}</div>
+              <div className="text-xs text-gray-700">Worst Loss Streak</div>
             </CardContent>
           </Card>
         </div>

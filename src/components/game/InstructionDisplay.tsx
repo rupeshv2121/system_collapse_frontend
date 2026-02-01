@@ -62,19 +62,18 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity, beatPuls
     )}>
       {/* Background glow */}
       <div className={cn(
-        "absolute inset-0 blur-xl opacity-30 rounded-lg",
-        phase === 1 && "bg-primary",
-        phase === 2 && "bg-secondary",
-        phase >= 3 && "bg-destructive"
+        "absolute inset-0 blur-xl opacity-15 rounded-lg",
+        phase === 1 && "bg-blue-500",
+        phase === 2 && "bg-yellow-500",
+        phase >= 3 && "bg-red-500"
       )} />
 
       {/* Main instruction container */}
       <div className={cn(
-        "relative hud-panel py-3 lg:py-4 px-6 lg:px-8 text-center",
-        phase >= 5 && "animate-jitter",
-        isBeatDropped && "neon-glow"
+        "relative hud-panel py-3 lg:py-4 px-6 lg:px-8 text-center bg-white border-blue-300",
+        phase >= 5 && "animate-jitter"
       )}>
-        <span className="text-muted-foreground text-sm uppercase tracking-widest">Instruction</span>
+        <span className="text-gray-700 text-sm uppercase tracking-widest">Instruction</span>
         
         <h2 
           className={cn(
@@ -82,7 +81,7 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity, beatPuls
             colorClass,
             phase >= 4 && "neon-text",
             phase >= 5 && "glitch-text animate-flicker",
-            isBeatDropped && "animate-neon-intensity"
+            "text-gray-900"
           )}
           data-text={displayText}
           style={{
@@ -95,9 +94,9 @@ const InstructionDisplay = memo(({ instruction, phase, entropy, sanity, beatPuls
         {/* Reliability indicator */}
         <div className={cn(
           "mt-2 text-xs tracking-wide",
-          phase === 1 && "text-success",
-          phase === 2 && "text-warning",
-          phase >= 3 && "text-destructive"
+          phase === 1 && "text-green-600",
+          phase === 2 && "text-amber-600",
+          phase >= 3 && "text-red-600"
         )}>
           {phase === 1 && "• RELIABLE •"}
           {phase === 2 && "• UNCERTAIN •"}
