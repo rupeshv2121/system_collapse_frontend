@@ -4,6 +4,7 @@
  */
 
 import { Button } from '@/components/ui/button';
+import { GuidedTour, TourStep } from '@/components/ui/guided-tour';
 import { useBeatSync } from '@/hooks/useBeatSync';
 import { useGameAudio } from '@/hooks/useGameAudio';
 import { useGameState } from '@/hooks/useGameState.tsx';
@@ -31,11 +32,73 @@ export const GameScreen = () => {
   const [showGameOverOverlay, setShowGameOverOverlay] = useState(true);
   const [playTimeSeconds, setPlayTimeSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
+  const [isGameTourOpen, setIsGameTourOpen] = useState(false);
+  const [isGamePausedForTour, setIsGamePausedForTour] = useState(false);
   
   const prevPhaseRef = useRef(phase);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const hasPlayedFirstTile = useRef(false);
   const playStartRef = useRef<number | null>(null);
+  const pausedTimeRef = useRef<number>(0);
+  const pauseStartRef = useRef<number | null>(null);
+
+  // Define game tour steps
+  const gameTourSteps: TourStep[] = [
+    {
+      target: '[data-tour="game-instruction"]',
+      title: 'Follow the Instruction 📝',
+      content: 'This shows which color tile you should click. Pay attention - the rules will change as the game progresses!',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="game-grid"]',
+      title: 'The Game Grid 🎮',
+      content: 'Click on the colored tiles according to the instruction. Each click affects your score, entropy, and sanity.',
+      position: 'top',
+    },
+    {
+      target: '[data-tour="game-score"]',
+      title: 'Your Score 🎯',
+      content: 'Earn points by making correct clicks. The scoring rules evolve through different phases of the game.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-entropy"]',
+      title: 'Entropy Meter 🌀',
+      content: 'Measures how far into chaos you\'ve progressed. Higher entropy means more challenging gameplay and rule changes.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-sanity"]',
+      title: 'Sanity Level 🧠',
+      content: 'Your mental stability. It drains over time and with wrong clicks. When it reaches 0, game over!',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-timer"]',
+      title: 'Round Timer ⏱️',
+      content: 'Time remaining for this round. Make a move before it runs out to avoid sanity loss!',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-phase"]',
+      title: 'Current Phase 🎭',
+      content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="game-hint"]',
+      title: 'System Hints 💡',
+      content: 'Helpful hints about the current game rules. These become more cryptic as chaos increases!',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="game-collapse"]',
+      title: 'Collapse Cycles 🔄',
+      content: 'Tracks how many times entropy has cycled from 0 to 100. Each cycle makes the game more unpredictable.',
+      position: 'right',
+    },
+  ];
   
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
@@ -140,11 +203,39 @@ export const GameScreen = () => {
     localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
   }, []);
 
+  const handleStartGameTour = useCallback(() => {
+    if (isPlaying) {
+      // Pause the game
+      setIsGamePausedForTour(true);
+      setTimerActive(false);
+      if (playStartRef.current && !pauseStartRef.current) {
+        pauseStartRef.current = Date.now();
+      }
+    }
+    setIsGameTourOpen(true);
+  }, [isPlaying]);
+
+  const handleGameTourClose = useCallback(() => {
+    setIsGameTourOpen(false);
+    if (isPlaying && isGamePausedForTour) {
+      // Resume the game
+      setIsGamePausedForTour(false);
+      setTimerActive(true);
+      if (pauseStartRef.current && playStartRef.current) {
+        const pauseDuration = Date.now() - pauseStartRef.current;
+        playStartRef.current += pauseDuration;
+        pauseStartRef.current = null;
+      }
+    }
+  }, [isPlaying, isGamePausedForTour]);
+
   const handleStartGame = useCallback(() => {
     initAudio();
     setPlayTimeSeconds(0);
     playStartRef.current = null;
     setTimerActive(false);
+    pauseStartRef.current = null;
+    pausedTimeRef.current = 0;
     startGame();
   }, [initAudio, startGame]);
 
@@ -182,6 +273,9 @@ export const GameScreen = () => {
   }, []);
 
   const handleTileClickWithSound = useCallback((tileId: number) => {
+    // Prevent clicks during tour
+    if (isGamePausedForTour) return;
+    
     // Start background music on first tile click
     if (!hasPlayedFirstTile.current && bgMusicRef.current) {
       bgMusicRef.current.play().catch(err => console.warn('Audio play failed:', err));
@@ -200,7 +294,7 @@ export const GameScreen = () => {
       playTileClick(tile.color, phase, wasCorrect);
     }
     handleTileClick(tileId);
-  }, [tiles, gameState.secretCorrectColor, phase, playTileClick, handleTileClick]);
+  }, [tiles, gameState.secretCorrectColor, phase, playTileClick, handleTileClick, isGamePausedForTour]);
 
   // Background chaos effects
   const backgroundStyle = useMemo(() => {
@@ -403,13 +497,27 @@ export const GameScreen = () => {
           <Button 
             variant="outline"
             size="icon"
-            onClick={() => setShowTutorial(true)}
+            onClick={isPlaying ? handleStartGameTour : () => setShowTutorial(true)}
             className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-            title="Guide"
+            title={isPlaying ? "Game Guide" : "Tutorial"}
           >
             <HelpCircle className="w-5 h-5" />
           </Button>
         </div>
+
+        {/* Pause Overlay when tour is active */}
+        {isGamePausedForTour && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/50 backdrop-blur-sm px-8 py-4 rounded-lg border-2 border-primary shadow-2xl">
+              <p className="text-3xl font-bold text-white neon-text animate-pulse">
+                ⏸️ GAME PAUSED
+              </p>
+              <p className="text-sm text-gray-200 text-center mt-2">
+                Tour in progress
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* HUD - Above instruction on mobile, right side on medium+ screens */}
         <div
@@ -439,6 +547,7 @@ export const GameScreen = () => {
             isGameOverBlast && "animate-explosion-scatter"
           )}
           style={isGameOverBlast ? getBlastStyle() : undefined}
+          data-tour="game-instruction"
         >
           <InstructionDisplay 
             instruction={currentInstruction}
@@ -460,7 +569,7 @@ export const GameScreen = () => {
             )}
             style={isGameOverBlast ? getBlastStyle() : undefined}
           >
-            <div className="hidden md:block hud-panel p-3 text-center bg-blue-50 border-blue-300">
+            <div className="hidden md:block hud-panel p-3 text-center bg-blue-50 border-blue-300" data-tour="game-phase">
               <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Phase</div>
               <div className={cn(
                 "font-bold text-sm",
@@ -473,16 +582,18 @@ export const GameScreen = () => {
                 {phaseConfig.name}
               </div>
             </div>
-            <SystemHint 
-              phase={phase}
-              sanity={sanity}
-              entropy={entropy}
-              isPlaying={isPlaying}
-              beatPulse={beatSync.beatPulse}
-              isBeatDropped={beatSync.isBeatDropped}
-            />
+            <div data-tour="game-hint">
+              <SystemHint 
+                phase={phase}
+                sanity={sanity}
+                entropy={entropy}
+                isPlaying={isPlaying}
+                beatPulse={beatSync.beatPulse}
+                isBeatDropped={beatSync.isBeatDropped}
+              />
+            </div>
             {/* Collapse Cycles Box */}
-            <div className="hud-panel p-3 text-center bg-orange-50 border-orange-300">
+            <div className="hud-panel p-3 text-center bg-orange-50 border-orange-300" data-tour="game-collapse">
               <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Collapse Cycles</div>
               <div className="font-bold text-2xl text-orange-600">
                 {collapseCount === 0 ? '--' : collapseCount}
@@ -497,6 +608,7 @@ export const GameScreen = () => {
               isGameOverBlast && "animate-explosion-scatter"
             )}
             style={isGameOverBlast ? getBlastStyle() : undefined}
+            data-tour="game-grid"
           >
             <div className="w-full max-w-md md:w-[350px] lg:w-[400px]">
               <GameGrid 
@@ -672,6 +784,24 @@ export const GameScreen = () => {
             }
           `}</style>
         </div>
+      )}
+
+      {/* Game Guided Tour */}
+      {isPlaying && (
+        <GuidedTour
+          steps={gameTourSteps}
+          storageKey="game-tour-completed"
+          isOpen={isGameTourOpen}
+          onComplete={() => {
+            console.log('Game tour completed!');
+            handleGameTourClose();
+          }}
+          onSkip={() => {
+            console.log('Game tour skipped');
+            handleGameTourClose();
+          }}
+          onClose={handleGameTourClose}
+        />
       )}
     </div>
   );
