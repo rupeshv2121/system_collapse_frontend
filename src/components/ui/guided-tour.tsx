@@ -33,23 +33,35 @@ export interface TourStep {
 interface GuidedTourProps {
   steps: TourStep[];
   storageKey: string; // localStorage key to track if tour was completed
+  isOpen?: boolean; // Manual control - when true, tour is forced open
   onComplete?: () => void;
   onSkip?: () => void;
+  onClose?: () => void;
 }
 
-export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTourProps) => {
+export const GuidedTour = ({ steps, storageKey, isOpen = false, onComplete, onSkip, onClose }: GuidedTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
-  // Check if tour should be shown on mount
+  // Check if tour should be shown on mount (only first time)
   useEffect(() => {
     const hasCompletedTour = localStorage.getItem(storageKey);
-    if (!hasCompletedTour) {
+    if (!hasCompletedTour && !isOpen) {
       // Small delay to ensure DOM is ready
       setTimeout(() => setIsActive(true), 500);
     }
-  }, [storageKey]);
+  }, [storageKey, isOpen]);
+
+  // Handle manual open via isOpen prop
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStep(0);
+      setIsActive(true);
+    } else if (!isOpen && isActive) {
+      setIsActive(false);
+    }
+  }, [isOpen]);
 
   // Update target element position when step changes
   useEffect(() => {
@@ -93,13 +105,17 @@ export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTour
   const handleComplete = () => {
     localStorage.setItem(storageKey, 'true');
     setIsActive(false);
+    setCurrentStep(0);
     onComplete?.();
+    onClose?.();
   };
 
   const handleSkip = () => {
     localStorage.setItem(storageKey, 'true');
     setIsActive(false);
+    setCurrentStep(0);
     onSkip?.();
+    onClose?.();
   };
 
   if (!isActive || !targetRect) return null;
@@ -144,21 +160,49 @@ export const GuidedTour = ({ steps, storageKey, onComplete, onSkip }: GuidedTour
 
   return createPortal(
     <div className="guided-tour-overlay">
-      {/* Dark overlay that dims everything */}
-      <div 
-        className="fixed inset-0 bg-black/70 transition-opacity duration-300"
-        style={{ zIndex: 10000 }}
-      />
+      {/* Dark overlay with cutout for highlighted element */}
+      <svg
+        className="fixed inset-0 w-full h-full pointer-events-none transition-opacity duration-300"
+        style={{ 
+          zIndex: 10000,
+          width: '100vw',
+          height: '100vh',
+        }}
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <mask id="spotlight-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            <rect
+              x={targetRect.left - 8}
+              y={targetRect.top - 8}
+              width={targetRect.width + 16}
+              height={targetRect.height + 16}
+              rx="8"
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="rgba(0, 0, 0, 0.75)"
+          mask="url(#spotlight-mask)"
+        />
+      </svg>
 
-      {/* Spotlight effect - highlights the target element */}
+      {/* Border highlight for the target element */}
       <div
-        className="fixed bg-transparent border-4 border-blue-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] transition-all duration-500 ease-in-out pointer-events-none"
+        className="fixed bg-transparent border-4 border-blue-500 rounded-lg transition-all duration-500 ease-in-out pointer-events-none animate-pulse"
         style={{
           zIndex: 10001,
           left: targetRect.left - 8,
           top: targetRect.top - 8,
           width: targetRect.width + 16,
           height: targetRect.height + 16,
+          boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.5)',
         }}
       />
 

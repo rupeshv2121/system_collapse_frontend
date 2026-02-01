@@ -47,7 +47,7 @@ const AnalyticsDashboard = () => {
   const { stats, resetStats } = useGameStats();
   const { userData } = useUserData();
   const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
-  const [showTour, setShowTour] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   // Define tour steps - MODIFY THESE to change the guided tour
   const tourSteps: TourStep[] = [
@@ -102,13 +102,7 @@ const AnalyticsDashboard = () => {
   ];
 
   const handleRestartTour = () => {
-    localStorage.removeItem('analytics-tour-completed');
-    setShowTour(true);
-    // Small delay to ensure state updates
-    setTimeout(() => {
-      setShowTour(false);
-      setTimeout(() => setShowTour(true), 100);
-    }, 50);
+    setIsTourOpen(true);
   };
 
   // Prepare chart data
@@ -517,8 +511,16 @@ const AnalyticsDashboard = () => {
         <GuidedTour
           steps={tourSteps}
           storageKey="analytics-tour-completed"
-          onComplete={() => console.log('Tour completed!')}
-          onSkip={() => console.log('Tour skipped')}
+          isOpen={isTourOpen}
+          onComplete={() => {
+            console.log('Tour completed!');
+            setIsTourOpen(false);
+          }}
+          onSkip={() => {
+            console.log('Tour skipped');
+            setIsTourOpen(false);
+          }}
+          onClose={() => setIsTourOpen(false)}
         />
       </div>
     </div>
