@@ -502,6 +502,51 @@
     }
   }
 
+  @keyframes glitch {
+    0%, 100% { 
+      transform: translate(0, 0) skew(0deg);
+      opacity: 0.5;
+    }
+    20% { 
+      transform: translate(-2px, 2px) skew(2deg);
+      opacity: 0.7;
+    }
+    40% { 
+      transform: translate(2px, -2px) skew(-2deg);
+      opacity: 0.4;
+    }
+    60% { 
+      transform: translate(-3px, -3px) skew(1deg);
+      opacity: 0.6;
+    }
+    80% { 
+      transform: translate(3px, 3px) skew(-1deg);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes slide-horizontal {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes particle-explode {
+    0% { 
+      transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateY(0);
+      opacity: 1;
+      scale: 1;
+    }
+    100% { 
+      transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateY(var(--distance, 300px));
+      opacity: 0;
+      scale: 0;
+    }
+  }
+
+  .animate-particle-explode {
+    animation: particle-explode 1.5s ease-out forwards;
+  }
+
   .animate-beat-pulse {
     animation: beat-pulse 0.15s ease-out;
   }

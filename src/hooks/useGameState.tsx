@@ -59,6 +59,9 @@ const getInitialState = (): GameState => {
     consecutiveSameColor: 0,
     uniqueColorsClicked: new Set<TileColor>(),
     gameStartTime: Date.now(),
+    timerStarted: false,
+    collapseCount: 0,
+    isCollapsing: false,
   };
 };
 
@@ -133,7 +136,7 @@ export const useGameState = () => {
   const handleTileClick = useCallback(
     (tileId: number) => {
       setGameState((prev) => {
-        if (!prev.isPlaying) return prev;
+        if (!prev.isPlaying || prev.isCollapsing) return prev;
 
         const clickedTile = prev.tiles.find((t) => t.id === tileId);
         if (!clickedTile) return prev;
@@ -163,8 +166,9 @@ export const useGameState = () => {
         const newEntropy = Math.min(100, prev.entropy + entropyIncrease);
         const newPhase = calculatePhase(newEntropy);
 
-        // Update sanity
-        let sanityChange = wasCorrect ? 2 : -PHASE_CONFIGS[prev.phase].sanityDrainRate;
+        // Update sanity - increase drain with each collapse cycle
+        const collapsePenalty = prev.collapseCount * 0.5; // Additional 0.5 sanity loss per collapse cycle
+        let sanityChange = wasCorrect ? 0.5 : -(PHASE_CONFIGS[prev.phase].sanityDrainRate + collapsePenalty);
         const newSanity = Math.max(0, Math.min(100, prev.sanity + sanityChange));
 
         // Track consecutive same color clicks
@@ -322,6 +326,7 @@ export const useGameState = () => {
           rulesBroken,
           hintsIgnored: hintsIgnoredRef.current,
           behaviorMetrics,
+          collapseCount: prev.collapseCount,
         });
         
         // Reset tracking refs for next game
@@ -336,7 +341,7 @@ export const useGameState = () => {
 
   // Timer effect
   useEffect(() => {
-    if (!gameState.isPlaying || !gameState.timerStarted) {
+    if (!gameState.isPlaying || !gameState.timerStarted || gameState.isCollapsing) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -348,15 +353,16 @@ export const useGameState = () => {
         const newTime = prev.timeRemaining - 0.1;
 
         if (newTime <= 0) {
-          // Time ran out - penalize player
-          const sanityLoss = PHASE_CONFIGS[prev.phase].sanityDrainRate * 2;
+          // Time ran out - penalize player with increased penalty based on collapse count
+          const collapsePenalty = prev.collapseCount * 0.5;
+          const sanityLoss = (PHASE_CONFIGS[prev.phase].sanityDrainRate * 2) + collapsePenalty;
           const newSanity = Math.max(0, prev.sanity - sanityLoss);
           const entropyGain = 5;
           const newEntropy = Math.min(100, prev.entropy + entropyGain);
           const newPhase = calculatePhase(newEntropy);
 
-          // Check for game over
-          if (newSanity <= 0 || newEntropy >= 100) {
+          // Check for game over (only if sanity is 0)
+          if (newSanity <= 0) {
             return { ...prev, isPlaying: false, sanity: 0 };
           }
 
@@ -380,18 +386,35 @@ export const useGameState = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameState.isPlaying, gameState.timerStarted, calculatePhase]);
+  }, [gameState.isPlaying, gameState.timerStarted, gameState.isCollapsing, calculatePhase]);
 
-  // Check for game over conditions
+  // Check for game over conditions and collapse cycles
   useEffect(() => {
     if (gameState.isPlaying) {
       if (gameState.sanity <= 0) {
         endGame(false);
-      } else if (gameState.entropy >= 100 && gameState.score > 50) {
-        endGame(true);
+      } else if (gameState.entropy >= 100 && !gameState.isCollapsing) {
+        // Trigger collapse animation
+        setGameState(prev => ({ ...prev, isCollapsing: true }));
+        
+        // After collapse animation (2 seconds), reset entropy and continue
+        setTimeout(() => {
+          setGameState(prev => ({
+            ...prev,
+            entropy: 0,
+            phase: 1,
+            collapseCount: prev.collapseCount + 1,
+            isCollapsing: false,
+            tiles: generateTiles(),
+            currentInstruction: getRandomColor(),
+            secretCorrectColor: getRandomColor(),
+            timeRemaining: PHASE_CONFIGS[1].timerDuration,
+            roundStartTime: Date.now(),
+          }));
+        }, 2000);
       }
     }
-  }, [gameState.sanity, gameState.entropy, gameState.score, gameState.isPlaying, endGame]);
+  }, [gameState.sanity, gameState.entropy, gameState.isPlaying, gameState.isCollapsing, endGame]);
 
   return {
     gameState,

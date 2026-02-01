@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameStats } from '@/hooks/useGameStats';
+import { useUserData } from '@/hooks/useUserData';
 import { Brain, Flame, RotateCcw, Skull, Trophy, User } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
@@ -43,6 +44,7 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, v
 
 const AnalyticsDashboard = () => {
   const { stats, resetStats } = useGameStats();
+  const { userData } = useUserData();
   const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
 
   // Prepare chart data
@@ -57,6 +59,15 @@ const AnalyticsDashboard = () => {
       entropy: value,
     }))
   , [stats.entropyHistory]);
+
+  const durationData = useMemo(() => {
+    // Use real duration data from userData.trends.durationHistory
+    const durations = userData.trends.durationHistory || [];
+    return durations.map((duration, index) => ({
+      game: index + 1,
+      duration: duration,
+    }));
+  }, [userData.trends.durationHistory]);
 
   const sanityLossData = useMemo(() => 
     stats.sanityLossHistory.map((value, index) => ({
@@ -241,22 +252,24 @@ const AnalyticsDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Sanity Loss Trends */}
+          {/* Total Time Played per Game */}
           <Card className="hud-panel">
             <CardHeader>
-              <CardTitle className="text-sm font-game tracking-wider">Sanity Lost per Game</CardTitle>
+              <CardTitle className="text-sm font-game tracking-wider">Total Time Played per Game</CardTitle>
             </CardHeader>
             <CardContent>
-              {sanityLossData.length > 0 ? (
+              {durationData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={sanityLossData}>
+                  <LineChart data={durationData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="game" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <Tooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           const data = payload[0].payload;
+                          const minutes = Math.floor(data.duration / 60);
+                          const seconds = data.duration % 60;
                           return (
                             <div style={{
                               backgroundColor: 'hsl(var(--card))',
@@ -266,9 +279,8 @@ const AnalyticsDashboard = () => {
                               color: 'hsl(var(--foreground))'
                             }}>
                               <div><strong>Game {data.game}</strong></div>
-                              <div style={{ color: '#ef4444' }}>Sanity Lost: {data.loss}%</div>
-                              <div style={{ color: data.sanity > 30 ? '#22c55e' : '#ef4444' }}>
-                                Final Sanity: {data.sanity}%
+                              <div style={{ color: 'hsl(var(--primary))' }}>
+                                Time: {minutes}:{seconds.toString().padStart(2, '0')}
                               </div>
                             </div>
                           );
@@ -276,26 +288,18 @@ const AnalyticsDashboard = () => {
                         return null;
                       }}
                     />
-                    <Bar 
-                      dataKey="loss" 
-                      fill="hsl(var(--destructive))"
-                      radius={[4, 4, 0, 0]}
-                    >
-                      <LabelList 
-                        dataKey="loss" 
-                        position="top" 
-                        style={{ 
-                          fill: 'hsl(var(--foreground))', 
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}
-                      />
-                    </Bar>
-                  </BarChart>
+                    <Line 
+                      type="monotone" 
+                      dataKey="duration" 
+                      stroke="hsl(var(--success))" 
+                      strokeWidth={2}
+                      dot={{ fill: 'hsl(var(--success))' }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                  Play games to see sanity trends
+                  Play games to see time trends
                 </div>
               )}
             </CardContent>

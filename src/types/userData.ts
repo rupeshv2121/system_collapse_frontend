@@ -38,6 +38,7 @@ export interface GameSession {
   rulesFollowed: number;
   rulesBroken: number;
   hintsIgnored: number;
+  collapseCount: number; // Number of entropy cycles completed
 }
 
 export type DominantBehavior =
@@ -67,6 +68,7 @@ export interface TrendData {
   entropyHistory: number[]; // Last 20 sessions
   sanityHistory: number[]; // Last 20 sessions
   scoreHistory: number[]; // Last 20 sessions
+  durationHistory: number[]; // Last 20 sessions - time in seconds
   phaseReachCounts: Record<number, number>; // phase -> count
   averageSessionDuration: number;
   performanceTrend: "improving" | "declining" | "stable";

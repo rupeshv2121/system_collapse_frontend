@@ -38,7 +38,11 @@ export interface GameState {
   lastClickTime: number;
   consecutiveSameColor: number;
   uniqueColorsClicked: Set<TileColor>;
-  gameStartTime: number;  timerStarted: boolean;}
+  gameStartTime: number;
+  timerStarted: boolean;
+  collapseCount: number; // Number of times entropy has cycled from 0-100
+  isCollapsing: boolean; // Currently in collapse animation
+}
 
 export interface GameStats {
   totalGamesPlayed: number;
@@ -81,7 +85,7 @@ export const PHASE_CONFIGS: Record<GamePhase, PhaseConfig> = {
     name: "STABLE",
     entropyThreshold: 0,
     timerDuration: 10,
-    sanityDrainRate: 1,
+    sanityDrainRate: 2,
     scoreMultiplier: 1,
     visualEffects: { jitter: 0, blur: 0, hueShift: 0, opacity: 1 },
   },
@@ -89,7 +93,7 @@ export const PHASE_CONFIGS: Record<GamePhase, PhaseConfig> = {
     name: "MEANING DRIFT",
     entropyThreshold: 25,
     timerDuration: 9,
-    sanityDrainRate: 2,
+    sanityDrainRate: 3.5,
     scoreMultiplier: 1.5,
     visualEffects: { jitter: 1, blur: 0.5, hueShift: 10, opacity: 0.95 },
   },
@@ -97,7 +101,7 @@ export const PHASE_CONFIGS: Record<GamePhase, PhaseConfig> = {
     name: "INVERSION",
     entropyThreshold: 50,
     timerDuration: 7,
-    sanityDrainRate: 3,
+    sanityDrainRate: 5,
     scoreMultiplier: 2,
     visualEffects: { jitter: 3, blur: 1, hueShift: 30, opacity: 0.9 },
   },
@@ -105,7 +109,7 @@ export const PHASE_CONFIGS: Record<GamePhase, PhaseConfig> = {
     name: "BEHAVIOR",
     entropyThreshold: 75,
     timerDuration: 6,
-    sanityDrainRate: 4,
+    sanityDrainRate: 6.5,
     scoreMultiplier: 2.5,
     visualEffects: { jitter: 5, blur: 1.5, hueShift: 60, opacity: 0.85 },
   },
@@ -113,7 +117,7 @@ export const PHASE_CONFIGS: Record<GamePhase, PhaseConfig> = {
     name: "COLLAPSE",
     entropyThreshold: 90,
     timerDuration: 5,
-    sanityDrainRate: 5,
+    sanityDrainRate: 8,
     scoreMultiplier: 3,
     visualEffects: { jitter: 10, blur: 2, hueShift: 120, opacity: 0.8 },
   },

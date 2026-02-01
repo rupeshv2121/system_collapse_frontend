@@ -172,6 +172,7 @@ export const useUserData = () => {
     rulesBroken: number;
     hintsIgnored: number;
     behaviorMetrics: BehaviorMetrics;
+    collapseCount: number;
   }) => {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     
@@ -195,6 +196,7 @@ export const useUserData = () => {
       rulesFollowed: sessionData.rulesFollowed,
       rulesBroken: sessionData.rulesBroken,
       hintsIgnored: sessionData.hintsIgnored,
+      collapseCount: sessionData.collapseCount,
     };
 
     setUserData((prev) => {
@@ -223,6 +225,7 @@ export const useUserData = () => {
         entropyHistory: [...prev.trends.entropyHistory, sessionData.maxEntropyReached].slice(-MAX_HISTORY),
         sanityHistory: [...prev.trends.sanityHistory, sessionData.sanityRemaining].slice(-MAX_HISTORY),
         scoreHistory: [...prev.trends.scoreHistory, sessionData.finalScore].slice(-MAX_HISTORY),
+        durationHistory: [...(prev.trends.durationHistory || []), sessionData.duration].slice(-MAX_HISTORY),
         phaseReachCounts: {
           ...prev.trends.phaseReachCounts,
           [sessionData.finalPhase]: (prev.trends.phaseReachCounts[sessionData.finalPhase] || 0) + 1,

@@ -19,9 +19,9 @@ import Tutorial from './Tutorial';
 
 const TUTORIAL_SEEN_KEY = 'rule-collapse-tutorial-seen';
 
-const GameScreen = () => {
+export const GameScreen = () => {
   const { gameState, handleTileClick, startGame, phaseConfig } = useGameState();
-  const { score, phase, entropy, sanity, timeRemaining, tiles, currentInstruction, isPlaying } = gameState;
+  const { score, phase, entropy, sanity, timeRemaining, tiles, currentInstruction, isPlaying, collapseCount, isCollapsing } = gameState;
   
   const [showTutorial, setShowTutorial] = useState(false);
   const [hasSeenTutorial, setHasSeenTutorial] = useState(() => {
@@ -206,7 +206,8 @@ const GameScreen = () => {
   const GameOverOverlay = useCallback(() => {
     if (isPlaying) return null;
     
-    const won = score > 50 && entropy >= 100;
+    // Determine win condition: Score > 200 AND completed 3+ collapse cycles
+    const won = score > 200 && collapseCount >= 3;
     
     return (
       <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center">
@@ -283,7 +284,11 @@ const GameScreen = () => {
                     {Math.round(sanity)}%
                   </div>
                 </div>
-                <div className="hud-panel p-4 bg-blue-50 border-blue-200 col-span-2">
+                <div className="hud-panel p-4 bg-orange-50 border-orange-300">
+                  <div className="text-xs text-gray-700">Collapse Cycles</div>
+                  <div className="text-2xl font-bold text-orange-600">{collapseCount}</div>
+                </div>
+                <div className="hud-panel p-4 bg-blue-50 border-blue-200">
                   <div className="text-xs text-gray-700">Total Play Time</div>
                   <div className="text-2xl font-bold text-gray-900">
                     {formatPlayTime(playTimeSeconds)}
@@ -383,6 +388,7 @@ const GameScreen = () => {
             playTimeSeconds={playTimeSeconds}
             beatPulse={beatSync.beatPulse}
             isBeatDropped={beatSync.isBeatDropped}
+            collapseCount={collapseCount}
           />
         </div>
 
@@ -439,6 +445,7 @@ const GameScreen = () => {
                 scatterAmount={beatSync.scatterAmount}
                 isBeatDropped={beatSync.isBeatDropped}
                 isPreDrop={beatSync.isPreDrop}
+                isCollapsing={isCollapsing}
               />
             </div>
           </div>
@@ -455,6 +462,7 @@ const GameScreen = () => {
               beatPulse={beatSync.beatPulse}
               isBeatDropped={beatSync.isBeatDropped}
               showPhase={false}
+              collapseCount={collapseCount}
             />
           </div>
         </div>
@@ -486,8 +494,160 @@ const GameScreen = () => {
           style={{ opacity: beatSync.flashIntensity }}
         />
       )}
+
+      {/* Collapse Animation Overlay */}
+      {isCollapsing && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-hidden">
+          {/* Animated background with gradient pulses */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-red-950 to-black animate-pulse" />
+          
+          {/* Radial burst effect */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-radial from-red-500/30 via-orange-500/20 to-transparent animate-ping" 
+                 style={{ animationDuration: '1.5s' }} />
+          </div>
+          
+          {/* Particle effects */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(30)].map((_, i) => (
+              <div
+                key={`particle-${i}`}
+                className="absolute w-1 h-1 bg-orange-400 rounded-full"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  opacity: Math.random() * 0.8,
+                  animation: `particle-explode ${1 + Math.random()}s ease-out forwards`,
+                  animationDelay: `${Math.random() * 0.3}s`,
+                  '--angle': `${(360 / 30) * i}deg`,
+                  '--distance': `${200 + Math.random() * 300}px`,
+                } as React.CSSProperties}
+              />
+            ))}
+          </div>
+          
+          {/* Horizontal scan lines */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+            {[...Array(15)].map((_, i) => (
+              <div
+                key={`scan-${i}`}
+                className="absolute h-px bg-gradient-to-r from-transparent via-red-500 to-transparent"
+                style={{
+                  top: `${(i / 15) * 100}%`,
+                  left: 0,
+                  right: 0,
+                  animation: `slide-horizontal ${1 + Math.random() * 0.5}s linear infinite`,
+                  animationDelay: `${Math.random() * 0.5}s`,
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Main content */}
+          <div className="relative z-10 text-center space-y-8 p-8 max-w-4xl">
+            {/* Circular ripple background */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border-4 border-red-500/30 animate-ping"
+                 style={{ animationDuration: '2s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border-4 border-orange-500/40 animate-ping"
+                 style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+            
+            {/* Title with enhanced glitch effect */}
+            <div className="relative mb-6">
+              <div className="relative inline-block">
+                <h2 className="text-7xl md:text-9xl font-bold font-game tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 drop-shadow-[0_0_30px_rgba(255,0,0,0.8)]">
+                  SYSTEM
+                </h2>
+                {/* Glitch layers */}
+                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-red-500 opacity-70 mix-blend-screen"
+                    style={{ 
+                      animation: 'glitch 0.2s infinite',
+                      clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)'
+                    }}>
+                  SYSTEM
+                </h2>
+                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-cyan-500 opacity-70 mix-blend-screen"
+                    style={{ 
+                      animation: 'glitch 0.2s infinite reverse',
+                      animationDelay: '0.1s',
+                      clipPath: 'polygon(0 45%, 100% 45%, 100% 100%, 0 100%)'
+                    }}>
+                  SYSTEM
+                </h2>
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="relative inline-block">
+                <h2 className="text-7xl md:text-9xl font-bold font-game tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 drop-shadow-[0_0_30px_rgba(255,100,0,0.8)]">
+                  COLLAPSE
+                </h2>
+                {/* Glitch layers */}
+                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-orange-500 opacity-70 mix-blend-screen"
+                    style={{ 
+                      animation: 'glitch 0.2s infinite',
+                      animationDelay: '0.15s',
+                      clipPath: 'polygon(0 0, 100% 0, 100% 60%, 0 60%)'
+                    }}>
+                  COLLAPSE
+                </h2>
+                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-blue-500 opacity-70 mix-blend-screen"
+                    style={{ 
+                      animation: 'glitch 0.2s infinite reverse',
+                      animationDelay: '0.25s',
+                      clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)'
+                    }}>
+                  COLLAPSE
+                </h2>
+              </div>
+            </div>
+            
+            {/* Cycle counter with dramatic styling */}
+            <div className="relative mt-12">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/20 to-transparent blur-xl" />
+              <div className="relative inline-block px-12 py-8 bg-gradient-to-br from-red-900/40 via-orange-900/40 to-red-900/40 backdrop-blur-md rounded-2xl border-2 border-orange-500/60 shadow-[0_0_50px_rgba(255,100,0,0.5)]">
+                <div className="text-sm text-orange-300 uppercase tracking-[0.3em] mb-3 font-semibold">
+                  Collapse Cycle
+                </div>
+                <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-yellow-200 via-orange-400 to-red-500 drop-shadow-[0_0_20px_rgba(255,150,0,1)] animate-pulse">
+                  {collapseCount + 1}
+                </div>
+                <div className="mt-4 text-xs text-orange-200/80 uppercase tracking-widest">
+                  System Integrity Compromised
+                </div>
+              </div>
+            </div>
+            
+            {/* Status message with typing effect feel */}
+            <div className="mt-8 space-y-2">
+              <div className="text-lg text-orange-400 font-mono animate-pulse tracking-wider">
+                &gt; ENTROPY OVERFLOW DETECTED
+              </div>
+              <div className="text-lg text-red-400 font-mono animate-pulse tracking-wider"
+                   style={{ animationDelay: '0.2s' }}>
+                &gt; RESETTING TO BASELINE...
+              </div>
+              <div className="text-lg text-yellow-400 font-mono animate-pulse tracking-wider"
+                   style={{ animationDelay: '0.4s' }}>
+                &gt; REINITIALIZING SYSTEMS
+              </div>
+            </div>
+            
+            {/* Warning symbol */}
+            <div className="flex justify-center mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 bg-orange-500 blur-2xl opacity-50 animate-pulse" />
+                <div className="relative w-20 h-20 border-4 border-orange-500 rotate-45 flex items-center justify-center">
+                  <div className="text-4xl text-orange-400 -rotate-45 font-bold animate-pulse">!</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Vignette effect */}
+          <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/60 pointer-events-none" />
+        </div>
+      )}
     </div>
   );
 };
-
 export default GameScreen;

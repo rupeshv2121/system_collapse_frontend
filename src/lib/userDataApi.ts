@@ -101,7 +101,8 @@ export const userDataApi = {
           final_sanity: session.sanityRemaining,
           phase_reached: session.finalPhase,
           won: session.win,
-          duration: session.duration,
+          total_time: session.duration,
+          collapse_count: session.collapseCount,
           total_clicks: session.behaviorMetrics.totalClicks,
           average_click_speed: session.behaviorMetrics.averageClickSpeed,
           most_clicked_color: session.behaviorMetrics.mostClickedColor,
@@ -195,6 +196,7 @@ export const userDataApi = {
           entropyHistory: stats.map((s: any) => s.final_entropy).slice(0, 20),
           sanityHistory: stats.map((s: any) => s.final_sanity).slice(0, 20),
           scoreHistory: stats.map((s: any) => s.final_score).slice(0, 20),
+          durationHistory: stats.map((s: any) => s.total_time || 0).slice(0, 20),
           phaseReachCounts: stats.reduce(
             (acc: any, s: any) => {
               acc[s.phase_reached] = (acc[s.phase_reached] || 0) + 1;
@@ -203,7 +205,7 @@ export const userDataApi = {
             { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
           ),
           averageSessionDuration:
-            stats.reduce((sum: number, s: any) => sum + s.duration, 0) /
+            stats.reduce((sum: number, s: any) => sum + (s.total_time || 0), 0) /
             totalGames,
           performanceTrend: "stable" as any,
         };
@@ -214,7 +216,7 @@ export const userDataApi = {
           finalPhase: s.phase_reached,
           maxEntropyReached: s.final_entropy,
           sanityRemaining: s.final_sanity,
-          duration: s.duration,
+          duration: s.total_time || 0,
           win: s.won,
           dominantBehavior: s.dominant_behavior,
           timestamp: new Date(s.played_at).getTime(),

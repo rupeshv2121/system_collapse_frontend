@@ -19,9 +19,10 @@ interface GameGridProps {
   scatterAmount?: number;
   isBeatDropped?: boolean;
   isPreDrop?: boolean;
+  isCollapsing?: boolean;
 }
 
-const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, isExploding, scatterAmount, isBeatDropped, isPreDrop }: GameGridProps) => {
+const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, isExploding, scatterAmount, isBeatDropped, isPreDrop, isCollapsing }: GameGridProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
 
   // Grid chaos effects
@@ -50,14 +51,17 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
   const gridAnimationClass = useMemo(() => {
     const classes = [];
     
-    if (beatPulse && isBeatDropped) classes.push('animate-beat-pulse');
-    if (isExploding) classes.push('animate-explosion-scatter');
-    if (phase >= 5) classes.push('animate-warp');
-    if (phase >= 4 && entropy > 80) classes.push('animate-jitter');
-    if (sanity < 20) classes.push('animate-shake');
+    if (isCollapsing) classes.push('animate-vibrate-intense');
+    else {
+      if (beatPulse && isBeatDropped) classes.push('animate-beat-pulse');
+      if (isExploding) classes.push('animate-explosion-scatter');
+      if (phase >= 5) classes.push('animate-warp');
+      if (phase >= 4 && entropy > 80) classes.push('animate-jitter');
+      if (sanity < 20) classes.push('animate-shake');
+    }
     
     return classes.join(' ');
-  }, [phase, entropy, sanity, beatPulse, isExploding]);
+  }, [phase, entropy, sanity, beatPulse, isExploding, isCollapsing]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -101,6 +105,11 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
         {/* Scanline overlay */}
         {phase >= 3 && (
           <div className="absolute inset-0 pointer-events-none scanlines rounded-xl" />
+        )}
+
+        {/* Collapse overlay */}
+        {isCollapsing && (
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/60 via-orange-500/60 to-yellow-500/60 rounded-xl pointer-events-none animate-pulse" />
         )}
       </div>
     </div>

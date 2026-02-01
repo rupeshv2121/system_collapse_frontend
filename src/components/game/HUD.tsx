@@ -18,9 +18,10 @@ interface HUDProps {
   beatPulse?: boolean;
   isBeatDropped?: boolean;
   showPhase?: boolean;
+  collapseCount?: number;
 }
 
-const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true }: HUDProps) => {
+const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount = 0 }: HUDProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
   const maxTime = phaseConfig.timerDuration;
   const timerPercent = (timeRemaining / maxTime) * 100;
@@ -64,6 +65,16 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
           <span className="hud-value text-lg text-gray-900">{formattedPlayTime}</span>
         </div>
       </div>
+
+      {/* Collapse Count */}
+      {collapseCount > 0 && (
+        <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-orange-50 border-orange-400">
+          <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Collapse Cycles</div>
+          <div className="text-center">
+            <span className="hud-value text-lg text-orange-600 font-bold">{collapseCount}</span>
+          </div>
+        </div>
+      )}
 
       {/* Score */}
       <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300">
