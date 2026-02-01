@@ -7,19 +7,20 @@ import { Brain, Flame, HelpCircle, RotateCcw, Trophy } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    LabelList,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 // Custom label renderer for pie chart
@@ -109,8 +110,8 @@ const AnalyticsDashboard = () => {
 
   // Prepare chart data
   const winLossData = useMemo(() => [
-    { name: 'Wins', value: stats.gamesWon, fill: 'hsl(var(--success))' },
-    { name: 'Losses', value: stats.gamesLost, fill: 'hsl(var(--destructive))' },
+    {  value: stats.gamesWon, fill: 'hsl(var(--success))' },
+    {  value: stats.gamesLost, fill: 'hsl(var(--destructive))' },
   ], [stats.gamesWon, stats.gamesLost]);
 
   const entropyData = useMemo(() => 
@@ -197,8 +198,8 @@ const AnalyticsDashboard = () => {
         </header>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" data-tour="stats-overview">
-          <Card className="hud-panel border-blue-300 bg-blue-50">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" data-tour="stats-overview">
+          <Card className="hud-panel border-blue-300 bg-blue-50 shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <Trophy className="w-8 h-8 mx-auto mb-2 text-blue-600" />
               <div className="text-3xl font-bold text-blue-700 hud-value">{stats.totalGamesPlayed}</div>
@@ -206,7 +207,7 @@ const AnalyticsDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="hud-panel border-green-300 bg-green-50">
+          <Card className="hud-panel border-green-300 bg-green-50 shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <Flame className="w-8 h-8 mx-auto mb-2 text-green-600" />
               <div className="text-3xl font-bold text-green-700">{winRate}%</div>
@@ -214,7 +215,7 @@ const AnalyticsDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="hud-panel border-orange-300 bg-orange-50">
+          <Card className="hud-panel border-orange-300 bg-orange-50 shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <Brain className="w-8 h-8 mx-auto mb-2 text-orange-600" />
               <div className="text-3xl font-bold text-orange-700">{stats.averageEntropyReached.toFixed(1)}</div>
@@ -224,15 +225,15 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* Charts Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Win/Loss Distribution */}
-          <Card className="hud-panel" data-tour="win-loss-chart">
-            <CardHeader>
-              <CardTitle className="text-sm font-game tracking-wider">Win/Loss Distribution</CardTitle>
+          <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow" data-tour="win-loss-chart">
+            <CardHeader className="text-center">
+              <CardTitle className="text-sm md:text-base font-game tracking-wider">Win/Loss Distribution</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex justify-center items-center">
               {stats.totalGamesPlayed > 0 ? (
-                <ResponsiveContainer width="100%" height={250} className="text-xs">
+                <ResponsiveContainer width="100%" height={300} className="text-xs">
                   <PieChart>
                     <Pie
                       data={winLossData}
@@ -257,10 +258,16 @@ const AnalyticsDashboard = () => {
                         color: '#000000'
                       }}
                     />
+                    <Legend 
+                      verticalAlign="bottom" 
+                      height={36}
+                      iconType="circle"
+                      wrapperStyle={{ fontSize: '12px' }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                   No games played yet
                 </div>
               )}
@@ -268,14 +275,14 @@ const AnalyticsDashboard = () => {
           </Card>
 
           {/* Entropy Over Time */}
-          <Card className="hud-panel" data-tour="entropy-chart">
-            <CardHeader>
-              <CardTitle className="text-sm font-game tracking-wider">Entropy Reached per Game</CardTitle>
+          <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow" data-tour="entropy-chart">
+            <CardHeader className="text-center">
+              <CardTitle className="text-sm md:text-base font-game tracking-wider">Entropy Reached per Game</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex justify-center items-center">
               {entropyData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={entropyData} margin={{ top: 10, right: 5, left: -20, bottom: 5 }}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={entropyData} margin={{ top: 10, right: 10, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
@@ -283,13 +290,15 @@ const AnalyticsDashboard = () => {
                       fontSize={10}
                       height={30}
                       tick={{ fontSize: 10 }}
+                      label={{ value: 'Game Number', position: 'insideBottom', offset: -5, fontSize: 11 }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={10} 
                       domain={[0, 100]}
-                      width={40}
+                      width={50}
                       tick={{ fontSize: 10 }}
+                      label={{ value: 'Entropy %', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11 }}
                     />
                     <Tooltip 
                       contentStyle={{ 
@@ -304,11 +313,12 @@ const AnalyticsDashboard = () => {
                       stroke="hsl(var(--primary))" 
                       strokeWidth={2}
                       dot={{ fill: 'hsl(var(--primary))' }}
+                      
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                   Play games to see entropy trends
                 </div>
               )}
@@ -316,14 +326,14 @@ const AnalyticsDashboard = () => {
           </Card>
 
           {/* Total Time Played per Game */}
-          <Card className="hud-panel" data-tour="duration-chart">
-            <CardHeader>
-              <CardTitle className="text-sm font-game tracking-wider">Total Time Played per Game</CardTitle>
+          <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow" data-tour="duration-chart">
+            <CardHeader className="text-center">
+              <CardTitle className="text-sm md:text-base font-game tracking-wider">Total Time Played per Game</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex justify-center items-center">
               {durationData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={durationData} margin={{ top: 10, right: 5, left: -15, bottom: 5 }}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={durationData} margin={{ top: 10, right: 10, left: 25, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
@@ -331,12 +341,14 @@ const AnalyticsDashboard = () => {
                       fontSize={10}
                       height={30}
                       tick={{ fontSize: 10 }}
+                      label={{ value: 'Game Number', position: 'insideBottom', offset: -5, fontSize: 11 }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={10} 
-                      width={45}
+                      width={55}
                       tick={{ fontSize: 10 }}
+                      label={{ value: 'Time (seconds)', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11 }}
                     />
                     <Tooltip 
                       content={({ active, payload }) => {
@@ -372,7 +384,7 @@ const AnalyticsDashboard = () => {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                   Play games to see time trends
                 </div>
               )}
@@ -380,14 +392,14 @@ const AnalyticsDashboard = () => {
           </Card>
 
           {/* Recent Games Performance */}
-          <Card className="hud-panel" data-tour="scores-chart">
-            <CardHeader>
-              <CardTitle className="text-sm font-game tracking-wider">Recent Game Scores</CardTitle>
+          <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow" data-tour="scores-chart">
+            <CardHeader className="text-center">
+              <CardTitle className="text-sm md:text-base font-game tracking-wider">Recent Game Scores</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex justify-center items-center">
               {recentGames.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={recentGames} margin={{ top: 20, right: 5, left: -15, bottom: 5 }}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={recentGames} margin={{ top: 20, right: 10, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
@@ -395,12 +407,14 @@ const AnalyticsDashboard = () => {
                       fontSize={10}
                       height={30}
                       tick={{ fontSize: 10 }}
+                      label={{ value: 'Game Number', position: 'insideBottom', offset: -5, fontSize: 11 }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={10}
-                      width={40}
+                      width={50}
                       tick={{ fontSize: 10 }}
+                      label={{ value: 'Score', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11 }}
                     />
                     <Tooltip 
                       content={({ active, payload }) => {
@@ -448,7 +462,7 @@ const AnalyticsDashboard = () => {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                   Play games to see score history
                 </div>
               )}
@@ -457,17 +471,17 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* Streaks Section */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-2 gap-4">
-          <Card className="hud-panel">
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="pt-4 text-center">
-              <div className="text-lg font-bold text-success">{stats.currentWinStreak}</div>
-              <div className="text-xs text-muted-foreground">Current Win Streak</div>
+              <div className="text-2xl md:text-3xl font-bold text-success">{stats.currentWinStreak}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Current Win Streak</div>
             </CardContent>
           </Card>
-          <Card className="hud-panel">
+          <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="pt-4 text-center">
-              <div className="text-lg font-bold text-destructive">{stats.currentLossStreak}</div>
-              <div className="text-xs text-muted-foreground">Current Loss Streak</div>
+              <div className="text-2xl md:text-3xl font-bold text-destructive">{stats.currentLossStreak}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Current Loss Streak</div>
             </CardContent>
           </Card>
         </div>

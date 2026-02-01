@@ -709,7 +709,7 @@ const TraitBar = ({ label, value, icon, compact }: any) => (
 const MetricCard = ({ label, value, description }: any) => (
   <div className="p-4 bg-gray-100 rounded-lg">
     <div className="text-sm text-gray-700 mb-1">{label}</div>
-    <div className="text-2xl font-bold text-gray-900 mb-1">{value}%</div>
+    <div className="text-2xl font-bold text-gray-900 mb-1">{typeof value === 'number' ? value.toFixed(2) : value}%</div>
     <div className="text-xs text-gray-600">{description}</div>
   </div>
 );
