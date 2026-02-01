@@ -223,11 +223,23 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               {entropyData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={entropyData}>
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={entropyData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="game" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} />
+                    <XAxis 
+                      dataKey="game" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12}
+                      height={50}
+                      label={{ value: 'Game Number', position: 'insideBottom', offset: 0, fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12} 
+                      domain={[0, 100]}
+                      width={80}
+                      label={{ value: 'Entropy %', angle: -90, position: 'center', dx: -10, fill: 'hsl(var(--muted-foreground))' }}
+                    />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: 'hsl(var(--card))',
@@ -245,7 +257,7 @@ const AnalyticsDashboard = () => {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
                   Play games to see entropy trends
                 </div>
               )}
@@ -259,11 +271,22 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               {durationData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={durationData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="game" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <XAxis 
+                      dataKey="game" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12}
+                      height={50}
+                      label={{ value: 'Game Number', position: 'insideBottom', offset: 0, fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12} 
+                      width={90}
+                      label={{ value: 'Time (seconds)', angle: -90, position: 'center', dx: -10, fill: 'hsl(var(--muted-foreground))' }}
+                    />
                     <Tooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -279,7 +302,7 @@ const AnalyticsDashboard = () => {
                               color: 'hsl(var(--foreground))'
                             }}>
                               <div><strong>Game {data.game}</strong></div>
-                              <div style={{ color: 'hsl(var(--primary))' }}>
+                              <div style={{ color: 'hsl(var(--success))' }}>
                                 Time: {minutes}:{seconds.toString().padStart(2, '0')}
                               </div>
                             </div>
@@ -298,7 +321,7 @@ const AnalyticsDashboard = () => {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
                   Play games to see time trends
                 </div>
               )}
@@ -312,11 +335,22 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               {recentGames.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={recentGames}>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={recentGames} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="game" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <XAxis 
+                      dataKey="game" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12}
+                      height={50}
+                      label={{ value: 'Game Number', position: 'insideBottom', offset: 0, fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={12}
+                      width={80}
+                      label={{ value: 'Score', angle: -90, position: 'center', dx: -10, fill: 'hsl(var(--muted-foreground))' }}
+                    />
                     <Tooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {

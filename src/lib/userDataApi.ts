@@ -7,6 +7,18 @@ import { supabase } from "./supabase";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
+// Error types for better error handling
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public type: "network" | "server" | "auth" | "generic" = "generic",
+    public statusCode?: number
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 // Helper to get auth token
 async function getAuthToken(): Promise<string | null> {
   const {
@@ -20,29 +32,105 @@ async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // Check internet connection first
+  if (!navigator.onLine) {
+    throw new ApiError(
+      "No internet connection detected. Please check your network connection and try again.",
+      "network"
+    );
+  }
+
   const token = await getAuthToken();
 
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new ApiError("Not authenticated", "auth");
   }
 
-  const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  try {
+    // Create abort controller for timeout
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 10000); // 10 second timeout
 
-  if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ error: response.statusText }));
-    throw new Error(error.error || `API call failed: ${response.statusText}`);
+    try {
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        ...options,
+        signal: abortController.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Check for specific status codes
+        if (response.status === 401 || response.status === 403) {
+          throw new ApiError("Authentication failed", "auth", response.status);
+        }
+        
+        if (response.status >= 500) {
+          throw new ApiError("Server error - please try again later", "server", response.status);
+        }
+
+        const error = await response
+          .json()
+          .catch(() => ({ error: response.statusText }));
+        
+        throw new ApiError(
+          error.error || `API call failed: ${response.statusText}`,
+          "generic",
+          response.status
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  } catch (error) {
+    // Handle abort/timeout errors - likely backend is down but not responding
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new ApiError(
+        "Backend server is not responding - please check if the server is running.",
+        "server"
+      );
+    }
+
+    // Network errors (no response from server)
+    if (error instanceof TypeError) {
+      // Common network error messages
+      const errorMessage = error.message.toLowerCase();
+      if (
+        errorMessage.includes("fetch") ||
+        errorMessage.includes("failed to fetch") ||
+        errorMessage.includes("network") ||
+        errorMessage.includes("cors") ||
+        errorMessage.includes("connection") ||
+        errorMessage.includes("refused") ||
+        errorMessage.includes("unreachable")
+      ) {
+        // User has internet but can't reach backend - backend is down
+        throw new ApiError(
+          "Unable to connect to backend server. The server may be offline or unreachable.",
+          "server"
+        );
+      }
+    }
+    
+    // Re-throw ApiError instances
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    // Generic errors
+    throw new ApiError(
+      error instanceof Error ? error.message : "An unexpected error occurred",
+      "generic"
+    );
   }
-
-  return response.json();
 }
 
 export const userDataApi = {
@@ -285,21 +373,11 @@ export const userDataApi = {
 
   // Get global leaderboard
   async getGlobalLeaderboard() {
-    try {
-      return await apiCall<any[]>("/api/leaderboard/global");
-    } catch (error) {
-      console.error("Error fetching global leaderboard:", error);
-      return [];
-    }
+    return await apiCall<any[]>("/api/leaderboard/global");
   },
 
   // Get top winners
   async getTopWinners() {
-    try {
-      return await apiCall<any[]>("/api/leaderboard/top-winners");
-    } catch (error) {
-      console.error("Error fetching top winners:", error);
-      return [];
-    }
+    return await apiCall<any[]>("/api/leaderboard/top-winners");
   },
 };

@@ -392,7 +392,9 @@ export const useGameState = () => {
   useEffect(() => {
     if (gameState.isPlaying) {
       if (gameState.sanity <= 0) {
-        endGame(false);
+        // Calculate win condition: Score > 200 AND 3+ collapse cycles
+        const won = gameState.score > 200 && gameState.collapseCount >= 3;
+        endGame(won);
       } else if (gameState.entropy >= 100 && !gameState.isCollapsing) {
         // Trigger collapse animation
         setGameState(prev => ({ ...prev, isCollapsing: true }));
