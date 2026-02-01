@@ -28,6 +28,9 @@ export const useGameAudio = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const currentPhaseRef = useRef<GamePhase>(1);
+  const tileClickAudioRef = useRef<HTMLAudioElement | null>(null);
+  const gameEndAudioRef = useRef<HTMLAudioElement | null>(null);
+  const phaseCycleAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize audio on first user interaction
   const initAudio = useCallback(() => {
@@ -39,103 +42,45 @@ export const useGameAudio = () => {
     setIsAudioEnabled(true);
   }, [isAudioEnabled]);
 
-  // Create distortion curve for wave shaper
-  const createDistortionCurve = useCallback((amount: number): Float32Array<ArrayBuffer> => {
-    const samples = 44100;
-    const buffer = new ArrayBuffer(samples * 4);
-    const curve = new Float32Array(buffer);
-    const deg = Math.PI / 180;
-    
-    for (let i = 0; i < samples; i++) {
-      const x = (i * 2) / samples - 1;
-      curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+  // Initialize tile click audio element
+  useEffect(() => {
+    if (!tileClickAudioRef.current) {
+      const audio = new Audio('/audio/tile_click.wav');
+      audio.preload = 'auto';
+      tileClickAudioRef.current = audio;
     }
-    return curve;
+
+    if (!gameEndAudioRef.current) {
+      const audio = new Audio('/audio/game_end.wav');
+      audio.preload = 'auto';
+      gameEndAudioRef.current = audio;
+    }
+
+    if (!phaseCycleAudioRef.current) {
+      const audio = new Audio('/audio/Phase_cycle_change.wav');
+      audio.preload = 'auto';
+      phaseCycleAudioRef.current = audio;
+    }
   }, []);
 
-  // Play tile click sound with phase-based distortion
+  // Play tile click sound from audio file
   const playTileClick = useCallback((color: TileColor, phase: GamePhase, wasCorrect: boolean) => {
-    if (isMuted || !isAudioEnabled) return;
+    if (isMuted || !isAudioEnabled || !tileClickAudioRef.current) return;
 
     try {
-      const ctx = getAudioContext();
-      const now = ctx.currentTime;
-
-      // Main oscillator
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      const filterNode = ctx.createBiquadFilter();
-
-      // Phase-based modifications
-      const baseFreq = COLOR_FREQUENCIES[color];
-      const detuneAmount = (phase - 1) * 25; // More detune at higher phases
-      const distortionAmount = (phase - 1) * 50;
-
-      // Oscillator setup
-      osc.type = phase >= 4 ? 'sawtooth' : phase >= 2 ? 'triangle' : 'sine';
-      osc.frequency.setValueAtTime(baseFreq, now);
-      osc.detune.setValueAtTime(Math.random() * detuneAmount - detuneAmount / 2, now);
-
-      // Filter for warmth/harshness
-      filterNode.type = 'lowpass';
-      filterNode.frequency.setValueAtTime(2000 - phase * 200, now);
-      filterNode.Q.setValueAtTime(phase * 2, now);
-
-      // Gain envelope
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(wasCorrect ? 0.3 : 0.15, now + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3 + phase * 0.1);
-
-      // Connect nodes
-      osc.connect(filterNode);
-      filterNode.connect(gainNode);
-
-      // Add distortion at higher phases
-      if (phase >= 3) {
-        const distNode = ctx.createWaveShaper();
-        distNode.curve = createDistortionCurve(distortionAmount);
-        distNode.oversample = '4x';
-        gainNode.connect(distNode);
-        distNode.connect(ctx.destination);
-      } else {
-        gainNode.connect(ctx.destination);
-      }
-
-      // Additional chaos sounds at high phases
-      if (phase >= 4 && Math.random() > 0.5) {
-        const noiseOsc = ctx.createOscillator();
-        const noiseGain = ctx.createGain();
-        noiseOsc.type = 'square';
-        noiseOsc.frequency.setValueAtTime(baseFreq * (Math.random() * 0.5 + 0.75), now);
-        noiseGain.gain.setValueAtTime(0.05, now);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        noiseOsc.connect(noiseGain);
-        noiseGain.connect(ctx.destination);
-        noiseOsc.start(now);
-        noiseOsc.stop(now + 0.15);
-      }
-
-      // Error sound effect
-      if (!wasCorrect) {
-        const errorOsc = ctx.createOscillator();
-        const errorGain = ctx.createGain();
-        errorOsc.type = 'square';
-        errorOsc.frequency.setValueAtTime(150, now);
-        errorOsc.frequency.linearRampToValueAtTime(80, now + 0.15);
-        errorGain.gain.setValueAtTime(0.1, now);
-        errorGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        errorOsc.connect(errorGain);
-        errorGain.connect(ctx.destination);
-        errorOsc.start(now);
-        errorOsc.stop(now + 0.25);
-      }
-
-      osc.start(now);
-      osc.stop(now + 0.5);
+      const audio = tileClickAudioRef.current;
+      audio.currentTime = 0;
+      
+      // Adjust volume based on phase and correctness
+      const baseVolume = wasCorrect ? 0.8 : 0.5;
+      const phaseVolume = Math.min(baseVolume * (1 + (phase - 1) * 0.1), 1);
+      audio.volume = phaseVolume;
+      
+      audio.play().catch(err => console.warn('Tile click audio play failed:', err));
     } catch (error) {
-      console.warn('Audio playback failed:', error);
+      console.warn('Tile click audio playback failed:', error);
     }
-  }, [isMuted, isAudioEnabled, createDistortionCurve]);
+  }, [isMuted, isAudioEnabled]);
 
   // Play phase transition sound
   const playPhaseTransition = useCallback((newPhase: GamePhase) => {
@@ -206,52 +151,30 @@ export const useGameAudio = () => {
   }, []);
 
   // Play game over sound
-  const playGameOver = useCallback((won: boolean) => {
-    if (isMuted || !isAudioEnabled) return;
+  const playGameOver = useCallback((_won: boolean) => {
+    if (isMuted || !isAudioEnabled || !gameEndAudioRef.current) return;
 
     try {
-      const ctx = getAudioContext();
-      const now = ctx.currentTime;
-
-      if (won) {
-        // Victory arpeggio
-        const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
-        notes.forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now + i * 0.15);
-          gain.gain.setValueAtTime(0, now + i * 0.15);
-          gain.gain.linearRampToValueAtTime(0.2, now + i * 0.15 + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.5);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now + i * 0.15);
-          osc.stop(now + i * 0.15 + 0.6);
-        });
-      } else {
-        // Defeat descending
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(50, now + 1.5);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-        
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1000, now);
-        filter.frequency.exponentialRampToValueAtTime(100, now + 1.5);
-        
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 1.6);
-      }
+      const audio = gameEndAudioRef.current;
+      audio.currentTime = 0;
+      audio.volume = 1;
+      audio.play().catch(err => console.warn('Game end audio play failed:', err));
     } catch (error) {
-      console.warn('Game over sound failed:', error);
+      console.warn('Game end audio playback failed:', error);
+    }
+  }, [isMuted, isAudioEnabled]);
+
+  // Play phase cycle completion sound
+  const playPhaseCycleChange = useCallback(() => {
+    if (isMuted || !isAudioEnabled || !phaseCycleAudioRef.current) return;
+
+    try {
+      const audio = phaseCycleAudioRef.current;
+      audio.currentTime = 0;
+      audio.volume = 1;
+      audio.play().catch(err => console.warn('Phase cycle audio play failed:', err));
+    } catch (error) {
+      console.warn('Phase cycle audio playback failed:', error);
     }
   }, [isMuted, isAudioEnabled]);
 
@@ -275,6 +198,7 @@ export const useGameAudio = () => {
     playTileClick,
     playPhaseTransition,
     playGameOver,
+    playPhaseCycleChange,
     startBackgroundMusic,
     stopBackgroundMusic,
     updateMusicForPhase,

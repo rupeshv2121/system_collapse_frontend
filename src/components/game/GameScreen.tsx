@@ -36,7 +36,14 @@ export const GameScreen = () => {
   const [isGamePausedForTour, setIsGamePausedForTour] = useState(false);
   
   const prevPhaseRef = useRef(phase);
+  const prevCollapseCountRef = useRef(collapseCount);
+  const wasCollapsingRef = useRef(isCollapsing);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
+  const musicContextRef = useRef<AudioContext | null>(null);
+  const musicSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const musicFilterRef = useRef<BiquadFilterNode | null>(null);
+  const musicShaperRef = useRef<WaveShaperNode | null>(null);
+  const musicGainRef = useRef<GainNode | null>(null);
   const hasPlayedFirstTile = useRef(false);
   const playStartRef = useRef<number | null>(null);
   const pausedTimeRef = useRef<number>(0);
@@ -181,6 +188,19 @@ export const GameScreen = () => {
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
 
+  const createDistortionCurve = useCallback((amount: number) => {
+    const samples = 44100;
+    const curve = new Float32Array(samples);
+    const deg = Math.PI / 180;
+
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+    }
+
+    return curve;
+  }, []);
+
   
   const {
     isMuted,
@@ -189,10 +209,61 @@ export const GameScreen = () => {
     playTileClick,
     playPhaseTransition,
     playGameOver,
+    playPhaseCycleChange,
     startBackgroundMusic,
     stopBackgroundMusic,
     updateMusicForPhase,
   } = useGameAudio();
+
+  // Initialize background music processing chain for distortion
+  useEffect(() => {
+    const audio = bgMusicRef.current;
+    if (!audio || musicContextRef.current || musicSourceRef.current) return;
+
+    const ctx = new AudioContext();
+    const source = ctx.createMediaElementSource(audio);
+    const filter = ctx.createBiquadFilter();
+    const shaper = ctx.createWaveShaper();
+    const gain = ctx.createGain();
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 20000;
+    filter.Q.value = 0.7;
+
+    shaper.curve = createDistortionCurve(0);
+    shaper.oversample = '4x';
+
+    gain.gain.value = 1;
+
+    source.connect(filter);
+    filter.connect(shaper);
+    shaper.connect(gain);
+    gain.connect(ctx.destination);
+
+    musicContextRef.current = ctx;
+    musicSourceRef.current = source;
+    musicFilterRef.current = filter;
+    musicShaperRef.current = shaper;
+    musicGainRef.current = gain;
+
+    return () => {
+      try {
+        source.disconnect();
+        filter.disconnect();
+        shaper.disconnect();
+        gain.disconnect();
+      } catch (error) {
+        console.warn('Music audio graph cleanup failed:', error);
+      }
+
+      ctx.close().catch(() => undefined);
+      musicContextRef.current = null;
+      musicSourceRef.current = null;
+      musicFilterRef.current = null;
+      musicShaperRef.current = null;
+      musicGainRef.current = null;
+    };
+  }, [createDistortionCurve]);
 
   // Update music based on game state
   useEffect(() => {
@@ -206,6 +277,28 @@ export const GameScreen = () => {
       }
     }
   }, [isPlaying, phase, entropy, sanity, updateMusicForPhase, playPhaseTransition]);
+
+  // Update background music distortion based on phase
+  useEffect(() => {
+    const ctx = musicContextRef.current;
+    const filter = musicFilterRef.current;
+    const shaper = musicShaperRef.current;
+    const gain = musicGainRef.current;
+
+    if (!ctx || !filter || !shaper || !gain) return;
+
+    const phaseIndex = Math.max(0, phase - 1);
+    const easedPhase = phaseIndex * phaseIndex;
+    const distortionAmount = Math.max(0, phaseIndex - 1) * 50 + phaseIndex * 8;
+    const cutoff = Math.max(1400, 19000 - easedPhase * 2800);
+    const qValue = 0.6 + phaseIndex * 0.6;
+    const gainValue = isMuted ? 0 : 1;
+
+    shaper.curve = createDistortionCurve(distortionAmount);
+    filter.frequency.setTargetAtTime(cutoff, ctx.currentTime, 0.18);
+    filter.Q.setTargetAtTime(qValue, ctx.currentTime, 0.18);
+    gain.gain.setTargetAtTime(gainValue, ctx.currentTime, 0.18);
+  }, [phase, isMuted, createDistortionCurve]);
 
   // Handle game start/end for audio
   useEffect(() => {
@@ -227,6 +320,22 @@ export const GameScreen = () => {
       }
     }
   }, [isPlaying, score, entropy, startBackgroundMusic, stopBackgroundMusic, playGameOver]);
+
+  // Play sound at the start of a collapse cycle for sync with visuals
+  useEffect(() => {
+    if (!isPlaying) {
+      prevCollapseCountRef.current = collapseCount;
+      wasCollapsingRef.current = isCollapsing;
+      return;
+    }
+
+    if (!wasCollapsingRef.current && isCollapsing) {
+      playPhaseCycleChange();
+    }
+
+    wasCollapsingRef.current = isCollapsing;
+    prevCollapseCountRef.current = collapseCount;
+  }, [collapseCount, isCollapsing, isPlaying, playPhaseCycleChange]);
 
   // Game-over blast transition before summary
   useEffect(() => {
@@ -357,6 +466,9 @@ export const GameScreen = () => {
     
     // Start background music on first tile click
     if (!hasPlayedFirstTile.current && bgMusicRef.current) {
+      if (musicContextRef.current?.state === 'suspended') {
+        musicContextRef.current.resume().catch(() => undefined);
+      }
       bgMusicRef.current.play().catch(err => console.warn('Audio play failed:', err));
       hasPlayedFirstTile.current = true;
     }
@@ -703,6 +815,9 @@ export const GameScreen = () => {
                 sanity={sanity}
                 onTileClick={handleTileClickWithSound}
                 beatPulse={beatSync.beatPulse}
+                beatIntensity={beatSync.beatIntensity}
+                gridShake={beatSync.gridShake}
+                glowIntensity={beatSync.glowIntensity}
                 isExploding={beatSync.isExploding || isGameOverBlast}
                 scatterAmount={isGameOverBlast ? 220 : beatSync.scatterAmount}
                 isBeatDropped={beatSync.isBeatDropped}
@@ -751,17 +866,22 @@ export const GameScreen = () => {
       {/* Background Music */}
       <audio 
         ref={bgMusicRef}
-        src="/audio/bg.webm"
+        src="/audio/game_bg.mp4"
         loop
         preload="auto"
       />
 
-      {/* Flash effect at beat drop */}
-      {beatSync.flashIntensity > 0 && isPlaying && (
-        <div 
-          className="fixed inset-0 pointer-events-none z-[100] bg-white animate-flash-bang"
-          style={{ opacity: beatSync.flashIntensity }}
-        />
+      {/* RGB Glow overlay for beat intensity (on grid background) */}
+      {beatSync.glowIntensity > 0 && isPlaying && (
+        <div className="fixed inset-0 pointer-events-none z-[95]">
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(circle at center, rgba(255, 0, 255, ${beatSync.glowIntensity * 0.1}), rgba(0, 255, 255, ${beatSync.glowIntensity * 0.05}), transparent)`,
+              opacity: beatSync.glowIntensity,
+            }}
+          />
+        </div>
       )}
 
       {/* Collapse Animation Overlay */}
