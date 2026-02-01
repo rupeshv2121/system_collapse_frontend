@@ -99,7 +99,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
         <div className="flex items-center gap-2">
           <Progress 
             value={entropy} 
-            className="h-2 flex-1"
+            className="h-2 flex-1 bg-gray-200 border border-gray-300"
             indicatorClassName={entropyColor}
           />
           <span className="hud-value text-sm w-8 text-gray-900">{Math.round(entropy)}</span>
@@ -112,7 +112,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
         <div className="flex items-center gap-2">
           <Progress 
             value={sanity} 
-            className="h-2 flex-1"
+            className="h-2 flex-1 bg-gray-200 border border-gray-300"
             indicatorClassName={sanityColor}
           />
           <span className={cn(
@@ -130,7 +130,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
         <div className="flex items-center gap-2">
           <Progress 
             value={timerPercent} 
-            className="h-3 flex-1"
+            className="h-3 flex-1 bg-gray-200 border border-gray-300"
             indicatorClassName={cn(timerColor, timerPercent < 30 && "animate-pulse")}
           />
           <span className={cn(
