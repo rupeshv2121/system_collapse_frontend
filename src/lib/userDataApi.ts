@@ -32,6 +32,14 @@ async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // Check internet connection first
+  if (!navigator.onLine) {
+    throw new ApiError(
+      "No internet connection detected. Please check your network connection and try again.",
+      "network"
+    );
+  }
+
   const token = await getAuthToken();
 
   if (!token) {
@@ -104,14 +112,6 @@ async function apiCall<T>(
         errorMessage.includes("refused") ||
         errorMessage.includes("unreachable")
       ) {
-        // Check if user has internet connection
-        if (!navigator.onLine) {
-          throw new ApiError(
-            "No internet connection detected. Please check your network connection and try again.",
-            "network"
-          );
-        }
-        
         // User has internet but can't reach backend - backend is down
         throw new ApiError(
           "Unable to connect to backend server. The server may be offline or unreachable.",
