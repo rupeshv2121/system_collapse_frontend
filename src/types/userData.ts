@@ -206,6 +206,7 @@ export const DEFAULT_USER_DATA: UserDataSchema = {
     entropyHistory: [],
     sanityHistory: [],
     scoreHistory: [],
+    durationHistory: [],
     phaseReachCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
     averageSessionDuration: 0,
     performanceTrend: "stable",
