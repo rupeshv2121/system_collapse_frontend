@@ -158,7 +158,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     title: 'Phase 2: Meaning Drift',
     description: 'The instruction says one thing... but the truth shifts. A hidden color now rewards you. The displayed instruction becomes a lie.',
-    icon: <Shuffle className="w-8 h-8 text-secondary" />,
+    icon: <Shuffle className="w-8 h-8 text-secondary-foreground" />,
     phase: 2,
     demo: <InteractiveTileDemo phase={2} />,
   },
@@ -172,7 +172,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     title: 'Phase 4: Behavior-Based',
     description: 'Colors no longer matter. The system watches HOW you play. Speed, variety, patterns—your behavior determines your fate.',
-    icon: <Brain className="w-8 h-8 text-accent" />,
+    icon: <Brain className="w-8 h-8 text-accent-foreground" />,
     phase: 4,
     demo: <InteractiveTileDemo phase={4} />,
   },
@@ -186,12 +186,12 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     title: 'Entropy & Sanity',
     description: 'ENTROPY rises with every action, pushing you toward chaos. SANITY drains when rules betray you. If sanity hits zero, collapse is forced. Survive to 100% entropy with positive score to win.',
-    icon: <Zap className="w-8 h-8 text-accent" />,
+    icon: <Zap className="w-8 h-8 text-accent-foreground" />,
     demo: (
       <div className="flex gap-4 p-4 bg-card/50 rounded-lg">
         <div className="text-center">
           <div className="text-xs text-muted-foreground">Entropy</div>
-          <div className="text-lg font-bold text-accent">↑ CHAOS</div>
+          <div className="text-lg font-bold text-accent-foreground">↑ CHAOS</div>
         </div>
         <div className="text-center">
           <div className="text-xs text-muted-foreground">Sanity</div>
@@ -234,11 +234,11 @@ const TutorialNew = ({ onComplete, onSkip }: TutorialProps) => {
             {step.phase && (
               <span className={cn(
                 "px-2 py-0.5 text-xs font-bold rounded",
-                step.phase === 1 && "bg-primary/20 text-primary",
-                step.phase === 2 && "bg-secondary/20 text-secondary",
-                step.phase === 3 && "bg-destructive/20 text-destructive",
-                step.phase === 4 && "bg-accent/20 text-accent",
-                step.phase === 5 && "bg-destructive/30 text-destructive animate-pulse"
+                step.phase === 1 && "bg-blue-500/15 text-blue-700",
+                step.phase === 2 && "bg-purple-500/15 text-purple-700",
+                step.phase === 3 && "bg-red-500/15 text-red-700",
+                step.phase === 4 && "bg-emerald-500/15 text-emerald-700",
+                step.phase === 5 && "bg-rose-500/20 text-rose-700 animate-pulse"
               )}>
                 Phase {step.phase}
               </span>

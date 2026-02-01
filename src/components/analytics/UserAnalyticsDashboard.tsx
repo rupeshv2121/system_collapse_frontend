@@ -206,7 +206,7 @@ export const UserAnalyticsDashboard = () => {
               <span className="text-gray-700">Win Rate</span>
               <span className="text-gray-900 font-semibold">{winRate.toFixed(1)}%</span>
             </div>
-            <Progress value={winRate} className="h-2" />
+            <Progress value={winRate} className="h-2 bg-gray-200 border border-gray-300" />
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Trend</span>
               <span className={`font-semibold ${
@@ -433,19 +433,19 @@ export const UserAnalyticsDashboard = () => {
           System Observation
         </h3>
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-700">Trust Level</span>
-            <div className="flex items-center gap-2">
-              <Progress value={systemMemory.trustLevel} className="w-32 h-2" />
-              <span className="text-gray-900 font-semibold w-12">{systemMemory.trustLevel}%</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Trust Level</span>
+              <span className="text-gray-900 font-semibold">{systemMemory.trustLevel}%</span>
             </div>
+            <Progress value={systemMemory.trustLevel} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-700">Manipulation Resistance</span>
-            <div className="flex items-center gap-2">
-              <Progress value={systemMemory.manipulationResistance} className="w-32 h-2" />
-              <span className="text-gray-900 font-semibold w-12">{systemMemory.manipulationResistance}%</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-700">Manipulation Resistance</span>
+              <span className="text-gray-900 font-semibold">{systemMemory.manipulationResistance}%</span>
             </div>
+            <Progress value={systemMemory.manipulationResistance} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-red-100 rounded-lg">
             <div>
@@ -534,7 +534,7 @@ const TraitBar = ({ label, value, icon, compact }: any) => (
       </span>
       <span className="text-gray-900 font-semibold">{value}%</span>
     </div>
-    <Progress value={value} className={compact ? 'h-1' : 'h-2'} />
+    <Progress value={value} className={cn(compact ? 'h-1' : 'h-2', 'bg-gray-200 border border-gray-300')} />
   </div>
 );
 
