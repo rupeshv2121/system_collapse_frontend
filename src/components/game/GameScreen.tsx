@@ -4,6 +4,7 @@
  */
 
 import { Button } from '@/components/ui/button';
+import { GuidedTour, TourStep } from '@/components/ui/guided-tour';
 import { useBeatSync } from '@/hooks/useBeatSync';
 import { useGameAudio } from '@/hooks/useGameAudio';
 import { useGameState } from '@/hooks/useGameState.tsx';
@@ -27,13 +28,77 @@ export const GameScreen = () => {
   const [hasSeenTutorial, setHasSeenTutorial] = useState(() => {
     return localStorage.getItem(TUTORIAL_SEEN_KEY) === 'true';
   });
+  const [isGameOverBlast, setIsGameOverBlast] = useState(false);
+  const [showGameOverOverlay, setShowGameOverOverlay] = useState(true);
   const [playTimeSeconds, setPlayTimeSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
+  const [isGameTourOpen, setIsGameTourOpen] = useState(false);
+  const [isGamePausedForTour, setIsGamePausedForTour] = useState(false);
   
   const prevPhaseRef = useRef(phase);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const hasPlayedFirstTile = useRef(false);
   const playStartRef = useRef<number | null>(null);
+  const pausedTimeRef = useRef<number>(0);
+  const pauseStartRef = useRef<number | null>(null);
+
+  // Define game tour steps
+  const gameTourSteps: TourStep[] = [
+    {
+      target: '[data-tour="game-instruction"]',
+      title: 'Follow the Instruction 📝',
+      content: 'This shows which color tile you should click. Pay attention - the rules will change as the game progresses!',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="game-grid"]',
+      title: 'The Game Grid 🎮',
+      content: 'Click on the colored tiles according to the instruction. Each click affects your score, entropy, and sanity.',
+      position: 'top',
+    },
+    {
+      target: '[data-tour="game-score"]',
+      title: 'Your Score 🎯',
+      content: 'Earn points by making correct clicks. The scoring rules evolve through different phases of the game.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-entropy"]',
+      title: 'Entropy Meter 🌀',
+      content: 'Measures how far into chaos you\'ve progressed. Higher entropy means more challenging gameplay and rule changes.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-sanity"]',
+      title: 'Sanity Level 🧠',
+      content: 'Your mental stability. It drains over time and with wrong clicks. When it reaches 0, game over!',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-timer"]',
+      title: 'Round Timer ⏱️',
+      content: 'Time remaining for this round. Make a move before it runs out to avoid sanity loss!',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-phase"]',
+      title: 'Current Phase 🎭',
+      content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="game-hint"]',
+      title: 'System Hints 💡',
+      content: 'Helpful hints about the current game rules. These become more cryptic as chaos increases!',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="game-collapse"]',
+      title: 'Collapse Cycles 🔄',
+      content: 'Tracks how many times entropy has cycled from 0 to 100. Each cycle makes the game more unpredictable.',
+      position: 'right',
+    },
+  ];
   
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
@@ -67,6 +132,8 @@ export const GameScreen = () => {
   useEffect(() => {
     if (isPlaying) {
       startBackgroundMusic();
+      setShowGameOverOverlay(false);
+      setIsGameOverBlast(false);
     } else {
       stopBackgroundMusic();
       // Stop background music when game ends
@@ -81,6 +148,26 @@ export const GameScreen = () => {
       }
     }
   }, [isPlaying, score, entropy, startBackgroundMusic, stopBackgroundMusic, playGameOver]);
+
+  // Game-over blast transition before summary
+  useEffect(() => {
+    if (!isPlaying && (score !== 0 || entropy !== 0)) {
+      setShowGameOverOverlay(false);
+      setIsGameOverBlast(true);
+      const timeout = setTimeout(() => {
+        setIsGameOverBlast(false);
+        setShowGameOverOverlay(true);
+      }, 700);
+      return () => clearTimeout(timeout);
+    }
+
+    if (!isPlaying && score === 0 && entropy === 0) {
+      setShowGameOverOverlay(true);
+      setIsGameOverBlast(false);
+    }
+
+    return undefined;
+  }, [isPlaying, score, entropy]);
 
   // Handle muting the background music
   useEffect(() => {
@@ -116,11 +203,39 @@ export const GameScreen = () => {
     localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
   }, []);
 
+  const handleStartGameTour = useCallback(() => {
+    if (isPlaying) {
+      // Pause the game
+      setIsGamePausedForTour(true);
+      setTimerActive(false);
+      if (playStartRef.current && !pauseStartRef.current) {
+        pauseStartRef.current = Date.now();
+      }
+    }
+    setIsGameTourOpen(true);
+  }, [isPlaying]);
+
+  const handleGameTourClose = useCallback(() => {
+    setIsGameTourOpen(false);
+    if (isPlaying && isGamePausedForTour) {
+      // Resume the game
+      setIsGamePausedForTour(false);
+      setTimerActive(true);
+      if (pauseStartRef.current && playStartRef.current) {
+        const pauseDuration = Date.now() - pauseStartRef.current;
+        playStartRef.current += pauseDuration;
+        pauseStartRef.current = null;
+      }
+    }
+  }, [isPlaying, isGamePausedForTour]);
+
   const handleStartGame = useCallback(() => {
     initAudio();
     setPlayTimeSeconds(0);
     playStartRef.current = null;
     setTimerActive(false);
+    pauseStartRef.current = null;
+    pausedTimeRef.current = 0;
     startGame();
   }, [initAudio, startGame]);
 
@@ -158,6 +273,9 @@ export const GameScreen = () => {
   }, []);
 
   const handleTileClickWithSound = useCallback((tileId: number) => {
+    // Prevent clicks during tour
+    if (isGamePausedForTour) return;
+    
     // Start background music on first tile click
     if (!hasPlayedFirstTile.current && bgMusicRef.current) {
       bgMusicRef.current.play().catch(err => console.warn('Audio play failed:', err));
@@ -176,7 +294,7 @@ export const GameScreen = () => {
       playTileClick(tile.color, phase, wasCorrect);
     }
     handleTileClick(tileId);
-  }, [tiles, gameState.secretCorrectColor, phase, playTileClick, handleTileClick]);
+  }, [tiles, gameState.secretCorrectColor, phase, playTileClick, handleTileClick, isGamePausedForTour]);
 
   // Background chaos effects
   const backgroundStyle = useMemo(() => {
@@ -202,9 +320,19 @@ export const GameScreen = () => {
     return scatterStyles;
   }, [beatSync.isExploding, beatSync.scatterAmount]);
 
+  const getBlastStyle = useCallback((): React.CSSProperties => {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 180 + Math.random() * 140;
+    return {
+      '--scatter-x': `${Math.cos(angle) * distance}px`,
+      '--scatter-y': `${Math.sin(angle) * distance}px`,
+      '--scatter-rotate': `${(Math.random() - 0.5) * 360}deg`,
+    } as React.CSSProperties;
+  }, []);
+
   // Game over screen
   const GameOverOverlay = useCallback(() => {
-    if (isPlaying) return null;
+    if (isPlaying || !showGameOverOverlay) return null;
     
     // Determine win condition: Score > 200 AND completed 3+ collapse cycles
     const won = score > 200 && collapseCount >= 3;
@@ -321,7 +449,7 @@ export const GameScreen = () => {
         </div>
       </div>
     );
-  }, [isPlaying, score, entropy, sanity, handleStartGame, phaseConfig]);
+  }, [isPlaying, showGameOverOverlay, score, entropy, sanity, handleStartGame, phaseConfig, collapseCount, playTimeSeconds]);
 
   return (
     <div 
@@ -369,16 +497,36 @@ export const GameScreen = () => {
           <Button 
             variant="outline"
             size="icon"
-            onClick={() => setShowTutorial(true)}
+            onClick={isPlaying ? handleStartGameTour : () => setShowTutorial(true)}
             className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-            title="Guide"
+            title={isPlaying ? "Game Guide" : "Tutorial"}
           >
             <HelpCircle className="w-5 h-5" />
           </Button>
         </div>
 
+        {/* Pause Overlay when tour is active */}
+        {isGamePausedForTour && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/50 backdrop-blur-sm px-8 py-4 rounded-lg border-2 border-primary shadow-2xl">
+              <p className="text-3xl font-bold text-white neon-text animate-pulse">
+                ⏸️ GAME PAUSED
+              </p>
+              <p className="text-sm text-gray-200 text-center mt-2">
+                Tour in progress
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* HUD - Above instruction on mobile, right side on medium+ screens */}
-        <div className="mb-4 md:hidden max-w-md mx-auto">
+        <div
+          className={cn(
+            "mb-4 md:hidden max-w-md mx-auto",
+            isGameOverBlast && "animate-explosion-scatter"
+          )}
+          style={isGameOverBlast ? getBlastStyle() : undefined}
+        >
           <HUD 
             score={score}
             phase={phase}
@@ -393,7 +541,14 @@ export const GameScreen = () => {
         </div>
 
         {/* Instruction - stays at top */}
-        <div className="mb-4 lg:mb-3 max-w-lg mx-auto">
+        <div
+          className={cn(
+            "mb-4 lg:mb-3 max-w-lg mx-auto",
+            isGameOverBlast && "animate-explosion-scatter"
+          )}
+          style={isGameOverBlast ? getBlastStyle() : undefined}
+          data-tour="game-instruction"
+        >
           <InstructionDisplay 
             instruction={currentInstruction}
             phase={phase}
@@ -407,8 +562,14 @@ export const GameScreen = () => {
         {/* Game Layout - Phase + Hint left, Grid center, HUD right for large screens */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-center gap-4 md:gap-6 lg:gap-8">
           {/* Left column - Phase box above System Hint */}
-          <div className="md:order-1 md:w-56 lg:w-64 xl:w-72 order-2 w-full space-y-4">
-            <div className="hidden md:block hud-panel p-3 text-center bg-blue-50 border-blue-300">
+          <div
+            className={cn(
+              "md:order-1 md:w-56 lg:w-64 xl:w-72 order-2 w-full space-y-4",
+              isGameOverBlast && "animate-explosion-scatter"
+            )}
+            style={isGameOverBlast ? getBlastStyle() : undefined}
+          >
+            <div className="hidden md:block hud-panel p-3 text-center bg-blue-50 border-blue-300" data-tour="game-phase">
               <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Phase</div>
               <div className={cn(
                 "font-bold text-sm",
@@ -421,18 +582,34 @@ export const GameScreen = () => {
                 {phaseConfig.name}
               </div>
             </div>
-            <SystemHint 
-              phase={phase}
-              sanity={sanity}
-              entropy={entropy}
-              isPlaying={isPlaying}
-              beatPulse={beatSync.beatPulse}
-              isBeatDropped={beatSync.isBeatDropped}
-            />
+            <div data-tour="game-hint">
+              <SystemHint 
+                phase={phase}
+                sanity={sanity}
+                entropy={entropy}
+                isPlaying={isPlaying}
+                beatPulse={beatSync.beatPulse}
+                isBeatDropped={beatSync.isBeatDropped}
+              />
+            </div>
+            {/* Collapse Cycles Box */}
+            <div className="hud-panel p-3 text-center bg-orange-50 border-orange-300" data-tour="game-collapse">
+              <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Collapse Cycles</div>
+              <div className="font-bold text-2xl text-orange-600">
+                {collapseCount === 0 ? '--' : collapseCount}
+              </div>
+            </div>
           </div>
 
           {/* Game Grid - Center */}
-          <div className="md:order-2 flex justify-center order-1 w-full md:w-auto">
+          <div
+            className={cn(
+              "md:order-2 flex justify-center order-1 w-full md:w-auto",
+              isGameOverBlast && "animate-explosion-scatter"
+            )}
+            style={isGameOverBlast ? getBlastStyle() : undefined}
+            data-tour="game-grid"
+          >
             <div className="w-full max-w-md md:w-[350px] lg:w-[400px]">
               <GameGrid 
                 tiles={tiles}
@@ -441,8 +618,8 @@ export const GameScreen = () => {
                 sanity={sanity}
                 onTileClick={handleTileClickWithSound}
                 beatPulse={beatSync.beatPulse}
-                isExploding={beatSync.isExploding}
-                scatterAmount={beatSync.scatterAmount}
+                isExploding={beatSync.isExploding || isGameOverBlast}
+                scatterAmount={isGameOverBlast ? 220 : beatSync.scatterAmount}
                 isBeatDropped={beatSync.isBeatDropped}
                 isPreDrop={beatSync.isPreDrop}
                 isCollapsing={isCollapsing}
@@ -451,7 +628,13 @@ export const GameScreen = () => {
           </div>
 
           {/* Right column - HUD (excluding Phase) */}
-          <div className="hidden md:block md:order-3 md:w-56 lg:w-64 xl:w-72">
+          <div
+            className={cn(
+              "hidden md:block md:order-3 md:w-56 lg:w-64 xl:w-72",
+              isGameOverBlast && "animate-explosion-scatter"
+            )}
+            style={isGameOverBlast ? getBlastStyle() : undefined}
+          >
             <HUD 
               score={score}
               phase={phase}
@@ -497,155 +680,128 @@ export const GameScreen = () => {
 
       {/* Collapse Animation Overlay */}
       {isCollapsing && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-hidden">
-          {/* Animated background with gradient pulses */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-red-950 to-black animate-pulse" />
-          
-          {/* Radial burst effect */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-full h-full bg-gradient-radial from-red-500/30 via-orange-500/20 to-transparent animate-ping" 
-                 style={{ animationDuration: '1.5s' }} />
-          </div>
-          
-          {/* Particle effects */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(30)].map((_, i) => (
-              <div
-                key={`particle-${i}`}
-                className="absolute w-1 h-1 bg-orange-400 rounded-full"
-                style={{
-                  top: '50%',
-                  left: '50%',
-                  opacity: Math.random() * 0.8,
-                  animation: `particle-explode ${1 + Math.random()}s ease-out forwards`,
-                  animationDelay: `${Math.random() * 0.3}s`,
-                  '--angle': `${(360 / 30) * i}deg`,
-                  '--distance': `${200 + Math.random() * 300}px`,
-                } as React.CSSProperties}
-              />
-            ))}
-          </div>
-          
-          {/* Horizontal scan lines */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-            {[...Array(15)].map((_, i) => (
-              <div
-                key={`scan-${i}`}
-                className="absolute h-px bg-gradient-to-r from-transparent via-red-500 to-transparent"
-                style={{
-                  top: `${(i / 15) * 100}%`,
-                  left: 0,
-                  right: 0,
-                  animation: `slide-horizontal ${1 + Math.random() * 0.5}s linear infinite`,
-                  animationDelay: `${Math.random() * 0.5}s`,
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* Main content */}
-          <div className="relative z-10 text-center space-y-8 p-8 max-w-4xl">
-            {/* Circular ripple background */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border-4 border-red-500/30 animate-ping"
-                 style={{ animationDuration: '2s' }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border-4 border-orange-500/40 animate-ping"
-                 style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
-            
-            {/* Title with enhanced glitch effect */}
-            <div className="relative mb-6">
-              <div className="relative inline-block">
-                <h2 className="text-7xl md:text-9xl font-bold font-game tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 drop-shadow-[0_0_30px_rgba(255,0,0,0.8)]">
-                  SYSTEM
-                </h2>
-                {/* Glitch layers */}
-                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-red-500 opacity-70 mix-blend-screen"
-                    style={{ 
-                      animation: 'glitch 0.2s infinite',
-                      clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)'
-                    }}>
-                  SYSTEM
-                </h2>
-                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-cyan-500 opacity-70 mix-blend-screen"
-                    style={{ 
-                      animation: 'glitch 0.2s infinite reverse',
-                      animationDelay: '0.1s',
-                      clipPath: 'polygon(0 45%, 100% 45%, 100% 100%, 0 100%)'
-                    }}>
-                  SYSTEM
-                </h2>
-              </div>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-hidden pointer-events-none"
+             style={{
+               animation: 'screen-shake 0.3s infinite, screen-glitch 0.15s infinite',
+             }}>
+          {/* Minimal content - just text */}
+          <div className="relative z-20 text-center space-y-8 px-4">
+            {/* Title with intense glitch */}
+            <div className="relative"
+                 style={{
+                   animation: 'text-glitch 0.2s infinite',
+                 }}>
+              <h2 className="text-7xl md:text-9xl font-bold font-game tracking-wider text-red-600"
+                  style={{
+                    textShadow: '3px 3px 0 cyan, -3px -3px 0 yellow, 5px -5px 0 magenta',
+                    animation: 'color-shift 0.1s infinite',
+                  }}>
+                SYSTEM
+              </h2>
             </div>
             
-            <div className="relative">
-              <div className="relative inline-block">
-                <h2 className="text-7xl md:text-9xl font-bold font-game tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 drop-shadow-[0_0_30px_rgba(255,100,0,0.8)]">
-                  COLLAPSE
-                </h2>
-                {/* Glitch layers */}
-                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-orange-500 opacity-70 mix-blend-screen"
-                    style={{ 
-                      animation: 'glitch 0.2s infinite',
-                      animationDelay: '0.15s',
-                      clipPath: 'polygon(0 0, 100% 0, 100% 60%, 0 60%)'
-                    }}>
-                  COLLAPSE
-                </h2>
-                <h2 className="absolute top-0 left-0 text-7xl md:text-9xl font-bold font-game tracking-wider text-blue-500 opacity-70 mix-blend-screen"
-                    style={{ 
-                      animation: 'glitch 0.2s infinite reverse',
-                      animationDelay: '0.25s',
-                      clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)'
-                    }}>
-                  COLLAPSE
-                </h2>
-              </div>
+            <div className="relative"
+                 style={{
+                   animation: 'text-glitch 0.2s infinite',
+                   animationDelay: '0.1s',
+                 }}>
+              <h2 className="text-7xl md:text-9xl font-bold font-game tracking-wider text-blue-600"
+                  style={{
+                    textShadow: '-3px 3px 0 lime, 3px -3px 0 magenta, -5px 5px 0 cyan',
+                    animation: 'color-shift 0.1s infinite',
+                    animationDelay: '0.05s',
+                  }}>
+                COLLAPSE
+              </h2>
             </div>
             
-            {/* Cycle counter with dramatic styling */}
-            <div className="relative mt-12">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/20 to-transparent blur-xl" />
-              <div className="relative inline-block px-12 py-8 bg-gradient-to-br from-red-900/40 via-orange-900/40 to-red-900/40 backdrop-blur-md rounded-2xl border-2 border-orange-500/60 shadow-[0_0_50px_rgba(255,100,0,0.5)]">
-                <div className="text-sm text-orange-300 uppercase tracking-[0.3em] mb-3 font-semibold">
-                  Collapse Cycle
-                </div>
-                <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-yellow-200 via-orange-400 to-red-500 drop-shadow-[0_0_20px_rgba(255,150,0,1)] animate-pulse">
-                  {collapseCount + 1}
-                </div>
-                <div className="mt-4 text-xs text-orange-200/80 uppercase tracking-widest">
-                  System Integrity Compromised
-                </div>
+            {/* Cycle counter - no background */}
+            <div className="relative mt-12"
+                 style={{
+                   animation: 'text-glitch 0.15s infinite',
+                 }}>
+              <div className="text-sm text-purple-600 uppercase tracking-[0.3em] mb-3 font-bold"
+                   style={{ textShadow: '2px 2px 0 cyan, -2px -2px 0 yellow' }}>
+                Collapse Cycle
               </div>
-            </div>
-            
-            {/* Status message with typing effect feel */}
-            <div className="mt-8 space-y-2">
-              <div className="text-lg text-orange-400 font-mono animate-pulse tracking-wider">
-                &gt; ENTROPY OVERFLOW DETECTED
-              </div>
-              <div className="text-lg text-red-400 font-mono animate-pulse tracking-wider"
-                   style={{ animationDelay: '0.2s' }}>
-                &gt; RESETTING TO BASELINE...
-              </div>
-              <div className="text-lg text-yellow-400 font-mono animate-pulse tracking-wider"
-                   style={{ animationDelay: '0.4s' }}>
-                &gt; REINITIALIZING SYSTEMS
-              </div>
-            </div>
-            
-            {/* Warning symbol */}
-            <div className="flex justify-center mt-8">
-              <div className="relative">
-                <div className="absolute inset-0 bg-orange-500 blur-2xl opacity-50 animate-pulse" />
-                <div className="relative w-20 h-20 border-4 border-orange-500 rotate-45 flex items-center justify-center">
-                  <div className="text-4xl text-orange-400 -rotate-45 font-bold animate-pulse">!</div>
-                </div>
+              <div className="text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-purple-600"
+                   style={{
+                     textShadow: '5px 5px 0 cyan, -5px -5px 0 yellow',
+                     WebkitTextStroke: '2px red',
+                   }}>
+                {collapseCount + 1}
               </div>
             </div>
           </div>
-          
-          {/* Vignette effect */}
-          <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/60 pointer-events-none" />
+
+          {/* Add CSS animations via style tag */}
+          <style>{`
+            @keyframes screen-shake {
+              0%, 100% { transform: translate(0, 0) rotate(0deg); }
+              10% { transform: translate(-10px, -10px) rotate(-1deg); }
+              20% { transform: translate(10px, 5px) rotate(1deg); }
+              30% { transform: translate(-5px, 10px) rotate(-0.5deg); }
+              40% { transform: translate(8px, -8px) rotate(0.5deg); }
+              50% { transform: translate(-8px, 8px) rotate(-1deg); }
+              60% { transform: translate(5px, -5px) rotate(1deg); }
+              70% { transform: translate(-10px, 5px) rotate(-0.5deg); }
+              80% { transform: translate(10px, -10px) rotate(0.5deg); }
+              90% { transform: translate(-5px, -5px) rotate(-1deg); }
+            }
+            
+            @keyframes screen-glitch {
+              0%, 100% { filter: none; }
+              10% { filter: hue-rotate(90deg) saturate(3); }
+              20% { filter: hue-rotate(-90deg) saturate(3); }
+              30% { filter: invert(1); }
+              40% { filter: hue-rotate(180deg) saturate(5); }
+              50% { filter: brightness(2) contrast(3); }
+              60% { filter: hue-rotate(-180deg) saturate(3); }
+              70% { filter: invert(0.5) hue-rotate(90deg); }
+              80% { filter: brightness(0.5) contrast(5); }
+              90% { filter: hue-rotate(270deg) saturate(3); }
+            }
+            
+            @keyframes text-glitch {
+              0%, 100% { transform: translate(0, 0) skew(0deg); opacity: 1; }
+              10% { transform: translate(-5px, 2px) skew(-2deg); opacity: 0.8; }
+              20% { transform: translate(5px, -2px) skew(2deg); opacity: 0.9; }
+              30% { transform: translate(-3px, -3px) skew(1deg); opacity: 0.7; }
+              40% { transform: translate(3px, 3px) skew(-1deg); opacity: 0.85; }
+              50% { transform: translate(-2px, 2px) skew(-2deg); opacity: 0.9; }
+              60% { transform: translate(2px, -2px) skew(2deg); opacity: 0.8; }
+              70% { transform: translate(-4px, 1px) skew(1deg); opacity: 0.75; }
+              80% { transform: translate(4px, -1px) skew(-1deg); opacity: 0.9; }
+              90% { transform: translate(-1px, -1px) skew(-2deg); opacity: 0.85; }
+            }
+            
+            @keyframes color-shift {
+              0% { filter: hue-rotate(0deg); }
+              25% { filter: hue-rotate(90deg); }
+              50% { filter: hue-rotate(180deg); }
+              75% { filter: hue-rotate(270deg); }
+              100% { filter: hue-rotate(360deg); }
+            }
+          `}</style>
         </div>
+      )}
+
+      {/* Game Guided Tour */}
+      {isPlaying && (
+        <GuidedTour
+          steps={gameTourSteps}
+          storageKey="game-tour-completed"
+          isOpen={isGameTourOpen}
+          onComplete={() => {
+            console.log('Game tour completed!');
+            handleGameTourClose();
+          }}
+          onSkip={() => {
+            console.log('Game tour skipped');
+            handleGameTourClose();
+          }}
+          onClose={handleGameTourClose}
+        />
       )}
     </div>
   );

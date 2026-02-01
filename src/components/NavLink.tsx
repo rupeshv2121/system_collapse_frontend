@@ -29,7 +29,7 @@ NavLink.displayName = "NavLink";
 
 // Enhanced Navbar Component
 const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { user, username, signOut } = useAuth();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -40,6 +40,9 @@ const Navbar = () => {
   ];
 
   const getUserInitial = () => {
+    if (username) {
+      return username.charAt(0).toUpperCase();
+    }
     if (user?.email) {
       return user.email.charAt(0).toUpperCase();
     }
@@ -104,7 +107,7 @@ const Navbar = () => {
                 <div className="hidden sm:flex flex-col items-start">
                   <span className="text-xs text-gray-600">Player</span>
                   <span className="text-sm text-gray-900 font-medium truncate max-w-[150px]">
-                    {user?.email?.split('@')[0] || 'User'}
+                    {username || 'User'}
                   </span>
                 </div>
                 <ChevronDown className={cn(
@@ -122,7 +125,7 @@ const Navbar = () => {
                         {getUserInitial()}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Player</p>
+                        <p className="text-sm font-medium text-gray-900">{username || 'Player'}</p>
                         <p className="text-xs text-gray-600 truncate">{user?.email}</p>
                       </div>
                     </div>
