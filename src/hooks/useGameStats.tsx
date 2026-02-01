@@ -16,8 +16,15 @@ export const useGameStats = () => {
     try {
       const saved = localStorage.getItem(STATS_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        setStats(parsed);
+        const parsed = JSON.parse(saved) as Partial<GameStats>;
+        setStats({
+          ...INITIAL_STATS,
+          ...parsed,
+          sanityLossHistory: parsed.sanityLossHistory ?? INITIAL_STATS.sanityLossHistory,
+          entropyHistory: parsed.entropyHistory ?? INITIAL_STATS.entropyHistory,
+          durationHistory: parsed.durationHistory ?? INITIAL_STATS.durationHistory,
+          gameResults: parsed.gameResults ?? INITIAL_STATS.gameResults,
+        });
       }
     } catch (error) {
       console.error('Failed to load game stats:', error);
@@ -60,11 +67,11 @@ export const useGameStats = () => {
           totalEntropySum: prev.totalEntropySum + result.finalEntropy,
           averageEntropyReached:
             (prev.totalEntropySum + result.finalEntropy) / (prev.totalGamesPlayed + 1),
-          sanityLossHistory: [...prev.sanityLossHistory.slice(-19), 100 - result.finalSanity],
-          entropyHistory: [...prev.entropyHistory.slice(-19), result.finalEntropy],
-          durationHistory: [...prev.durationHistory.slice(-19), result.duration || 0],
+          sanityLossHistory: [...(prev.sanityLossHistory ?? []).slice(-19), 100 - result.finalSanity],
+          entropyHistory: [...(prev.entropyHistory ?? []).slice(-19), result.finalEntropy],
+          durationHistory: [...(prev.durationHistory ?? []).slice(-19), result.duration || 0],
           gameResults: [
-            ...prev.gameResults.slice(-49),
+            ...(prev.gameResults ?? []).slice(-49),
             {
               won: result.won,
               finalScore: result.finalScore,

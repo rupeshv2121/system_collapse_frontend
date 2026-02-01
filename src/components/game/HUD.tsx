@@ -19,9 +19,10 @@ interface HUDProps {
   isBeatDropped?: boolean;
   showPhase?: boolean;
   collapseCount?: number;
+  enableTourTargets?: boolean;
 }
 
-const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount: _collapseCount = 0 }: HUDProps) => {
+const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount = 0, enableTourTargets = false }: HUDProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
   const maxTime = phaseConfig.timerDuration;
   const timerPercent = (timeRemaining / maxTime) * 100;
@@ -59,7 +60,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       beatPulse && isBeatDropped && "animate-beat-pulse"
     )}>
       {/* Play Time */}
-      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300">
+      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-timer' })}>
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Play Time</div>
         <div className="text-center">
           <span className="hud-value text-lg text-gray-900">{formattedPlayTime}</span>
@@ -67,7 +68,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Score */}
-      <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300" data-tour="game-score">
+      <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-score' })}>
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Score</div>
         <div className={cn(
           "hud-value text-2xl text-gray-900",
@@ -95,7 +96,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       )}
 
       {/* Entropy */}
-      <div className="hud-panel p-3 bg-blue-50 border-blue-300" data-tour="game-entropy">
+      <div className="hud-panel p-3 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-entropy' })}>
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Entropy</div>
         <div className="flex items-center gap-2">
           <Progress 
@@ -108,7 +109,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Sanity */}
-      <div className="hud-panel p-3 bg-blue-50 border-blue-300" data-tour="game-sanity">
+      <div className="hud-panel p-3 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-sanity' })}>
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Sanity</div>
         <div className="flex items-center gap-2">
           <Progress 
@@ -126,7 +127,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Timer */}
-      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300" data-tour="game-timer">
+      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-round-timer' })}>
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Time</div>
         <div className="flex items-center gap-2">
           <Progress 
