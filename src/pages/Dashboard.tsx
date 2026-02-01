@@ -1,287 +1,388 @@
-import { Navbar } from '@/components/NavLink';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserData } from '@/hooks/useUserData';
-import { 
-  Activity, 
-  BarChart3, 
-  Brain, 
-  Crown, 
-  Flame,
-  Gamepad2, 
-  Sparkles, 
-  Trophy, 
-  TrendingUp,
-  Zap
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Navbar } from "@/components/NavLink";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserData } from "@/hooks/useUserData";
+import { Activity, Award, Brain, Flame, Gamepad2, HelpCircle, Target, TrendingUp, Trophy, Volume2, VolumeX, Zap } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const { user, username } = useAuth();
-  const { userData } = useUserData();
+const TUTORIAL_SEEN_KEY = "rule-collapse-tutorial-seen";
 
-  const quickStats = [
-    {
-      icon: Gamepad2,
-      label: 'Total Games',
-      value: userData.stats.totalGames,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-    },
-    {
-      icon: Trophy,
-      label: 'Wins',
-      value: userData.stats.wins,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-    },
-    {
-      icon: Flame,
-      label: 'Win Streak',
-      value: userData.stats.currentWinStreak,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-    },
-    {
-      icon: Crown,
-      label: 'Highest Score',
-      value: userData.stats.highestScore,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-    },
-  ];
+// Animated background tiles with chaos effect
+const AnimatedTile = ({ 
+  delay, 
+  color, 
+  top, 
+  left, 
+  size 
+}: { 
+  delay: number; 
+  color: string; 
+  top: string; 
+  left: string; 
+  size: number;
+}) => {
+  const [isVisible, setIsVisible] = useState(Math.random() > 0.5);
+  const [glowIntensity, setGlowIntensity] = useState(0.05);
 
-  const recentAchievements = [
-    {
-      title: 'First Victory',
-      description: 'Won your first game',
-      achieved: userData.stats.wins > 0,
-      icon: Trophy,
-    },
-    {
-      title: 'Perfect Run',
-      description: 'Complete a game with 100% sanity',
-      achieved: userData.trends.sanityHistory.some(s => s >= 100),
-      icon: Sparkles,
-    },
-    {
-      title: 'High Scorer',
-      description: 'Score over 500 points',
-      achieved: userData.stats.highestScore >= 500,
-      icon: TrendingUp,
-    },
-    {
-      title: 'Experienced',
-      description: 'Play 10+ games',
-      achieved: userData.stats.totalGames >= 10,
-      icon: Brain,
-    },
-  ];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Randomly appear/disappear
+      setIsVisible(Math.random() > 0.3);
+      // Random glow intensity for chaos effect
+      setGlowIntensity(Math.random() * 0.2 + 0.05);
+    }, 1200 + delay * 150);
+    return () => clearInterval(interval);
+  }, [delay]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 grid-pattern">
-      <Navbar />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
-              {username ? username.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
+    <div
+      className={`absolute rounded-lg ${color} transition-all duration-1000 ease-in-out`}
+      style={{ 
+        opacity: isVisible ? glowIntensity : 0,
+        top,
+        left,
+        width: `${size}px`,
+        height: `${size}px`,
+        boxShadow: `0 0 ${size * 0.8}px ${size * 0.4}px currentColor`,
+        filter: `blur(${Math.random() * 2}px)`,
+        transform: isVisible ? 'scale(1)' : 'scale(0.8)',
+      }}
+    />
+  );
+};
+
+// Generate random tiles for chaotic background
+const generateTiles = () => {
+  const tiles = [];
+  const colors = ['text-red-500', 'text-blue-500', 'text-green-500', 'text-yellow-500', 'text-purple-500', 'text-pink-500', 'text-cyan-500', 'text-orange-500', 'text-indigo-500', 'text-rose-500'];
+  
+  // Generate 40-50 tiles scattered across the screen
+  for (let i = 0; i < 45; i++) {
+    tiles.push({
+      id: i,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.floor(Math.random() * 60) + 40, // 40-100px
+      delay: Math.random() * 10,
+    });
+  }
+  return tiles;
+};
+
+// Animated Title Component
+const AnimatedDashboardTitle = () => {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const word1 = "SYSTEM";
+  const word2 = "COLLAPSE";
+  
+  return (
+    <h1 
+      className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 tracking-wider inline-block cursor-default"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span className="inline-block">
+        {word1.split('').map((letter, index) => (
+          <span
+            key={`w1-${index}`}
+            className="inline-block text-gray-900 transition-all duration-300 ease-out"
+            style={{
+              transitionDelay: isHovered ? `${index * 40}ms` : `${(word1.length - index) * 25}ms`,
+              transform: isHovered ? `translateY(${(index % 2 === 0 ? -6 : 6)}px) scale(1.05)` : 'translateY(0) scale(1)',
+              color: isHovered ? '#2563eb' : '#111827',
+            }}
+          >
+            {letter}
+          </span>
+        ))}
+      </span>
+      <span className="inline-block mx-2 sm:mx-3"></span>
+      <span className="inline-block">
+        {word2.split('').map((letter, index) => (
+          <span
+            key={`w2-${index}`}
+            className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 ease-out"
+            style={{
+              transitionDelay: isHovered ? `${(word1.length + index) * 40}ms` : `${(word2.length - index) * 25}ms`,
+              transform: isHovered ? `translateY(${(index % 2 === 0 ? 6 : -6)}px) scale(1.08) rotate(${index % 2 === 0 ? 1 : -1}deg)` : 'translateY(0) scale(1) rotate(0deg)',
+              filter: isHovered ? 'brightness(1.3) drop-shadow(0 0 12px rgba(147, 51, 234, 0.6))' : 'brightness(1)',
+            }}
+          >
+            {letter}
+          </span>
+        ))}
+      </span>
+    </h1>
+  );
+};
+
+const Demo = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { userData } = useUserData();
+  const [backgroundTiles] = useState(generateTiles());
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(0.5);
+
+  const playerName =
+    (user?.user_metadata as { username?: string } | undefined)?.username ||
+    user?.email?.split("@")[0] ||
+    "Player";
+
+  const winRate = useMemo(() => {
+    if (!userData?.stats?.totalGames) return 0;
+    return Math.round((userData.stats.wins / userData.stats.totalGames) * 100);
+  }, [userData.stats.totalGames, userData.stats.wins]);
+
+  // Left sidebar stats configuration
+  const leftStats = useMemo(() => [
+    { icon: Trophy, label: 'High Score', value: userData.stats.highestScore, color: 'blue' },
+    { icon: Target, label: 'Win Rate', value: `${winRate}%`, color: 'purple' },
+    { icon: Activity, label: 'Total Games', value: userData.stats.totalGames, color: 'green' },
+  ], [userData.stats.highestScore, userData.stats.totalGames, winRate]);
+
+  // Right sidebar stats configuration
+  const rightStats = useMemo(() => [
+    { icon: Award, label: 'Play Style', value: userData.playerProfile.playStyle, color: 'indigo', isText: true },
+    { icon: Flame, label: 'Win Streak', value: userData.stats.currentWinStreak, color: 'pink' },
+    { icon: Zap, label: 'Collapses', value: userData.stats.collapseCount, color: 'orange' },
+  ], [userData.playerProfile.playStyle, userData.stats.currentWinStreak, userData.stats.collapseCount]);
+
+  // Quick stats configuration
+  const quickStats = useMemo(() => [
+    { icon: Trophy, label: 'Total Wins', value: userData.stats.wins, color: 'green' },
+    { icon: TrendingUp, label: 'Best Streak', value: userData.stats.longestWinStreak, color: 'amber' },
+    { icon: Brain, label: 'Archetype', value: userData.playerProfile.psychologicalArchetype.split('-')[0], fullValue: userData.playerProfile.psychologicalArchetype, color: 'purple', isText: true },
+  ], [userData.stats.wins, userData.stats.longestWinStreak, userData.playerProfile.psychologicalArchetype]);
+
+  const handleStartGame = () => navigate("/game");
+  const handleTutorial = () => {
+    localStorage.setItem(TUTORIAL_SEEN_KEY, "false");
+    navigate("/game");
+  };
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume;
+    audioRef.current.muted = isMuted;
+  }, [volume, isMuted]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = volume;
+    audio.muted = isMuted;
+
+    const playPromise = audio.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        // Autoplay may be blocked; user can start via unmute/interaction.
+      });
+    }
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const button = target.closest("button");
+      if (!button || button.getAttribute("data-click-sfx") !== "true") return;
+
+      const clickAudio = new Audio("/audio/clickfx.wav");
+      clickAudio.volume = 1;
+      clickAudio.play().catch(() => undefined);
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative overflow-hidden">
+      <audio ref={audioRef} src="/audio/music.mp3" loop preload="auto" />
+      {/* Animated background tiles - chaotic system breakdown visual */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {backgroundTiles.map((tile) => (
+          <AnimatedTile
+            key={tile.id}
+            delay={tile.delay}
+            color={tile.color}
+            top={tile.top}
+            left={tile.left}
+            size={tile.size}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-[100]">
+        <Navbar />
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 flex min-h-[calc(100vh-64px)] items-center">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 lg:gap-8 lg:grid-cols-[200px_1fr_200px] items-center">
+            {/* Left sidebar - small stats */}
+            <div className="space-y-4 order-2 lg:order-1">
+              {leftStats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className={`bg-white/70 backdrop-blur-sm border border-${stat.color}-200 rounded-lg p-4 shadow-sm hover:shadow-md hover:border-${stat.color}-400 transition-all group cursor-default`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className={`w-4 h-4 text-${stat.color}-600 group-hover:scale-110 transition-transform`} />
+                      <div className="text-xs text-gray-600">{stat.label}</div>
+                    </div>
+                    <div className={`text-2xl font-bold text-${stat.color}-600 group-hover:text-${stat.color}-700 transition-colors`}>{stat.value}</div>
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-500 bg-clip-text text-transparent">
-                Welcome back, {username || user?.email?.split('@')[0] || 'Player'}!
-              </h1>
-              <p className="text-gray-600">Ready to challenge your mind?</p>
+
+            {/* Center - main content */}
+            <div className="text-center space-y-6 sm:space-y-8 order-1 lg:order-2">
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 border-2 border-blue-300 mt-10 xl:mt-0 mb-4 shadow-sm hover:shadow-md transition-all">
+                <span className="text-blue-800 text-sm font-semibold">Welcome back, {playerName}!</span>
+              </div>
+
+              <div>
+                <AnimatedDashboardTitle />
+                <p className="text-base sm:text-lg text-gray-700 max-w-xl mx-auto mt-4">
+                  An experimental game where rules intentionally collapse over time
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-4 items-center justify-center max-w-md mx-auto">
+                <Button
+                  onClick={handleStartGame}
+                  size="lg"
+                  data-click-sfx="true"
+                  className="w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 sm:py-7 text-lg font-bold rounded-xl shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group animate-pulse hover:animate-none"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  <span className="relative flex items-center justify-center">
+                    <Gamepad2 className="w-6 h-6 mr-2 group-hover:scale-110 transition-transform" />
+                    START GAME
+                  </span>
+                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <Button
+                    onClick={handleTutorial}
+                    size="lg"
+                    variant="outline"
+                    data-click-sfx="true"
+                    className="flex-1 border-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 px-6 py-3 sm:py-6 text-base rounded-xl transition-all hover:shadow-md"
+                  >
+                    <HelpCircle className="w-5 h-5 mr-2" />
+                    Tutorial
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/analytics")}
+                    size="lg"
+                    variant="outline"
+                    data-click-sfx="true"
+                    className="flex-1 border-2 border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-3 sm:px-6 py-3 sm:py-6 text-base rounded-xl transition-all hover:shadow-md"
+                  >
+                    <Brain className="w-5 h-5 mr-2" />
+                    Analytics
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right sidebar - small stats */}
+            <div className="space-y-4 order-3">
+              {rightStats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className={`bg-white/70 backdrop-blur-sm border border-${stat.color}-200 rounded-lg p-4 shadow-sm hover:shadow-md hover:border-${stat.color}-400 transition-all group cursor-default`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className={`w-4 h-4 text-${stat.color}-600 group-hover:scale-110 transition-transform`} />
+                      <div className="text-xs text-gray-600">{stat.label}</div>
+                    </div>
+                    <div className={`${stat.isText ? 'text-sm' : 'text-2xl'} font-bold text-${stat.color}-600 group-hover:text-${stat.color}-700 transition-colors`}>{stat.value}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
 
-        {/* Main Action Card */}
-        <Card className="mb-8 border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl" />
-          <CardHeader className="relative">
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Gamepad2 className="w-8 h-8 text-blue-600" />
-              Start Your Journey
-            </CardTitle>
-            <CardDescription className="text-base">
-              Enter the world of System Collapse where rules change and chaos reigns
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                size="lg"
-                onClick={() => navigate('/game')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all"
-              >
-                <Zap className="w-5 h-5 mr-2" />
-                Start Game
-              </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => navigate('/demo')}
-                className="border-blue-300 text-blue-700 hover:bg-blue-100 px-8 py-6 text-lg rounded-xl"
-              >
-                <Activity className="w-5 h-5 mr-2" />
-                Try Demo Mode
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {quickStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index} className="border-blue-200 hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                      <Icon className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {stat.label}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Recent Achievements */}
-          <Card className="border-blue-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-600" />
-                Recent Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentAchievements.map((achievement, index) => {
-                  const Icon = achievement.icon;
+          {/* Bottom section */}
+          <div className="mt-8 sm:mt-12 space-y-6">
+            {/* Quick Stats Summary */}
+            <Card className="bg-white/70 backdrop-blur-sm border-blue-200 p-4 max-w-2xl mx-auto">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                {quickStats.map((stat) => {
+                  const Icon = stat.icon;
                   return (
-                    <div 
-                      key={index}
-                      className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                        achievement.achieved 
-                          ? 'bg-green-50 border-green-200' 
-                          : 'bg-gray-50 border-gray-200 opacity-60'
-                      }`}
-                    >
-                      <div className={`p-2 rounded-full ${
-                        achievement.achieved 
-                          ? 'bg-green-100 text-green-600' 
-                          : 'bg-gray-200 text-gray-400'
-                      }`}>
-                        <Icon className="w-5 h-5" />
+                    <div key={stat.label} className="group cursor-default">
+                      <div className="text-xs text-gray-600 mb-1">{stat.label}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <Icon className={`w-4 h-4 text-${stat.color}-600 group-hover:scale-110 transition-transform`} />
+                        <span className={`${stat.isText ? 'text-xs' : 'text-lg'} font-bold text-${stat.color}-600 truncate`} title={stat.fullValue}>
+                          {stat.value}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900">
-                          {achievement.title}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {achievement.description}
-                        </div>
-                      </div>
-                      {achievement.achieved && (
-                        <div className="text-green-600 font-bold">✓</div>
-                      )}
                     </div>
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="border-blue-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-purple-600" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start text-left h-auto py-4"
-                  onClick={() => navigate('/leaderboard')}
-                >
-                  <Trophy className="w-5 h-5 mr-3 text-yellow-600" />
-                  <div>
-                    <div className="font-semibold">View Leaderboard</div>
-                    <div className="text-xs text-gray-500">See global rankings</div>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start text-left h-auto py-4"
-                  onClick={() => navigate('/analytics')}
-                >
-                  <BarChart3 className="w-5 h-5 mr-3 text-blue-600" />
-                  <div>
-                    <div className="font-semibold">Your Analytics</div>
-                    <div className="text-xs text-gray-500">Deep dive into your stats</div>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start text-left h-auto py-4"
-                  onClick={() => navigate('/profile')}
-                >
-                  <Activity className="w-5 h-5 mr-3 text-green-600" />
-                  <div>
-                    <div className="font-semibold">Profile Settings</div>
-                    <div className="text-xs text-gray-500">Manage your account</div>
-                  </div>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            </Card>
+            
+            {/* Leaderboard Button */}
+            <div className="text-center">
+              <Button
+                onClick={() => navigate("/leaderboard")}
+                variant="outline"
+                data-click-sfx="true"
+                className="text-gray-600 hover:text-blue-600 border-2 border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all px-6 py-3 rounded-xl"
+              >
+                <Trophy className="w-5 h-5 mr-2" />
+                View Leaderboard
+              </Button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Play Style Info */}
-        {userData.playerProfile.playStyle && (
-          <Card className="mt-6 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-purple-600" />
-                Your Play Style
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <div className="text-2xl font-bold text-purple-700">
-                  {userData.playerProfile.playStyle}
-                </div>
-                <div className="h-8 w-px bg-purple-300" />
-                <div className="text-sm text-gray-700">
-                  Archetype: <span className="font-semibold">{userData.playerProfile.psychologicalArchetype}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Audio controls */}
+      <div className="fixed right-6 top-[30%] -translate-y-1/2 z-[120]">
+        <div className="group relative flex flex-col items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsMuted((prev) => !prev)}
+            className="h-12 w-12 rounded-full bg-white/80 border border-blue-200 shadow-sm flex items-center justify-center text-blue-700 hover:bg-white"
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+          </button>
+          <div className="h-32 w-12 rounded-full bg-white/70 border border-blue-200 shadow-sm flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:pointer-events-auto">
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={volume}
+              onChange={(event) => setVolume(Number(event.target.value))}
+              className="h-24 w-6 [writing-mode:vertical-rl] rotate-180 accent-blue-600"
+              aria-label="Volume"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Demo;
