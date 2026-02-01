@@ -1,5 +1,7 @@
 import { Navbar } from "@/components/NavLink";
-import { userDataApi } from "@/lib/userDataApi";
+import { ErrorDisplay } from "@/components/ui/error-display";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ApiError, userDataApi } from "@/lib/userDataApi";
 import { Award, Crown, Medal, TrendingUp, Trophy, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -21,6 +23,7 @@ const Leaderboard = () => {
   const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [topWinners, setTopWinners] = useState<TopWinner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<{ message: string; type: "network" | "server" | "auth" | "generic" } | null>(null);
   const [activeTab, setActiveTab] = useState<"score" | "wins">("score");
 
   useEffect(() => {
@@ -30,14 +33,20 @@ const Leaderboard = () => {
   const loadLeaderboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const [global, winners] = await Promise.all([
         userDataApi.getGlobalLeaderboard(),
         userDataApi.getTopWinners(),
       ]);
       setGlobalLeaderboard(global);
       setTopWinners(winners);
-    } catch (error) {
-      console.error("Error loading leaderboard:", error);
+    } catch (err) {
+      console.error("Error loading leaderboard:", err);
+      if (err instanceof ApiError) {
+        setError({ message: err.message, type: err.type });
+      } else {
+        setError({ message: "Failed to load leaderboard data", type: "generic" });
+      }
     } finally {
       setLoading(false);
     }
@@ -56,6 +65,30 @@ const Leaderboard = () => {
     if (rank === 3) return "bg-gradient-to-r from-orange-100 to-yellow-100 border-orange-300";
     return "bg-blue-50 border-blue-200";
   };
+
+  const LeaderboardEntrySkeleton = () => (
+    <div className="flex items-center gap-4 p-4 rounded-lg border bg-gray-50 border-gray-200">
+      <Skeleton className="w-12 h-12 rounded-full" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="space-y-2 text-right">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+  );
+
+  const StatCardSkeleton = () => (
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 backdrop-blur-sm">
+      <div className="flex items-center gap-3 mb-2">
+        <Skeleton className="w-8 h-8 rounded" />
+        <Skeleton className="h-6 w-24" />
+      </div>
+      <Skeleton className="h-10 w-12" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -102,9 +135,19 @@ const Leaderboard = () => {
         </div>
 
         {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        {error ? (
+          <ErrorDisplay
+            message={error.message}
+            type={error.type}
+            onRetry={loadLeaderboardData}
+          />
+        ) : loading ? (
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-3 mb-8">
+              {[...Array(5)].map((_, index) => (
+                <LeaderboardEntrySkeleton key={index} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
@@ -215,35 +258,45 @@ const Leaderboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 max-w-4xl mx-auto">
-          <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Trophy className="w-8 h-8 text-amber-500" />
-              <h3 className="text-gray-900 font-bold text-lg">Total Players</h3>
-            </div>
-            <p className="text-3xl font-bold text-blue-600">
-              {globalLeaderboard.length}
-            </p>
-          </div>
+          {loading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Trophy className="w-8 h-8 text-amber-500" />
+                  <h3 className="text-gray-900 font-bold text-lg">Total Players</h3>
+                </div>
+                <p className="text-3xl font-bold text-blue-600">
+                  {globalLeaderboard.length}
+                </p>
+              </div>
 
-          <div className="bg-green-50 border border-green-300 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Award className="w-8 h-8 text-green-600" />
-              <h3 className="text-gray-900 font-bold text-lg">Total Wins</h3>
-            </div>
-            <p className="text-3xl font-bold text-green-600">
-              {globalLeaderboard.filter((e) => e.won).length}
-            </p>
-          </div>
+              <div className="bg-green-50 border border-green-300 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Award className="w-8 h-8 text-green-600" />
+                  <h3 className="text-gray-900 font-bold text-lg">Total Wins</h3>
+                </div>
+                <p className="text-3xl font-bold text-green-600">
+                  {globalLeaderboard.filter((e) => e.won).length}
+                </p>
+              </div>
 
-          <div className="bg-amber-50 border border-amber-300 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Zap className="w-8 h-8 text-amber-600" />
-              <h3 className="text-gray-900 font-bold text-lg">Highest Score</h3>
-            </div>
-            <p className="text-3xl font-bold text-amber-600">
-              {globalLeaderboard[0]?.score.toLocaleString() || "0"}
-            </p>
-          </div>
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="w-8 h-8 text-amber-600" />
+                  <h3 className="text-gray-900 font-bold text-lg">Highest Score</h3>
+                </div>
+                <p className="text-3xl font-bold text-amber-600">
+                  {globalLeaderboard[0]?.score.toLocaleString() || "0"}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

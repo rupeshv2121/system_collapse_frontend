@@ -4,6 +4,7 @@
  */
 
 import { Card } from '@/components/ui/card';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { Progress } from '@/components/ui/progress';
 import { useUserData } from '@/hooks/useUserData';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,16 @@ import {
 } from 'lucide-react';
 
 export const UserAnalyticsDashboard = () => {
-  const { userData, isLoading } = useUserData();
+  const { userData, isLoading, error } = useUserData();
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        message={error.message}
+        type={error.type}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
