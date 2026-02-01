@@ -267,7 +267,7 @@ export const UserAnalyticsDashboard = () => {
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${session.win ? 'bg-green-400' : 'bg-red-400'}`} />
                   <div>
-                    <div className="text-sm font-semibold text-white">Phase {session.finalPhase} - Score: {session.finalScore}</div>
+                    <div className="text-sm font-semibold text-white">Score: {session.finalScore}</div>
                     <div className="text-xs text-gray-400 capitalize">{session.dominantBehavior} behavior</div>
                   </div>
                 </div>
