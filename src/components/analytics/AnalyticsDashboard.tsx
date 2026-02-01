@@ -6,19 +6,19 @@ import { useUserData } from '@/hooks/useUserData';
 import { Brain, Flame, HelpCircle, RotateCcw, Skull, Trophy, User } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    LabelList,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
 } from 'recharts';
 import { UserAnalyticsDashboard } from './UserAnalyticsDashboard';
 

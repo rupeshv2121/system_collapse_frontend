@@ -8,7 +8,6 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { Progress } from '@/components/ui/progress';
 import { useUserData } from '@/hooks/useUserData';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 import {
   Activity,
   Brain,
@@ -22,6 +21,7 @@ import {
   Users,
   Zap
 } from 'lucide-react';
+import { useState } from 'react';
 import {
   CartesianGrid,
   Line,

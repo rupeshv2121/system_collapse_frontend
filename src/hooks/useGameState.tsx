@@ -4,13 +4,13 @@
  */
 
 import {
-  ClickRecord,
-  COLORS,
-  GamePhase,
-  GameState,
-  PHASE_CONFIGS,
-  TileColor,
-  TileState,
+    ClickRecord,
+    COLORS,
+    GamePhase,
+    GameState,
+    PHASE_CONFIGS,
+    TileColor,
+    TileState,
 } from '@/types/game';
 import { BehaviorMetrics } from '@/types/userData';
 import { useCallback, useEffect, useRef, useState } from 'react';
