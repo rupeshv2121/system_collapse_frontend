@@ -531,58 +531,60 @@ export const GameScreen = () => {
   }, [isPlaying, showGameOverOverlay, score, entropy, sanity, handleStartGame, phaseConfig, collapseCount, playTimeSeconds]);
 
   return (
-    <div 
-      className={cn(
-        "min-h-screen bg-background grid-pattern relative",
-        isPlaying ? "overflow-auto" : "overflow-hidden"
-      )}
-      style={backgroundStyle}
-    >
-      {/* Animated background elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className={cn(
-          "absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20",
-          "bg-primary animate-float"
-        )} />
-        <div className={cn(
-          "absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20",
-          "bg-secondary animate-float",
-          "animation-delay-1000"
-        )} style={{ animationDelay: '1s' }} />
-        {phase >= 3 && (
-          <div className={cn(
-            "absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-2xl opacity-30",
-            "bg-destructive animate-pulse"
-          )} />
-        )}
+    <>
+      {/* Floating Control Buttons - MUST be outside filtered container to maintain fixed position */}
+      <div className="fixed top-20 right-4 z-[60] flex flex-col gap-2">
+        <Button 
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            initAudio();
+            toggleMute();
+          }}
+          className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+          title={isMuted ? "Unmute" : "Mute"}
+        >
+          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </Button>
+        <Button 
+          variant="outline"
+          size="icon"
+          onClick={isPlaying ? handleStartGameTour : () => setShowTutorial(true)}
+          className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+          title={isPlaying ? "Game Guide" : "Tutorial"}
+        >
+          <HelpCircle className="w-5 h-5" />
+        </Button>
       </div>
 
-      {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
-        {/* Floating Control Buttons - Top Right */}
-        <div className="fixed top-20 right-4 z-50 flex flex-col gap-2">
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              initAudio();
-              toggleMute();
-            }}
-            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-            title={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </Button>
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={isPlaying ? handleStartGameTour : () => setShowTutorial(true)}
-            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-            title={isPlaying ? "Game Guide" : "Tutorial"}
-          >
-            <HelpCircle className="w-5 h-5" />
-          </Button>
+      <div 
+        className={cn(
+          "min-h-screen bg-background grid-pattern relative",
+          isPlaying ? "overflow-auto" : "overflow-hidden"
+        )}
+        style={backgroundStyle}
+      >
+        {/* Animated background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className={cn(
+            "absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20",
+            "bg-primary animate-float"
+          )} />
+          <div className={cn(
+            "absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20",
+            "bg-secondary animate-float",
+            "animation-delay-1000"
+          )} style={{ animationDelay: '1s' }} />
+          {phase >= 3 && (
+            <div className={cn(
+              "absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-2xl opacity-30",
+              "bg-destructive animate-pulse"
+            )} />
+          )}
         </div>
+
+        {/* Main content */}
+        <div className="relative z-10 container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
 
         {/* Pause Overlay when tour is active */}
         {isGamePausedForTour && (
@@ -884,7 +886,8 @@ export const GameScreen = () => {
           onClose={handleGameTourClose}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 export default GameScreen;
