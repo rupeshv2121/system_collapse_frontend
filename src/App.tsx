@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Analytics from "./pages/Analytics.tsx";
 import Auth from "./pages/Auth.tsx";
+import Demo from "./pages/Demo.tsx";
 import Index from "./pages/Index.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
@@ -30,6 +31,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/demo"
+              element={
+                <ProtectedRoute>
+                  <Demo />
                 </ProtectedRoute>
               }
             />
