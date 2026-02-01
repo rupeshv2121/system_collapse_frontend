@@ -2,6 +2,27 @@
 
 A psychological puzzle game that challenges players' adaptability and pattern recognition through evolving rule systems. Built with React, TypeScript, and modern web technologies.
 
+## 🆕 Recent Updates (February 2026)
+
+### ✨ New Features
+- **Dedicated Error Pages**: Full-page network and server error screens with auto-recovery
+- **Global Error Context**: Centralized error handling with automatic navigation
+- **Email Sharing**: Share user statistics via email powered by Nodemailer backend
+- **Enhanced Error Detection**: 10-second timeouts, network monitoring, and connection status tracking
+
+### 🔧 Improvements
+- **Compact Error UI**: Streamlined error pages (max-w-md) for better UX
+- **Real-time Connection Status**: Auto-refresh when network restores
+- **Comprehensive Integration**: Error handling across all pages (Leaderboard, Analytics, Profile)
+- **Psychological Trait Evolution**: 6-trait line graph showing development over last 20 games
+
+### 🐛 Bug Fixes
+- Fixed JSX syntax errors in App.tsx routing
+- Improved API timeout handling with AbortController
+- Enhanced error type detection (network vs server vs auth)
+
+---
+
 ## 📖 Table of Contents
 
 - [Overview](#-overview)
@@ -81,11 +102,13 @@ The game measures 6 behavioral traits:
 ### 📊 Analytics & Leaderboards
 - **User Analytics Dashboard**:
   - Game statistics (total games, win rate, average score)
-  - Psychological trait evolution graphs
-  - Achievement tracking
-  - Email sharing feature
-- **Global Leaderboard**: Top players by score
-- **Game Statistics Charts**: Entropy, sanity loss, score trends
+  - Psychological trait evolution graphs (6 traits over time)
+  - Achievement tracking with progress indicators
+  - Email sharing feature (powered by Nodemailer)
+  - Real-time error handling with dedicated error pages
+- **Global Leaderboard**: Top players by score with skeleton loaders
+- **Game Statistics Charts**: Entropy, sanity loss, score trends with labeled axes
+- **Automatic Error Recovery**: Redirects to error pages when backend is down
 
 ### 🎯 Game Features
 - **Interactive Tutorial**: First-time user onboarding
@@ -95,7 +118,9 @@ The game measures 6 behavioral traits:
 - **Audio Controls**: Volume management
 
 ### 🛠️ Developer Features
-- **Error Handling**: Network vs server error distinction
+- **Dedicated Error Pages**: Full-page network and server error screens
+- **Global Error Handling**: ErrorContext with automatic navigation
+- **Error Detection**: Network vs server error distinction with timeout handling
 - **Loading States**: Skeleton loaders for async data
 - **Type Safety**: Full TypeScript coverage
 - **Code Splitting**: Optimized bundle size
@@ -181,7 +206,8 @@ system_collapse_frontend/
 │   │   └── NavLink.tsx     # Navigation component
 │   │
 │   ├── contexts/           # React contexts
-│   │   └── AuthContext.tsx # Authentication state
+│   │   ├── AuthContext.tsx     # Authentication state
+│   │   └── ErrorContext.tsx    # Global error handling
 │   │
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useGameState.tsx    # Core game logic (430 lines)
@@ -204,6 +230,8 @@ system_collapse_frontend/
 │   │   ├── Analytics.tsx       # Analytics page
 │   │   ├── Leaderboard.tsx     # Leaderboard page
 │   │   ├── Profile.tsx         # User profile
+│   │   ├── NetworkError.tsx    # Network error page
+│   │   ├── ServerError.tsx     # Server error page
 │   │   └── NotFound.tsx        # 404 page
 │   │
 │   ├── types/              # TypeScript definitions
@@ -297,7 +325,13 @@ AuthContext provides user session
     ↓
 ProtectedRoute wraps authenticated pages
     ↓
+ErrorContext monitors API calls
+    ↓
 Game/Analytics/Leaderboard/Profile (Authenticated)
+    ↓
+(On API Error)
+    ↓
+NetworkError.tsx (/error/network) OR ServerError.tsx (/error/server)
 ```
 
 ### Game State Flow
@@ -331,6 +365,11 @@ useUserData updates psychological profile
   - `/api/user-data/profile` - User stats
   - `/api/user-data/leaderboard` - Top scores
   - `/api/user-data/session` - Game session recording
+  - `/api/email/share-profile` - Email sharing via Nodemailer
+- **Error Handling**: Automatic detection and navigation
+  - Network errors: `navigator.onLine` check
+  - Server errors: Timeout (10s) and connection detection
+  - Dedicated error pages: `/error/network` and `/error/server`
 - **Local Storage**: Tutorial completion, audio preferences
 
 ---
@@ -448,6 +487,40 @@ useUserData updates psychological profile
 }
 ```
 
+### Error Pages
+
+#### `NetworkError.tsx`
+**Purpose**: Dedicated page for network connection errors
+**Route**: `/error/network`
+
+**Features**:
+- Real-time connection status indicator
+- Auto-refresh when connection restored
+- Clean, compact design (max-w-md)
+- Red theme with animated WiFi icon
+- "Try Again" and "Go Home" actions
+
+**Triggers**:
+- `navigator.onLine` returns false
+- Network unavailable before API calls
+
+#### `ServerError.tsx`
+**Purpose**: Dedicated page for backend server errors
+**Route**: `/error/server`
+
+**Features**:
+- Server health check on retry
+- Orange theme with animated Server icon
+- Compact card design
+- Connection timeout handling
+- Retry with loading state
+
+**Triggers**:
+- Backend server not responding
+- API timeout (10 seconds)
+- HTTP 500+ status codes
+- Connection refused errors
+
 ### Analytics Components
 
 #### `UserAnalyticsDashboard.tsx`
@@ -537,6 +610,44 @@ Pre-built accessible components using Radix UI:
 **Usage**:
 ```tsx
 const { user, signIn, signOut } = useAuth();
+```
+
+### Error Management State
+
+**Location**: `src/contexts/ErrorContext.tsx`
+
+**Purpose**: Global error handling and navigation
+
+**Provides**:
+```typescript
+{
+  showNetworkError: () => void;  // Navigate to /error/network
+  showServerError: () => void;   // Navigate to /error/server
+  clearError: () => void;        // Clear current error state
+}
+```
+
+**Features**:
+- Automatic network monitoring via `navigator.onLine`
+- Auto-refresh when connection restored
+- Preserves previous route for back navigation
+- Integrated throughout all API calls
+
+**Usage**:
+```tsx
+const { showNetworkError, showServerError } = useError();
+
+// In API calls
+if (!navigator.onLine) {
+  showNetworkError();
+  return;
+}
+
+// On server timeout/error
+if (error.name === 'AbortError') {
+  showServerError();
+  return;
+}
 ```
 
 ### Game State
@@ -636,7 +747,9 @@ GET /api/user-data/top-winners
 ```typescript
 POST /api/email/share-profile
 // Body: { to: string, subject: string, content: string }
-// Sends user stats via email
+// Sends user stats via email using Nodemailer (Gmail SMTP)
+// Timeout: 10 seconds
+// Returns: { success: true } or error
 ```
 
 ### API Client
@@ -644,10 +757,23 @@ POST /api/email/share-profile
 **Location**: `src/lib/userDataApi.ts`
 
 **Features**:
-- Network detection (`navigator.onLine`)
-- Request timeouts (10 seconds)
-- Typed error handling (`ApiError` class)
-- Error types: `"network" | "server" | "auth" | "generic"`
+- **Network detection**: Checks `navigator.onLine` before every call
+- **Request timeouts**: 10-second AbortController timeout
+- **Typed error handling**: `ApiError` class with error categorization
+- **Error types**: `"network" | "server" | "auth" | "generic"`
+- **Automatic retry detection**: Distinguishes timeout vs connection errors
+
+**Error Flow**:
+```typescript
+1. Check navigator.onLine → Throw "network" error if offline
+2. Create AbortController with 10s timeout
+3. Make fetch request with signal
+4. Timeout triggers → Throw "server" error (AbortError)
+5. Connection refused → Throw "server" error (TypeError)
+6. HTTP 500+ → Throw "server" error
+7. HTTP 401/403 → Throw "auth" error
+8. Other errors → Throw "generic" error
+```
 
 **Example**:
 ```typescript
@@ -655,15 +781,15 @@ export async function getGlobalLeaderboard(): Promise<LeaderboardEntry[]> {
   return apiCall<LeaderboardEntry[]>('/api/user-data/leaderboard');
 }
 
-// Error handling
+// Error handling with automatic navigation
 try {
   const leaderboard = await getGlobalLeaderboard();
 } catch (error) {
   if (error instanceof ApiError) {
     if (error.type === 'network') {
-      // Show "No internet" message
+      showNetworkError(); // → Navigate to /error/network
     } else if (error.type === 'server') {
-      // Show "Server unavailable" message
+      showServerError(); // → Navigate to /error/server
     }
   }
 }
@@ -687,6 +813,142 @@ const { data, error } = await supabase
   .select('*')
   .eq('user_id', userId);
 ```
+
+---
+
+## 🚨 Error Handling System
+
+### Architecture Overview
+
+The application implements a comprehensive three-tier error handling system:
+
+1. **Detection Layer**: API client with network/server detection
+2. **Context Layer**: ErrorContext for global error state management
+3. **Presentation Layer**: Dedicated full-page error screens
+
+### Error Categories
+
+#### Network Errors (`type: "network"`)
+**Triggers**:
+- `navigator.onLine` returns `false`
+- No internet connection before API call
+
+**Handling**:
+- Immediate navigation to `/error/network`
+- Real-time connection monitoring
+- Auto-refresh when connection restored
+
+**User Experience**:
+- Red-themed page with WiFi icon
+- Connection status indicator
+- "Try Again" button checks connection
+- "Go Home" fallback option
+
+#### Server Errors (`type: "server"`)
+**Triggers**:
+- Request timeout (10+ seconds)
+- Backend server not responding
+- HTTP 500+ status codes
+- Connection refused (ECONNREFUSED)
+- AbortController timeout
+
+**Handling**:
+- Navigation to `/error/server`
+- Health check on retry attempt
+- Preserves user's intended route
+
+**User Experience**:
+- Orange-themed page with Server icon
+- Compact card design (max-w-md)
+- Retry with loading state
+- Backend status feedback
+
+#### Auth Errors (`type: "auth"`)
+**Triggers**:
+- HTTP 401/403 status codes
+- Invalid or expired JWT token
+- Missing authentication
+
+**Handling**:
+- Inline error display
+- Redirect to `/auth` if needed
+- Token refresh attempt
+
+#### Generic Errors (`type: "generic"`)
+**Triggers**:
+- Unexpected errors
+- Business logic errors
+- Validation failures
+
+**Handling**:
+- Inline error display
+- Toast notifications
+- Contextual error messages
+
+### Implementation Details
+
+**Pages with Error Handling**:
+- ✅ Leaderboard (`/leaderboard`) - Redirects on API errors
+- ✅ Analytics (`/analytics`) - Automatic error navigation
+- ✅ Profile (`/profile`) - Username update + data loading
+- ✅ UserAnalyticsDashboard - Data fetching + email sharing
+
+**API Calls with Timeout**:
+```typescript
+const abortController = new AbortController();
+const timeoutId = setTimeout(() => abortController.abort(), 10000);
+
+try {
+  const response = await fetch(url, {
+    signal: abortController.signal,
+    // ...options
+  });
+  clearTimeout(timeoutId);
+  // Handle response
+} catch (error) {
+  clearTimeout(timeoutId);
+  if (error.name === 'AbortError') {
+    showServerError(); // Backend timeout
+  }
+}
+```
+
+**Hooks Integration**:
+```typescript
+// useUserData.tsx
+export const useUserData = () => {
+  const { showNetworkError, showServerError } = useError();
+  
+  // In error catch blocks
+  if (err.type === "network") {
+    showNetworkError();
+    return;
+  } else if (err.type === "server") {
+    showServerError();
+    return;
+  }
+};
+```
+
+### Error Recovery
+
+**Network Error Recovery**:
+- Window event listeners for `online`/`offline` events
+- Auto-refresh on connection restoration
+- Connection status badge updates in real-time
+
+**Server Error Recovery**:
+- Retry button with health check
+- Loading state during retry
+- Clear error feedback
+
+**Best Practices**:
+1. Always check `navigator.onLine` before API calls
+2. Use AbortController for all fetch requests
+3. Set reasonable timeouts (10 seconds)
+4. Clear timeouts in finally blocks
+5. Distinguish between network and server errors
+6. Provide actionable error messages
 
 ---
 
@@ -817,6 +1079,7 @@ npm run lint
 - [ ] TypeScript types are correct
 - [ ] Components are responsive
 - [ ] No console errors in browser
+- [ ] Error handling tested (network offline, backend down)
 - [ ] Documentation updated if needed
 
 ---
@@ -833,6 +1096,30 @@ npm run lint
 - [TanStack Query](https://tanstack.com/query/latest)
 - [Recharts](https://recharts.org/)
 - [Supabase](https://supabase.com/docs)
+- [Nodemailer](https://nodemailer.com/) (Backend email service)
+
+### Feature Guides
+
+**Email Sharing System**:
+- Located in: `UserAnalyticsDashboard.tsx`
+- Backend: `/api/email/share-profile` endpoint
+- Service: Nodemailer with Gmail SMTP
+- Configuration: See `system_collapse_backend/EMAIL_SETUP.md`
+- Timeout: 10 seconds with error handling
+- Validation: Email format validation with regex
+
+**Error Handling System**:
+- ErrorContext: `src/contexts/ErrorContext.tsx`
+- Network page: `src/pages/NetworkError.tsx`
+- Server page: `src/pages/ServerError.tsx`
+- API client: `src/lib/userDataApi.ts`
+- Integration: All pages with API calls
+
+**Psychological Profiling**:
+- 6 traits tracked: Risk Tolerance, Adaptability, Patience, Chaos Affinity, Order Affinity, Learning Rate
+- Evolution graph: Last 20 games with line chart
+- Calculations: Dynamic per-game cumulative metrics
+- Display: UserAnalyticsDashboard component
 
 ---
 
@@ -841,7 +1128,25 @@ npm run lint
 For issues, questions, or contributions:
 1. Check existing issues in the repository
 2. Review this README thoroughly
-3. Contact the development team
+3. Test error pages: Disable network or stop backend
+4. Contact the development team
+
+### Common Issues & Solutions
+
+**"Backend server unavailable" error**:
+- Ensure backend is running: `cd system_collapse_backend && npm run dev`
+- Check port 3000 is not in use
+- Verify `.env` file has correct configuration
+
+**"No internet connection" error**:
+- Check WiFi/mobile data connection
+- Disable VPN if causing issues
+- Check firewall settings
+
+**Email sharing not working**:
+- Backend needs Gmail credentials in `.env`
+- Requires Gmail App Password (not regular password)
+- See `EMAIL_SETUP.md` in backend directory
 
 ---
 

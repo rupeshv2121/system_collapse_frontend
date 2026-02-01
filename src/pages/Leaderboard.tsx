@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/NavLink";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useError } from "@/contexts/ErrorContext";
 import { ApiError, userDataApi } from "@/lib/userDataApi";
 import { Award, Crown, Medal, TrendingUp, Trophy, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -25,6 +26,7 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ message: string; type: "network" | "server" | "auth" | "generic" } | null>(null);
   const [activeTab, setActiveTab] = useState<"score" | "wins">("score");
+  const { showNetworkError, showServerError } = useError();
 
   useEffect(() => {
     loadLeaderboardData();
@@ -43,6 +45,14 @@ const Leaderboard = () => {
     } catch (err) {
       console.error("Error loading leaderboard:", err);
       if (err instanceof ApiError) {
+        // Navigate to dedicated error pages
+        if (err.type === "network") {
+          showNetworkError();
+          return;
+        } else if (err.type === "server") {
+          showServerError();
+          return;
+        }
         setError({ message: err.message, type: err.type });
       } else {
         setError({ message: "Failed to load leaderboard data", type: "generic" });

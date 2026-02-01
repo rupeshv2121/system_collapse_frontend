@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorProvider } from "@/contexts/ErrorContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Analytics from "./pages/Analytics.tsx";
@@ -12,8 +13,10 @@ import Demo from "./pages/Demo.tsx";
 import Index from "./pages/Index.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
+import NetworkError from "./pages/NetworkError.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Profile from "./pages/Profile.tsx";
+import ServerError from "./pages/ServerError.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,10 +27,13 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LandingPage/>}/>
-            <Route path="/auth" element={<Auth />} />
-            <Route
+          <ErrorProvider>
+            <Routes>
+              <Route path="/" element={<LandingPage/>}/>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/error/network" element={<NetworkError />} />
+              <Route path="/error/server" element={<ServerError />} />
+              <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
@@ -36,47 +42,48 @@ const App = () => (
               }
             />
             <Route
-              path="/game"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/demo"
-              element={
-                <ProtectedRoute>
-                  <Demo />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leaderboard"
-              element={
-                <ProtectedRoute>
-                  <Leaderboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/analytics"
-              element={
-                <ProtectedRoute>
-                  <Analytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+                path="/game"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/demo"
+                element={
+                  <ProtectedRoute>
+                    <Demo />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leaderboard"
+                element={
+                  <ProtectedRoute>
+                    <Leaderboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
