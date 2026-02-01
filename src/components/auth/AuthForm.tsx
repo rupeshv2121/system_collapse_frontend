@@ -24,7 +24,7 @@ export const AuthForm = () => {
           toast.error(error.message || 'Failed to sign in');
         } else {
           toast.success('Successfully signed in!');
-          navigate('/');
+          navigate('/game');
         }
       } else {
         if (!username.trim()) {

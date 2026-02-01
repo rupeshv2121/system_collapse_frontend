@@ -34,7 +34,7 @@ const Navbar = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navLinks = [
-    { to: "/", label: "Game", icon: Play },
+    { to: "/game", label: "Game", icon: Play },
     { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { to: "/analytics", label: "Analytics", icon: Activity },
   ];
