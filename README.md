@@ -4,19 +4,21 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 
 ## 📖 Table of Contents
 
-- [Overview](#overview)
-- [Game Concept](#game-concept)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Architecture Deep Dive](#architecture-deep-dive)
-- [Component Documentation](#component-documentation)
-- [State Management](#state-management)
-- [API Integration](#api-integration)
-- [Styling System](#styling-system)
-- [Development Workflow](#development-workflow)
-- [Contributing](#contributing)
+- [Overview](#-overview)
+- [Game Concept](#-game-concept)
+- [Features](#-features)
+- [Tech Stack](#%EF%B8%8F-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Architecture Deep Dive](#%EF%B8%8F-architecture-deep-dive)
+- [Component Documentation](#-component-documentation)
+- [State Management](#-state-management)
+- [API Integration](#-api-integration)
+- [Styling System](#-styling-system)
+- [Development Workflow](#-development-workflow)
+- [Contributing](#-contributing)
+- [Additional Resources](#-additional-resources)
+- [Support](#-support)
 
 ---
 
@@ -315,7 +317,7 @@ Game loop begins:
     * Record click metrics
     * Deplete sanity
     ↓
-Game ends (sanity = 0 OR time = 0)
+Game ends (sanity = 0)
     ↓
 recordGameEnd() saves to backend
     ↓
@@ -771,70 +773,6 @@ npm run preview
 npm run lint
 ```
 
-### Code Organization Best Practices
-
-1. **Component Structure**:
-   ```tsx
-   // Imports
-   import { ... } from '...';
-   
-   // Type definitions
-   interface Props { ... }
-   
-   // Component
-   export const Component = ({ props }: Props) => {
-     // Hooks
-     // State
-     // Effects
-     // Handlers
-     // Render
-   };
-   ```
-
-2. **Custom Hooks**:
-   - Prefix with `use` (e.g., `useGameState`)
-   - Encapsulate complex logic
-   - Return stable references (useCallback, useMemo)
-
-3. **Type Safety**:
-   - Define interfaces in `/types`
-   - Use strict TypeScript settings
-   - Avoid `any` types
-
-4. **API Calls**:
-   - Centralize in `userDataApi.ts`
-   - Use TanStack Query for caching
-   - Handle errors with `ApiError` class
-
-### Testing
-
-```bash
-npm run test        # Run Vitest tests
-npm run test:ui     # Open Vitest UI
-```
-
-**Test Structure**:
-```typescript
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-
-describe('Component', () => {
-  it('renders correctly', () => {
-    render(<Component />);
-    expect(screen.getByText('Text')).toBeInTheDocument();
-  });
-});
-```
-
-### Environment Variables
-
-**Required**:
-- `VITE_SUPABASE_URL` - Supabase project URL
-- `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
-
-**Optional**:
-- `VITE_BACKEND_URL` - Backend API URL (default: http://localhost:3000)
-
 ### Common Issues
 
 #### Build Errors
@@ -896,18 +834,6 @@ describe('Component', () => {
 - [Recharts](https://recharts.org/)
 - [Supabase](https://supabase.com/docs)
 
-### Game Design Documents
-
-- Phase mechanics and scoring rules: See `src/types/game.ts` → `PHASE_CONFIGS`
-- Psychological trait calculations: See `src/hooks/useGameStats.tsx`
-- System messages: See `src/data/systemMessages.tsx`
-
----
-
-## 📜 License
-
-This project is part of the System Collapse game suite.
-
 ---
 
 ## 🆘 Support
@@ -919,4 +845,4 @@ For issues, questions, or contributions:
 
 ---
 
-**Built with ❤️ using React, TypeScript, and modern web technologies**
+**Built with ❤️ by Commit & Conquer using React, TypeScript, and modern web technologies**
