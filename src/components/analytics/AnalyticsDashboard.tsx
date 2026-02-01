@@ -2,9 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GuidedTour, TourStep } from '@/components/ui/guided-tour';
 import { useGameStats } from '@/hooks/useGameStats';
-import { useUserData } from '@/hooks/useUserData';
-import { Brain, Flame, HelpCircle, RotateCcw, Skull, Trophy, User } from 'lucide-react';
+import { Brain, Flame, HelpCircle, RotateCcw, Trophy } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bar,
   BarChart,
@@ -20,7 +20,6 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
-import { UserAnalyticsDashboard } from './UserAnalyticsDashboard';
 
 // Custom label renderer for pie chart
 const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, value }: any) => {
@@ -44,9 +43,8 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, v
 };
 
 const AnalyticsDashboard = () => {
+  const navigate = useNavigate();
   const { stats, resetStats } = useGameStats();
-  const { userData } = useUserData();
-  const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   // Define tour steps - MODIFY THESE to change the guided tour
@@ -181,34 +179,20 @@ const AnalyticsDashboard = () => {
               <RotateCcw className="w-4 h-4" />
               <span className="hidden sm:inline">Reset Stats</span>
             </Button>
+            <Button
+              onClick={() => navigate('/profile')}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Trophy className="w-4 h-4" />
+              <span className="hidden sm:inline">View Profile</span>
+            </Button>
           </div>
         </header>
 
-        {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6  mx-auto justify-center sm:flex-row flex-col" data-tour="tabs">
-          <Button
-            variant={activeTab === 'game-stats' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('game-stats')}
-            className="flex-1"
-          >
-            <Trophy className="w-4 h-4 mr-2" />
-            Game Statistics
-          </Button>
-          <Button
-            variant={activeTab === 'user-profile' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('user-profile')}
-            className="flex-1"
-          >
-            <User className="w-4 h-4 mr-2" />
-            User Profile
-          </Button>
-        </div>
-
-        {/* Conditional Content */}
-        {activeTab === 'game-stats' ? (
-          <>
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" data-tour="stats-overview">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" data-tour="stats-overview">
           <Card className="hud-panel border-blue-300 bg-blue-50">
             <CardContent className="pt-6 text-center">
               <Trophy className="w-8 h-8 mx-auto mb-2 text-blue-600" />
@@ -230,14 +214,6 @@ const AnalyticsDashboard = () => {
               <Brain className="w-8 h-8 mx-auto mb-2 text-orange-600" />
               <div className="text-3xl font-bold text-orange-700">{stats.averageEntropyReached.toFixed(1)}</div>
               <div className="text-xs text-gray-700 uppercase tracking-wider">Avg Entropy</div>
-            </CardContent>
-          </Card>
-
-          <Card className="hud-panel border-red-300 bg-red-50">
-            <CardContent className="pt-6 text-center">
-              <Skull className="w-8 h-8 mx-auto mb-2 text-red-600" />
-              <div className="text-3xl font-bold text-red-700">{stats.maxWinStreak}</div>
-              <div className="text-xs text-gray-700 uppercase tracking-wider">Best Streak</div>
             </CardContent>
           </Card>
         </div>
@@ -476,7 +452,7 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* Streaks Section */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-2 gap-4">
           <Card className="hud-panel">
             <CardContent className="pt-4 text-center">
               <div className="text-lg font-bold text-success">{stats.currentWinStreak}</div>
@@ -489,24 +465,8 @@ const AnalyticsDashboard = () => {
               <div className="text-xs text-muted-foreground">Current Loss Streak</div>
             </CardContent>
           </Card>
-          <Card className="hud-panel">
-            <CardContent className="pt-4 text-center">
-              <div className="text-lg font-bold text-primary">{stats.maxWinStreak}</div>
-              <div className="text-xs text-muted-foreground">Best Win Streak</div>
-            </CardContent>
-          </Card>
-          <Card className="hud-panel">
-            <CardContent className="pt-4 text-center">
-              <div className="text-lg font-bold text-red-600">{stats.maxLossStreak}</div>
-              <div className="text-xs text-gray-700">Worst Loss Streak</div>
-            </CardContent>
-          </Card>
         </div>
-          </>
-        ) : (
-          <UserAnalyticsDashboard />
-        )}
-
+        
         {/* Guided Tour */}
         <GuidedTour
           steps={tourSteps}
