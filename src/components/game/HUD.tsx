@@ -67,7 +67,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Score */}
-      <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300">
+      <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300" data-tour="game-score">
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Score</div>
         <div className={cn(
           "hud-value text-2xl text-gray-900",
@@ -95,7 +95,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       )}
 
       {/* Entropy */}
-      <div className="hud-panel p-3 bg-blue-50 border-blue-300">
+      <div className="hud-panel p-3 bg-blue-50 border-blue-300" data-tour="game-entropy">
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Entropy</div>
         <div className="flex items-center gap-2">
           <Progress 
@@ -108,7 +108,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Sanity */}
-      <div className="hud-panel p-3 bg-blue-50 border-blue-300">
+      <div className="hud-panel p-3 bg-blue-50 border-blue-300" data-tour="game-sanity">
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Sanity</div>
         <div className="flex items-center gap-2">
           <Progress 
@@ -126,7 +126,7 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Timer */}
-      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300">
+      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300" data-tour="game-timer">
         <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Time</div>
         <div className="flex items-center gap-2">
           <Progress 
