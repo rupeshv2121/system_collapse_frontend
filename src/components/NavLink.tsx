@@ -47,7 +47,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className=" border-b backdrop-blur-sm sticky top-0 z-50">
+    <nav className=" border-b border-blue-200 bg-white backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
@@ -56,10 +56,10 @@ const Navbar = () => {
             className="flex items-center gap-2 group"
           >
             <div className="relative">
-              <Brain className="w-8 h-8 text-purple-400 group-hover:text-purple-300 transition-colors" />
+              <Brain className="w-8 h-8 text-blue-600 group-hover:text-blue-700 transition-colors" />
               <div className="absolute inset-0  blur-xl transition-all" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
               System Collapse
             </span>
           </Link>
@@ -76,14 +76,14 @@ const Navbar = () => {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 relative group",
                     isActive
-                      ? "text-white"
-                      : "text-gray-300 hover:text-white hover:bg-purple-500/10"
+                      ? "text-blue-600 font-semibold"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-blue-100/50"
                   )}
                 >
                   <Icon className="w-4 h-4" />
                   <span className="font-medium">{link.label}</span>
                   {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-500" />
                   )}
                 </Link>
               );
@@ -96,34 +96,34 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all group"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-100 hover:bg-blue-200 border border-blue-300 transition-all group"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
                   {getUserInitial()}
                 </div>
                 <div className="hidden sm:flex flex-col items-start">
-                  <span className="text-xs text-gray-400">Player</span>
-                  <span className="text-sm text-white font-medium truncate max-w-[150px]">
+                  <span className="text-xs text-gray-600">Player</span>
+                  <span className="text-sm text-gray-900 font-medium truncate max-w-[150px]">
                     {user?.email?.split('@')[0] || 'User'}
                   </span>
                 </div>
                 <ChevronDown className={cn(
-                  "w-4 h-4 text-gray-400 transition-transform duration-200",
+                  "w-4 h-4 text-gray-600 transition-transform duration-200",
                   showUserMenu && "rotate-180"
                 )} />
               </button>
 
               {/* Dropdown Menu */}
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-purple-500/30 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-3 border-b border-purple-500/20 bg-purple-500/5">
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-blue-300 rounded-lg shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-3 border-b border-blue-200 bg-blue-50">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white font-bold">
                         {getUserInitial()}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-white">Player</p>
-                        <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                        <p className="text-sm font-medium text-gray-900">Player</p>
+                        <p className="text-xs text-gray-600 truncate">{user?.email}</p>
                       </div>
                     </div>
                   </div>
@@ -131,7 +131,7 @@ const Navbar = () => {
                   <div className="p-2">
                     <Link
                       to="/analytics"
-                      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-purple-500/10 text-gray-300 hover:text-white transition-colors"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="w-4 h-4" />
@@ -143,7 +143,7 @@ const Navbar = () => {
                         setShowUserMenu(false);
                         signOut();
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-red-500/10 text-gray-300 hover:text-red-400 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-red-100 text-gray-700 hover:text-red-600 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       <span className="text-sm">Sign Out</span>
@@ -166,8 +166,8 @@ const Navbar = () => {
                   className={cn(
                     "p-2 rounded-lg transition-all",
                     isActive
-                      ? "text-white bg-purple-600/30"
-                      : "text-gray-400 hover:text-white hover:bg-purple-500/10"
+                      ? "text-blue-600 bg-blue-100"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-100/50"
                   )}
                 >
                   <Icon className="w-5 h-5" />

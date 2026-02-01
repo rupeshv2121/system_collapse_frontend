@@ -66,10 +66,9 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, isExp
     if (phase >= 5) classes.push('animate-jitter');
     if (phase >= 4 && Math.random() > 0.7) classes.push('animate-pulse-glow');
     if (phase >= 3 && entropy > 60) classes.push('animate-warp');
-    if (isBeatDropped) classes.push('animate-neon-intensity');
     
     return classes.join(' ');
-  }, [phase, entropy, tile.isShaking, beatPulse, isExploding, isBeatDropped, isPreDrop]);
+  }, [phase, entropy, tile.isShaking, beatPulse, isExploding, isPreDrop]);
 
   // Color class mapping
   const colorClass = {
@@ -79,9 +78,6 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, isExp
     yellow: 'tile-yellow',
   }[tile.color];
 
-  // Enhanced neon effect after beat drop
-  const neonClass = isBeatDropped ? 'neon-glow' : '';
-
   return (
     <button
       onClick={() => onClick(tile.id)}
@@ -89,12 +85,11 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, isExp
       className={cn(
         'tile-base w-full aspect-square',
         colorClass,
-        neonClass,
         animationClass,
         phase >= 3 && 'hover:scale-110',
         phase >= 4 && 'hover:animate-pulse-glow',
         phase >= 5 && sanity < 30 && 'animate-flicker',
-        'transition-all duration-150 active:scale-95',
+        'transition-all duration-150 active:scale-95 active:brightness-125',
         'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background'
       )}
       aria-label={`${tile.color} tile`}
