@@ -122,6 +122,23 @@ const Demo = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const button = target.closest("button");
+      if (!button || button.getAttribute("data-click-sfx") !== "true") return;
+
+      const clickAudio = new Audio("/audio/clickfx.wav");
+      clickAudio.volume = 1;
+      clickAudio.play().catch(() => undefined);
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative overflow-hidden">
       <audio ref={audioRef} src="/audio/music.mp3" loop preload="auto" />
@@ -146,9 +163,9 @@ const Demo = () => {
       {/* Main content */}
       <div className="relative z-10 flex min-h-[calc(100vh-64px)] items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-[200px_1fr_200px] gap-8 items-center">
+          <div className="grid gap-6 lg:gap-8 lg:grid-cols-[200px_1fr_200px] items-center">
             {/* Left sidebar - small stats */}
-            <div className="space-y-4">
+            <div className="space-y-4 order-2 lg:order-1">
               <div className="bg-white/60 backdrop-blur-sm border border-blue-200 rounded-lg p-3 shadow-sm">
                 <div className="text-xs text-gray-600 mb-1">High Score</div>
                 <div className="text-xl font-bold text-blue-600">{userData.stats.highestScore}</div>
@@ -164,17 +181,16 @@ const Demo = () => {
             </div>
 
             {/* Center - main content */}
-            <div className="text-center space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 border border-blue-300 mb-4">
-                <Sparkles className="w-4 h-4 text-blue-600" />
+            <div className="text-center space-y-6 sm:space-y-8 order-1 lg:order-2">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 border border-blue-300 mb-4">
                 <span className="text-blue-800 text-sm font-medium">Welcome back, {playerName}</span>
               </div>
 
               <div>
-                <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-4 tracking-wider">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 tracking-wider">
                   SYSTEM <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">COLLAPSE</span>
                 </h1>
-                <p className="text-lg text-gray-700 max-w-xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-700 max-w-xl mx-auto">
                   An experimental game where rules intentionally collapse over time
                 </p>
               </div>
@@ -183,16 +199,18 @@ const Demo = () => {
                 <Button
                   onClick={handleStartGame}
                   size="lg"
+                  data-click-sfx="true"
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all"
                 >
                   <Gamepad2 className="w-5 h-5 mr-2" />
                   START GAME
                 </Button>
-                <div className="flex gap-3 w-full">
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Button
                     onClick={handleTutorial}
                     size="lg"
                     variant="outline"
+                    data-click-sfx="true"
                     className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50 px-6 py-6 text-base rounded-xl"
                   >
                     <HelpCircle className="w-4 h-4 mr-2" />
@@ -202,6 +220,7 @@ const Demo = () => {
                     onClick={() => navigate("/analytics")}
                     size="lg"
                     variant="outline"
+                    data-click-sfx="true"
                     className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-50 px-6 py-6 text-base rounded-xl"
                   >
                     <Activity className="w-4 h-4 mr-2" />
@@ -212,7 +231,7 @@ const Demo = () => {
             </div>
 
             {/* Right sidebar - small stats */}
-            <div className="space-y-4">
+            <div className="space-y-4 order-3">
               <div className="bg-white/60 backdrop-blur-sm border border-indigo-200 rounded-lg p-3 shadow-sm">
                 <div className="text-xs text-gray-600 mb-1">Play Style</div>
                 <div className="text-sm font-semibold text-indigo-600">{userData.playerProfile.playStyle}</div>
@@ -229,10 +248,11 @@ const Demo = () => {
           </div>
 
           {/* Bottom link */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-8 sm:mt-12">
             <Button
               onClick={() => navigate("/leaderboard")}
               variant="ghost"
+              data-click-sfx="true"
               className="text-gray-600 hover:text-blue-600"
             >
               <Trophy className="w-4 h-4 mr-2" />
