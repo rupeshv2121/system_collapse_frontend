@@ -38,8 +38,7 @@ export interface GameState {
   lastClickTime: number;
   consecutiveSameColor: number;
   uniqueColorsClicked: Set<TileColor>;
-  gameStartTime: number;
-}
+  gameStartTime: number;  timerStarted: boolean;}
 
 export interface GameStats {
   totalGamesPlayed: number;
