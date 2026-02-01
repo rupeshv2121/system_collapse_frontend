@@ -52,7 +52,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <Link 
-            to="/" 
+            to="/game" 
             className="flex items-center gap-2 group"
           >
             <div className="relative">
