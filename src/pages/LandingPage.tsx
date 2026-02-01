@@ -12,13 +12,13 @@ const LandingPage = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-purple-50/30 to-pink-50/30" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-40 pb-44 text-center">
+        <div className="relative max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 md:pt-40 md:pb-44 pt-20 pb-16 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 border border-blue-300 mb-8">
             <Sparkles className="w-4 h-4 text-blue-600" />
             <span className="text-blue-800 text-sm font-medium">Hackathon Project - Raptors Team</span>
           </div>
           
-          <h1 className="text-5xl md:text-9xl font-bold text-gray-900 mb-10 tracking-wider">
+          <h1 className="text-5xl sm:text-7xl md:text-9xl font-bold text-gray-900 mb-10 tracking-wider">
             System <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Collapse</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
@@ -113,10 +113,10 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 text-center sm:text-left">
                 Psychological Profiling System
               </h2>
-              <p className="text-gray-700 text-lg mb-6">
+              <p className="text-gray-700 text-center sm:text-left text-lg mb-6">
                 Advanced behavioral analytics that track over 27+ metrics to build a comprehensive psychological profile of your playstyle.
               </p>
               <div className="space-y-4">
@@ -143,7 +143,7 @@ const LandingPage = () => {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Card className="bg-white border-blue-200 p-6 hover:shadow-lg transition-all">
                 <BarChart3 className="w-8 h-8 text-blue-600 mb-3" />
                 <div className="text-3xl font-bold text-gray-900 mb-1">27+</div>
@@ -260,7 +260,7 @@ const LandingPage = () => {
           <Button 
             size="lg"
             onClick={() => navigate('/auth')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-6 text-xl rounded-xl shadow-lg hover:shadow-xl transition-all"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-12 py-6  text-md sm:text-xl rounded-xl shadow-lg hover:shadow-xl transition-all "
           >
             <Gamepad2 className="w-6 h-6 mr-3" />
             Enter System Collapse

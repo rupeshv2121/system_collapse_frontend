@@ -241,7 +241,7 @@ export const UserAnalyticsDashboard = () => {
           <Trophy className="w-5 h-5 text-blue-600" />
           Achievements
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {achievements.map((achievement) => (
             <div
               key={achievement.id}
@@ -523,7 +523,7 @@ export const UserAnalyticsDashboard = () => {
           </div>
         </div>
 
-        <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+        <div className="mt-4 p-3 bg-purple-100 rounded-lg flex flex-row md:flex-row gap-4 justify-between items-center">
           <div className="text-sm text-gray-700">Stress Response:</div>
           <div className="text-lg font-semibold text-purple-700">{playerProfile.stressResponse}</div>
         </div>
@@ -535,27 +535,29 @@ export const UserAnalyticsDashboard = () => {
           <Activity className="w-5 h-5 text-orange-600" />
           Behavioral Analysis
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Total Clicks</span>
-              <span className="text-gray-900 font-semibold">{behaviorMetrics.totalClicks}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Avg Click Speed</span>
-              <span className="text-gray-900 font-semibold">{behaviorMetrics.averageClickSpeed.toFixed(0)}ms</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Most Clicked</span>
-              <span className="text-gray-900 font-semibold capitalize">{behaviorMetrics.mostClickedColor}</span>
-            </div>
+        
+        {/* Click Statistics */}
+        <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-orange-100 rounded-lg">
+          <div className="text-center">
+            <div className="text-xs text-gray-700 mb-1">Total Clicks</div>
+            <div className="text-2xl font-bold text-orange-700">{behaviorMetrics.totalClicks}</div>
           </div>
-          <div className="space-y-2">
-            <TraitBar label="Variety" value={behaviorMetrics.varietyScore} compact />
-            <TraitBar label="Hesitation" value={behaviorMetrics.hesitationScore} compact />
-            <TraitBar label="Impulsivity" value={behaviorMetrics.impulsivityScore} compact />
-            <TraitBar label="Pattern Adherence" value={behaviorMetrics.patternAdherence} compact />
+          <div className="text-center">
+            <div className="text-xs text-gray-700 mb-1">Avg Click Speed</div>
+            <div className="text-2xl font-bold text-orange-700">{behaviorMetrics.averageClickSpeed.toFixed(0)}<span className="text-sm">ms</span></div>
           </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-700 mb-1">Most Clicked</div>
+            <div className="text-2xl font-bold text-orange-700 capitalize">{behaviorMetrics.mostClickedColor}</div>
+          </div>
+        </div>
+
+        {/* Behavioral Traits */}
+        <div className="space-y-3">
+          <TraitBar label="Variety Score" value={behaviorMetrics.varietyScore} icon="🎨" />
+          <TraitBar label="Hesitation Score" value={behaviorMetrics.hesitationScore} icon="⏸️" />
+          <TraitBar label="Impulsivity Score" value={behaviorMetrics.impulsivityScore} icon="⚡" />
+          <TraitBar label="Pattern Adherence" value={behaviorMetrics.patternAdherence} icon="🔄" />
         </div>
       </Card>
 
@@ -569,14 +571,14 @@ export const UserAnalyticsDashboard = () => {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Trust Level</span>
-              <span className="text-gray-900 font-semibold">{systemMemory.trustLevel}%</span>
+              <span className="text-gray-900 font-semibold">{typeof systemMemory.trustLevel === 'number' ? systemMemory.trustLevel.toFixed(2) : systemMemory.trustLevel}%</span>
             </div>
             <Progress value={systemMemory.trustLevel} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Manipulation Resistance</span>
-              <span className="text-gray-900 font-semibold">{systemMemory.manipulationResistance}%</span>
+              <span className="text-gray-900 font-semibold">{typeof systemMemory.manipulationResistance === 'number' ? systemMemory.manipulationResistance.toFixed(2) : systemMemory.manipulationResistance}%</span>
             </div>
             <Progress value={systemMemory.manipulationResistance} className="h-2 bg-gray-200 border border-gray-300" />
           </div>
@@ -665,7 +667,7 @@ const TraitBar = ({ label, value, icon, compact, color }: any) => (
         {icon && <span>{icon}</span>}
         {label}
       </span>
-      <span className="text-gray-900 font-semibold">{value}%</span>
+      <span className="text-gray-900 font-semibold">{typeof value === 'number' ? value.toFixed(2) : value}%</span>
     </div>
     <Progress value={value} className={cn(compact ? 'h-1' : 'h-2', 'bg-gray-200 border border-gray-300')} />
   </div>
@@ -674,7 +676,7 @@ const TraitBar = ({ label, value, icon, compact, color }: any) => (
 const MetricCard = ({ label, value, description }: any) => (
   <div className="p-4 bg-gray-100 rounded-lg">
     <div className="text-sm text-gray-700 mb-1">{label}</div>
-    <div className="text-2xl font-bold text-gray-900 mb-1">{value}%</div>
+    <div className="text-2xl font-bold text-gray-900 mb-1">{typeof value === 'number' ? value.toFixed(2) : value}%</div>
     <div className="text-xs text-gray-600">{description}</div>
   </div>
 );
