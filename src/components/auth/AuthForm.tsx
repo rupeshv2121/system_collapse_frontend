@@ -66,7 +66,7 @@ export const AuthForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 grid-pattern p-4">
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-xl p-8 border border-blue-200">
           <h2 className="text-3xl font-bold text-center mb-2 text-gray-900">
