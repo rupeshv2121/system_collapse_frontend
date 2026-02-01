@@ -41,6 +41,7 @@ export const useGameStats = () => {
       finalEntropy: number;
       finalSanity: number;
       phaseReached: GamePhase;
+      duration?: number;
     }) => {
       setStats((prev: GameStats) => {
         const newStats: GameStats = {
@@ -61,6 +62,7 @@ export const useGameStats = () => {
             (prev.totalEntropySum + result.finalEntropy) / (prev.totalGamesPlayed + 1),
           sanityLossHistory: [...prev.sanityLossHistory.slice(-19), 100 - result.finalSanity],
           entropyHistory: [...prev.entropyHistory.slice(-19), result.finalEntropy],
+          durationHistory: [...prev.durationHistory.slice(-19), result.duration || 0],
           gameResults: [
             ...prev.gameResults.slice(-49),
             {

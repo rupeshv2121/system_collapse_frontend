@@ -56,6 +56,7 @@ export interface GameStats {
   totalEntropySum: number;
   sanityLossHistory: number[];
   entropyHistory: number[];
+  durationHistory: number[];
   gameResults: Array<{
     won: boolean;
     finalScore: number;
@@ -137,5 +138,6 @@ export const INITIAL_STATS: GameStats = {
   totalEntropySum: 0,
   sanityLossHistory: [],
   entropyHistory: [],
+  durationHistory: [],
   gameResults: [],
 };
