@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Analytics from "./pages/Analytics.tsx";
 import Auth from "./pages/Auth.tsx";
 import Index from "./pages/Index.tsx";
+import LandingPage from "./pages/LandingPage.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -21,9 +22,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<LandingPage/>}/>
             <Route path="/auth" element={<Auth />} />
             <Route
-              path="/"
+              path="/game"
               element={
                 <ProtectedRoute>
                   <Index />
