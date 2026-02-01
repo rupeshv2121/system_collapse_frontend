@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateUsername: updateUsernameContext } = useAuth();
   const { userData } = useUserData();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -51,22 +51,39 @@ const Profile = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          username: username.trim(),
-          updated_at: new Date().toISOString(),
-        });
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
 
-      if (error) {
-        toast.error('Failed to update username');
-        console.error('Error:', error);
-      } else {
-        toast.success('Username updated successfully!');
-        setEditing(false);
-        loadProfile();
+      if (!token) {
+        toast.error('Not authenticated');
+        return;
       }
+
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      
+      // Update profile via backend API
+      const response = await fetch(`${BACKEND_URL}/api/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to update username' }));
+        toast.error(errorData.error || 'Failed to update username');
+        return;
+      }
+
+      toast.success('Username updated successfully!');
+      updateUsernameContext(username.trim());
+      setEditing(false);
+      loadProfile();
     } catch (error) {
       toast.error('An error occurred');
       console.error('Error:', error);
