@@ -42,8 +42,8 @@ export const GameScreen = () => {
   const pausedTimeRef = useRef<number>(0);
   const pauseStartRef = useRef<number | null>(null);
 
-  // Define game tour steps
-  const gameTourSteps: TourStep[] = [
+  // Define mobile tour steps (for screens < 768px)
+  const mobileTourSteps: TourStep[] = [
     {
       target: '[data-tour="game-instruction"]',
       title: 'Follow the Instruction 📝',
@@ -51,10 +51,74 @@ export const GameScreen = () => {
       position: 'bottom',
     },
     {
+      target: '[data-tour="game-score game-entropy game-sanity game-timer"]',
+      title: 'Game Stats HUD 📊',
+      content: 'Track your Score, Entropy (chaos level), Sanity (mental health), and Time remaining. These metrics determine your progress and survival.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="game-grid"]',
+      title: 'The Game Grid 🎮',
+      content: 'Click on the colored tiles according to the instruction. Each click affects your score, entropy, and sanity.',
+      position: 'bottom',
+    },
+    // {
+    //   target: '[data-tour="game-phase"]',
+    //   title: 'Current Phase 🎭',
+    //   content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
+    //   position: 'bottom',
+    // },
+    {
+      target: '[data-tour="game-hint"]',
+      title: 'System Hints 💡',
+      content: 'Helpful hints about the current game rules. These become more cryptic as chaos increases!',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="game-collapse"]',
+      title: 'Collapse Cycles 🔄',
+      content: 'Tracks how many times entropy has cycled from 0 to 100. Each cycle makes the game more unpredictable.',
+      position: 'top',
+    },
+  ];
+
+  // Define desktop tour steps (for screens >= 768px)
+  const desktopTourSteps: TourStep[] = [
+    {
+      target: '[data-tour="game-instruction"]',
+      title: 'Follow the Instruction 📝',
+      content: 'This shows which color tile you should click. Pay attention - the rules will change as the game progresses!',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="game-phase"]',
+      title: 'Current Phase 🎭',
+      content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="game-hint"]',
+      title: 'System Hints 💡',
+      content: 'Helpful hints about the current game rules. These become more cryptic as chaos increases!',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="game-collapse"]',
+      title: 'Collapse Cycles 🔄',
+      content: 'Tracks how many times entropy has cycled from 0 to 100. Each cycle makes the game more unpredictable.',
+      position: 'right',
+    },
+    {
       target: '[data-tour="game-grid"]',
       title: 'The Game Grid 🎮',
       content: 'Click on the colored tiles according to the instruction. Each click affects your score, entropy, and sanity.',
       position: 'top',
+    },
+    {
+      target: '[data-tour="game-timer"]',
+      title: 'Round Timer ⏱️',
+      content: 'Time remaining for this round. Make a move before it runs out to avoid sanity loss!',
+      position: 'left',
     },
     {
       target: '[data-tour="game-score"]',
@@ -75,33 +139,48 @@ export const GameScreen = () => {
       position: 'left',
     },
     {
-      target: '[data-tour="game-timer"]',
+      target: '[data-tour="game-round-timer"]',
       title: 'Round Timer ⏱️',
       content: 'Time remaining for this round. Make a move before it runs out to avoid sanity loss!',
       position: 'left',
     },
-    {
-      target: '[data-tour="game-phase"]',
-      title: 'Current Phase 🎭',
-      content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
-      position: 'right',
-    },
-    {
-      target: '[data-tour="game-hint"]',
-      title: 'System Hints 💡',
-      content: 'Helpful hints about the current game rules. These become more cryptic as chaos increases!',
-      position: 'right',
-    },
-    {
-      target: '[data-tour="game-collapse"]',
-      title: 'Collapse Cycles 🔄',
-      content: 'Tracks how many times entropy has cycled from 0 to 100. Each cycle makes the game more unpredictable.',
-      position: 'right',
-    },
   ];
+
+  // Determine which tour to use based on screen size
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const gameTourSteps = isMobile ? mobileTourSteps : desktopTourSteps;
+
+  // Update isMobile on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Debug: Check tour elements
+  useEffect(() => {
+    if (isPlaying) {
+      console.log('🎯 TOUR DEBUG:');
+      console.log('Screen width:', window.innerWidth, 'isMobile:', isMobile);
+      console.log('Tour steps:', gameTourSteps.length);
+      
+      gameTourSteps.forEach((step, index) => {
+        const element = document.querySelector(step.target);
+        console.log(`Step ${index + 1} (${step.title}):`, {
+          target: step.target,
+          found: !!element,
+          visible: element ? window.getComputedStyle(element).display !== 'none' : false,
+          element: element
+        });
+      });
+    }
+  }, [isPlaying, isMobile, gameTourSteps]);
   
   // Beat synchronization
   const beatSync = useBeatSync(bgMusicRef);
+
   
   const {
     isMuted,
@@ -526,6 +605,7 @@ export const GameScreen = () => {
             isGameOverBlast && "animate-explosion-scatter"
           )}
           style={isGameOverBlast ? getBlastStyle() : undefined}
+          data-tour="game-score game-entropy game-sanity game-timer"
         >
           <HUD 
             score={score}
@@ -646,6 +726,7 @@ export const GameScreen = () => {
               isBeatDropped={beatSync.isBeatDropped}
               showPhase={false}
               collapseCount={collapseCount}
+              enableTourTargets={true}
             />
           </div>
         </div>
