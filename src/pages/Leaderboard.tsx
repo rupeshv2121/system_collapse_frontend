@@ -67,7 +67,7 @@ const Leaderboard = () => {
   };
 
   const LeaderboardEntrySkeleton = () => (
-    <div className="flex items-center gap-4 p-4 rounded-lg border bg-gray-800/40 border-gray-700/50">
+    <div className="flex items-center gap-4 p-4 rounded-lg border bg-gray-50 border-gray-200">
       <Skeleton className="w-12 h-12 rounded-full" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-5 w-32" />
@@ -81,7 +81,7 @@ const Leaderboard = () => {
   );
 
   const StatCardSkeleton = () => (
-    <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 backdrop-blur-sm">
       <div className="flex items-center gap-3 mb-2">
         <Skeleton className="w-8 h-8 rounded" />
         <Skeleton className="h-6 w-24" />
@@ -148,9 +148,6 @@ const Leaderboard = () => {
                 <LeaderboardEntrySkeleton key={index} />
               ))}
             </div>
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
@@ -269,44 +266,37 @@ const Leaderboard = () => {
             </>
           ) : (
             <>
-              <div className="bg-gray-800/40 border border-purple-500/30 rounded-lg p-6 backdrop-blur-sm">
+              <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-2">
-                  <Trophy className="w-8 h-8 text-yellow-400" />
-                  <h3 className="text-white font-bold text-lg">Total Players</h3>
+                  <Trophy className="w-8 h-8 text-amber-500" />
+                  <h3 className="text-gray-900 font-bold text-lg">Total Players</h3>
                 </div>
-                <p className="text-3xl font-bold text-purple-400">
+                <p className="text-3xl font-bold text-blue-600">
                   {globalLeaderboard.length}
                 </p>
               </div>
-          <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Trophy className="w-8 h-8 text-amber-500" />
-              <h3 className="text-gray-900 font-bold text-lg">Total Players</h3>
-            </div>
-            <p className="text-3xl font-bold text-blue-600">
-              {globalLeaderboard.length}
-            </p>
-          </div>
 
-          <div className="bg-green-50 border border-green-300 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Award className="w-8 h-8 text-green-600" />
-              <h3 className="text-gray-900 font-bold text-lg">Total Wins</h3>
-            </div>
-            <p className="text-3xl font-bold text-green-600">
-              {globalLeaderboard.filter((e) => e.won).length}
-            </p>
-          </div>
+              <div className="bg-green-50 border border-green-300 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Award className="w-8 h-8 text-green-600" />
+                  <h3 className="text-gray-900 font-bold text-lg">Total Wins</h3>
+                </div>
+                <p className="text-3xl font-bold text-green-600">
+                  {globalLeaderboard.filter((e) => e.won).length}
+                </p>
+              </div>
 
-          <div className="bg-amber-50 border border-amber-300 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Zap className="w-8 h-8 text-amber-600" />
-              <h3 className="text-gray-900 font-bold text-lg">Highest Score</h3>
-            </div>
-            <p className="text-3xl font-bold text-amber-600">
-              {globalLeaderboard[0]?.score.toLocaleString() || "0"}
-            </p>
-          </div>
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="w-8 h-8 text-amber-600" />
+                  <h3 className="text-gray-900 font-bold text-lg">Highest Score</h3>
+                </div>
+                <p className="text-3xl font-bold text-amber-600">
+                  {globalLeaderboard[0]?.score.toLocaleString() || "0"}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

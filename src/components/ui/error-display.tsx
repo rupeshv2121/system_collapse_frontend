@@ -17,13 +17,13 @@ export const ErrorDisplay = ({
   const getIcon = () => {
     switch (type) {
       case "network":
-        return <WifiOff className="w-16 h-16 text-red-400 mb-4 mx-auto animate-pulse" />;
+        return <WifiOff className="w-16 h-16 text-red-500 mb-4 mx-auto animate-pulse" />;
       case "server":
-        return <Server className="w-16 h-16 text-orange-400 mb-4 mx-auto animate-pulse" />;
+        return <Server className="w-16 h-16 text-orange-500 mb-4 mx-auto animate-pulse" />;
       case "auth":
-        return <AlertCircle className="w-16 h-16 text-yellow-400 mb-4 mx-auto animate-pulse" />;
+        return <AlertCircle className="w-16 h-16 text-yellow-600 mb-4 mx-auto animate-pulse" />;
       default:
-        return <AlertCircle className="w-16 h-16 text-red-400 mb-4 mx-auto animate-pulse" />;
+        return <AlertCircle className="w-16 h-16 text-red-500 mb-4 mx-auto animate-pulse" />;
     }
   };
 
@@ -55,21 +55,21 @@ export const ErrorDisplay = ({
 
   return (
     <div className="flex items-center justify-center min-h-[400px] p-8">
-      <Card className="max-w-md w-full border-red-500/30 bg-gray-900/80 backdrop-blur-sm">
+      <Card className="max-w-md w-full border-red-300 bg-gray-50 backdrop-blur-sm shadow-lg">
         <CardContent className="pt-8 pb-8 text-center">
           {getIcon()}
           
-          <h2 className="text-2xl font-bold text-white mb-3">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
             {title || getDefaultTitle()}
           </h2>
           
-          <p className="text-gray-400 mb-6 leading-relaxed">
+          <p className="text-gray-600 mb-6 leading-relaxed">
             {message || getDefaultMessage()}
           </p>
 
           {type === "server" && (
-            <div className="mb-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-              <div className="flex items-center justify-center gap-2 text-orange-400 text-sm">
+            <div className="mb-6 p-4 bg-orange-100 border border-orange-300 rounded-lg">
+              <div className="flex items-center justify-center gap-2 text-orange-700 text-sm">
                 <Server className="w-4 h-4" />
                 <span>Backend server is not running or unreachable</span>
               </div>
@@ -77,8 +77,8 @@ export const ErrorDisplay = ({
           )}
 
           {type === "network" && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <div className="flex items-center justify-center gap-2 text-red-400 text-sm">
+            <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg">
+              <div className="flex items-center justify-center gap-2 text-red-700 text-sm">
                 <WifiOff className="w-4 h-4" />
                 <span>Please check your internet connection</span>
               </div>
@@ -120,13 +120,13 @@ export const InlineErrorDisplay = ({
   };
 
   return (
-    <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+    <div className="p-4 bg-red-100 border border-red-300 rounded-lg">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">
           {getIcon()}
         </div>
         <div className="flex-1">
-          <p className="text-sm text-gray-300">
+          <p className="text-sm text-gray-700">
             {message || "An error occurred"}
           </p>
           {onRetry && (
