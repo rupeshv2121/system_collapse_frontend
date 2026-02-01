@@ -209,7 +209,11 @@ export const UserAnalyticsDashboard = () => {
               <span className="text-gray-700">Win Rate</span>
               <span className="text-gray-900 font-semibold">{winRate.toFixed(1)}%</span>
             </div>
-            <Progress value={winRate} className="h-2 bg-gray-200 border border-gray-300" />
+            <Progress 
+              value={winRate} 
+              variant="green"
+              className="h-3 bg-gray-200 border border-gray-300 shadow-sm" 
+            />
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Trend</span>
               <span className={`font-semibold ${
@@ -527,12 +531,12 @@ export const UserAnalyticsDashboard = () => {
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Overall Stats</h4>
             <div className="space-y-3">
-              <TraitBar label="Risk Tolerance" value={playerProfile.riskTolerance} icon="🎲" compact />
-              <TraitBar label="Adaptability" value={playerProfile.adaptabilityScore} icon="🔄" compact />
-              <TraitBar label="Patience" value={playerProfile.patienceScore} icon="⏳" compact />
-              <TraitBar label="Chaos Affinity" value={playerProfile.chaosAffinity} icon="🌀" compact />
-              <TraitBar label="Order Affinity" value={playerProfile.orderAffinity} icon="📐" compact />
-              <TraitBar label="Learning Rate" value={playerProfile.learningRate} icon="📚" compact />
+              <TraitBar label="Risk Tolerance" value={playerProfile.riskTolerance} icon="🎲" variant="blue" compact />
+              <TraitBar label="Adaptability" value={playerProfile.adaptabilityScore} icon="🔄" variant="green" compact />
+              <TraitBar label="Patience" value={playerProfile.patienceScore} icon="⏳" variant="orange" compact />
+              <TraitBar label="Chaos Affinity" value={playerProfile.chaosAffinity} icon="🌀" variant="red" compact />
+              <TraitBar label="Order Affinity" value={playerProfile.orderAffinity} icon="📐" variant="purple" compact />
+              <TraitBar label="Learning Rate" value={playerProfile.learningRate} icon="📚" variant="cyan" compact />
             </div>
           </div>
         </div>
@@ -573,22 +577,22 @@ export const UserAnalyticsDashboard = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-purple-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-2">Variety</div>
-              <TraitBar label="" value={behaviorMetrics.varietyScore} compact />
+              <TraitBar label="" value={behaviorMetrics.varietyScore} variant="purple" compact />
             </div>
 
             <div className="p-4 bg-orange-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-2">Hesitation</div>
-              <TraitBar label="" value={behaviorMetrics.hesitationScore} compact />
+              <TraitBar label="" value={behaviorMetrics.hesitationScore} variant="orange" compact />
             </div>
 
             <div className="p-4 bg-pink-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-2">Impulsivity</div>
-              <TraitBar label="" value={behaviorMetrics.impulsivityScore} compact />
+              <TraitBar label="" value={behaviorMetrics.impulsivityScore} variant="gradient" compact />
             </div>
 
             <div className="p-4 bg-emerald-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-2">Pattern Adherence</div>
-              <TraitBar label="" value={behaviorMetrics.patternAdherence} compact />
+              <TraitBar label="" value={behaviorMetrics.patternAdherence} variant="green" compact />
             </div>
           </div>
         </CardContent>
@@ -606,14 +610,22 @@ export const UserAnalyticsDashboard = () => {
               <span className="text-gray-700">Trust Level</span>
               <span className="text-gray-900 font-semibold">{systemMemory.trustLevel}%</span>
             </div>
-            <Progress value={systemMemory.trustLevel} className="h-2 bg-gray-200 border border-gray-300" />
+            <Progress 
+              value={systemMemory.trustLevel} 
+              variant="blue"
+              className="h-3 bg-gray-200 border border-gray-300 shadow-sm" 
+            />
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Manipulation Resistance</span>
               <span className="text-gray-900 font-semibold">{systemMemory.manipulationResistance}%</span>
             </div>
-            <Progress value={systemMemory.manipulationResistance} className="h-2 bg-gray-200 border border-gray-300" />
+            <Progress 
+              value={systemMemory.manipulationResistance} 
+              variant="purple"
+              className="h-3 bg-gray-200 border border-gray-300 shadow-sm" 
+            />
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-red-100 rounded-lg">
             <div>
@@ -693,7 +705,7 @@ const StatCard = ({ icon, label, value, color }: any) => (
   </Card>
 );
 
-const TraitBar = ({ label, value, icon, compact }: any) => (
+const TraitBar = ({ label, value, icon, compact, variant = 'default' }: any) => (
   <div className={compact ? 'space-y-1' : 'space-y-2'}>
     <div className="flex justify-between text-sm">
       <span className="text-gray-700 flex items-center gap-1">
@@ -702,7 +714,14 @@ const TraitBar = ({ label, value, icon, compact }: any) => (
       </span>
       <span className="text-gray-900 font-semibold">{value}%</span>
     </div>
-    <Progress value={value} className={cn(compact ? 'h-1' : 'h-2', 'bg-gray-200 border border-gray-300')} />
+    <Progress 
+      value={value} 
+      variant={variant}
+      className={cn(
+        compact ? 'h-2' : 'h-3', 
+        'bg-gray-200 border border-gray-300 shadow-sm'
+      )} 
+    />
   </div>
 );
 
