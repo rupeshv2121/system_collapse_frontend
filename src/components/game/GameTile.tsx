@@ -34,19 +34,19 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, isExp
       '--chaos-jitter': `${jitter}px`,
       '--chaos-blur': `${blur}px`,
       '--chaos-hue-shift': `${hueShift}deg`,
-      '--chaos-opacity': phaseConfig.visualEffects.opacity,
+      '--chaos-opacity': `${phaseConfig.visualEffects.opacity}`,
       transform: tile.drift.x || tile.drift.y
         ? `translate(${tile.drift.x}px, ${tile.drift.y}px) rotate(${tile.rotation}deg)`
         : undefined,
-    };
+    } as React.CSSProperties & Record<string, any>;
 
     // Add scatter effect during explosion
     if (isExploding && scatterAmount) {
       const angle = (tile.id * Math.PI) / 8 + Math.random() * 0.5; // Unique angle per tile
       const distance = scatterAmount * (0.8 + Math.random() * 0.4);
-      styles['--scatter-x' as any] = `${Math.cos(angle) * distance}px`;
-      styles['--scatter-y' as any] = `${Math.sin(angle) * distance}px`;
-      styles['--scatter-rotate' as any] = `${(Math.random() - 0.5) * 360}deg`;
+      (styles as any)['--scatter-x'] = `${Math.cos(angle) * distance}px`;
+      (styles as any)['--scatter-y'] = `${Math.sin(angle) * distance}px`;
+      (styles as any)['--scatter-rotate'] = `${(Math.random() - 0.5) * 360}deg`;
     }
 
     return styles;

@@ -384,16 +384,17 @@ export const GameScreen = () => {
   }, [phase, entropy, phaseConfig]);
 
   // Container style for explosion/scatter effects
-  const containerStyle = useMemo(() => {
+  // @ts-ignore - Style prepared for future implementation
+  const _containerStyle = useMemo(() => {
     const scatterStyles: React.CSSProperties = {};
     
     if (beatSync.isExploding) {
       // Generate random scatter values for explosion effect
       const angle = Math.random() * Math.PI * 2;
       const distance = beatSync.scatterAmount;
-      scatterStyles['--scatter-x' as any] = `${Math.cos(angle) * distance}px`;
-      scatterStyles['--scatter-y' as any] = `${Math.sin(angle) * distance}px`;
-      scatterStyles['--scatter-rotate' as any] = `${(Math.random() - 0.5) * 180}deg`;
+      (scatterStyles as any)['--scatter-x'] = `${Math.cos(angle) * distance}px`;
+      (scatterStyles as any)['--scatter-y'] = `${Math.sin(angle) * distance}px`;
+      (scatterStyles as any)['--scatter-rotate'] = `${(Math.random() - 0.5) * 180}deg`;
     }
     
     return scatterStyles;

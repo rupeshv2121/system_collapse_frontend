@@ -4,13 +4,13 @@
  */
 
 import {
-  ClickRecord,
-  COLORS,
-  GamePhase,
-  GameState,
-  PHASE_CONFIGS,
-  TileColor,
-  TileState,
+    ClickRecord,
+    COLORS,
+    GamePhase,
+    GameState,
+    PHASE_CONFIGS,
+    TileColor,
+    TileState,
 } from '@/types/game';
 import { BehaviorMetrics } from '@/types/userData';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -85,7 +85,7 @@ export const useGameState = () => {
   // Calculate score change based on current phase and click
   const calculateScoreChange = useCallback(
     (clickedColor: TileColor, state: GameState): number => {
-      const { phase, secretCorrectColor, lastClickTime, consecutiveSameColor, uniqueColorsClicked } = state;
+      const { phase, secretCorrectColor, lastClickTime: _lastClickTime, consecutiveSameColor, uniqueColorsClicked } = state;
       const responseTime = Date.now() - state.roundStartTime;
       const isFastClick = responseTime < 1500;
       const isCorrectByInstruction = clickedColor === state.currentInstruction;

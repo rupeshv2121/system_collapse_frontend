@@ -3,12 +3,11 @@
  * Displays comprehensive user data, behavior patterns, and psychological profile
  */
 
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { Progress } from '@/components/ui/progress';
 import { useUserData } from '@/hooks/useUserData';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 import {
   Activity,
   Brain,
@@ -22,6 +21,7 @@ import {
   Users,
   Zap
 } from 'lucide-react';
+import { useState } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -569,13 +569,9 @@ export const UserAnalyticsDashboard = () => {
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Trait Evolution Over Games</h4>
             {userData.sessions.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={userData.sessions.slice(-20).map((session, index, array) => {
+                <LineChart data={userData.sessions.slice(-20).map((_session, index, array) => {
                   // Calculate cumulative metrics up to this point
                   const sessionsUpToNow = array.slice(0, index + 1);
-                  
-                  // Performance: Cumulative win rate
-                  const winsUpToNow = sessionsUpToNow.filter(s => s.win).length;
-                  const performance = (winsUpToNow / sessionsUpToNow.length) * 100;
                   
                   // Risk Tolerance: Based on average entropy reached
                   const avgEntropyUpToNow = sessionsUpToNow.reduce((sum, s) => sum + s.maxEntropyReached, 0) / sessionsUpToNow.length;
@@ -724,33 +720,54 @@ export const UserAnalyticsDashboard = () => {
       </Card>
 
       {/* Behavior Metrics */}
-      <Card className="bg-blue-50 border-blue-300 p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-blue-600" />
-          Behavioral Analysis
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Total Clicks</span>
-              <span className="text-gray-900 font-semibold">{behaviorMetrics.totalClicks}</span>
+      <Card className="bg-white/90 backdrop-blur-sm border-cyan-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-cyan-600" />
+            Behavioral Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 bg-cyan-50 rounded-lg text-center">
+              <div className="text-xs text-gray-600 mb-1">Total Clicks</div>
+              <div className="text-2xl font-bold text-cyan-700">{behaviorMetrics.totalClicks}</div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Avg Click Speed</span>
-              <span className="text-gray-900 font-semibold">{behaviorMetrics.averageClickSpeed.toFixed(2)}ms</span>
+            
+            <div className="p-4 bg-blue-50 rounded-lg text-center">
+              <div className="text-xs text-gray-600 mb-1">Avg Click Speed</div>
+              <div className="text-xl font-bold text-blue-700">{behaviorMetrics.averageClickSpeed.toFixed(2)}</div>
+              <div className="text-xs text-gray-600">ms</div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700">Most Clicked</span>
-              <span className="text-gray-900 font-semibold capitalize">{behaviorMetrics.mostClickedColor}</span>
+            
+            <div className="p-4 bg-indigo-50 rounded-lg text-center">
+              <div className="text-xs text-gray-600 mb-1">Most Clicked</div>
+              <div className="text-2xl font-bold text-indigo-700 capitalize">{behaviorMetrics.mostClickedColor}</div>
             </div>
           </div>
-          <div className="space-y-2">
-            <TraitBar label="Variety" value={behaviorMetrics.varietyScore} compact />
-            <TraitBar label="Hesitation" value={behaviorMetrics.hesitationScore} compact />
-            <TraitBar label="Impulsivity" value={behaviorMetrics.impulsivityScore} compact />
-            <TraitBar label="Pattern Adherence" value={behaviorMetrics.patternAdherence} compact />
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <div className="text-xs text-gray-600 mb-2">Variety</div>
+              <TraitBar label="" value={behaviorMetrics.varietyScore} compact />
+            </div>
+
+            <div className="p-4 bg-orange-50 rounded-lg">
+              <div className="text-xs text-gray-600 mb-2">Hesitation</div>
+              <TraitBar label="" value={behaviorMetrics.hesitationScore} compact />
+            </div>
+
+            <div className="p-4 bg-pink-50 rounded-lg">
+              <div className="text-xs text-gray-600 mb-2">Impulsivity</div>
+              <TraitBar label="" value={behaviorMetrics.impulsivityScore} compact />
+            </div>
+
+            <div className="p-4 bg-emerald-50 rounded-lg">
+              <div className="text-xs text-gray-600 mb-2">Pattern Adherence</div>
+              <TraitBar label="" value={behaviorMetrics.patternAdherence} compact />
+            </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       {/* System Interaction */}
@@ -852,7 +869,7 @@ const StatCard = ({ icon, label, value, color }: any) => (
   </Card>
 );
 
-const TraitBar = ({ label, value, icon, compact, color }: any) => (
+const TraitBar = ({ label, value, icon, compact, color: _color }: any) => (
   <div className={compact ? 'space-y-1' : 'space-y-2'}>
     <div className="flex justify-between text-sm">
       <span className="text-gray-700 flex items-center gap-1">

@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Activity, Calendar, Crown, Mail, Trophy, User as UserIcon, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { UserAnalyticsDashboard } from '@/components/analytics/UserAnalyticsDashboard';
 
 const Profile = () => {
   const { user, signOut, updateUsername: updateUsernameContext } = useAuth();
@@ -122,6 +123,9 @@ const Profile = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* User Analytics Dashboard - Moved to top */}
+            <UserAnalyticsDashboard />
+
             {/* Profile Info Card */}
             <Card className="bg-white/90 backdrop-blur-sm border-blue-300">
               <CardHeader>
@@ -252,7 +256,7 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Account Actions */}
+            {/* Account Actions - Moved to bottom */}
             <Card className="bg-white/90 backdrop-blur-sm border-red-300">
               <CardHeader>
                 <CardTitle className="text-red-700">Account Actions</CardTitle>

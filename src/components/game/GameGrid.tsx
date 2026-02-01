@@ -40,9 +40,9 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
     if (isExploding && scatterAmount) {
       const angle = Math.random() * Math.PI * 2;
       const distance = scatterAmount * 0.5; // Grid moves less than tiles
-      styles['--scatter-x' as any] = `${Math.cos(angle) * distance}px`;
-      styles['--scatter-y' as any] = `${Math.sin(angle) * distance}px`;
-      styles['--scatter-rotate' as any] = `${(Math.random() - 0.5) * 15}deg`;
+      (styles as any)['--scatter-x'] = `${Math.cos(angle) * distance}px`;
+      (styles as any)['--scatter-y'] = `${Math.sin(angle) * distance}px`;
+      (styles as any)['--scatter-rotate'] = `${(Math.random() - 0.5) * 15}deg`;
     }
     
     return styles;
