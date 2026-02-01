@@ -55,7 +55,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <Link 
-            to="/game" 
+            to={user ? "/dashboard" : "/"} 
             className="flex items-center gap-2 group"
           >
             <div className="relative">

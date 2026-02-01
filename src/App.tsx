@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Analytics from "./pages/Analytics.tsx";
 import Auth from "./pages/Auth.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
 import Demo from "./pages/Demo.tsx";
 import Index from "./pages/Index.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
@@ -33,6 +34,14 @@ const App = () => (
               <Route path="/error/network" element={<NetworkError />} />
               <Route path="/error/server" element={<ServerError />} />
               <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
                 path="/game"
                 element={
                   <ProtectedRoute>
