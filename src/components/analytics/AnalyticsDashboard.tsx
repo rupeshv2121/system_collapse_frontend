@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GuidedTour, TourStep } from '@/components/ui/guided-tour';
 import { useGameStats } from '@/hooks/useGameStats';
 import { useUserData } from '@/hooks/useUserData';
-import { Brain, Flame, RotateCcw, Skull, Trophy, User } from 'lucide-react';
+import { Brain, Flame, HelpCircle, RotateCcw, Skull, Trophy, User } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   Bar,
@@ -46,6 +47,69 @@ const AnalyticsDashboard = () => {
   const { stats, resetStats } = useGameStats();
   const { userData } = useUserData();
   const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
+  const [showTour, setShowTour] = useState(false);
+
+  // Define tour steps - MODIFY THESE to change the guided tour
+  const tourSteps: TourStep[] = [
+    {
+      target: '[data-tour="header"]',
+      title: 'Welcome to Analytics! 📊',
+      content: 'This dashboard shows all your game statistics and performance metrics. Let me show you around!',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="tabs"]',
+      title: 'Two Types of Analytics',
+      content: 'Switch between Game Statistics (performance data) and User Profile (psychological analysis based on your gameplay patterns).',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="stats-overview"]',
+      title: 'Quick Stats Overview',
+      content: 'At a glance: Total games played, your win rate percentage, average entropy reached, and your best win streak.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="win-loss-chart"]',
+      title: 'Win/Loss Distribution',
+      content: 'Visual breakdown of your wins versus losses. The more you play, the more data you\'ll see here!',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="entropy-chart"]',
+      title: 'Entropy Progress',
+      content: 'Track how far you reached into chaos in each game. Higher entropy means you survived longer into the game\'s harder phases.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="duration-chart"]',
+      title: 'Time Played Per Game',
+      content: 'See how long each game lasted. Longer games often mean better performance and higher scores.',
+      position: 'right',
+    },
+    {
+      target: '[data-tour="scores-chart"]',
+      title: 'Recent Game Scores',
+      content: 'Your last 10 game scores are displayed here. Green bars indicate wins, gray bars show losses.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="reset-button"]',
+      title: 'Reset Stats',
+      content: 'Click here to clear all statistics and start fresh. Use this if you want to track a new session.',
+      position: 'bottom',
+    },
+  ];
+
+  const handleRestartTour = () => {
+    localStorage.removeItem('analytics-tour-completed');
+    setShowTour(true);
+    // Small delay to ensure state updates
+    setTimeout(() => {
+      setShowTour(false);
+      setTimeout(() => setShowTour(true), 100);
+    }, 50);
+  };
 
   // Prepare chart data
   const winLossData = useMemo(() => [
@@ -98,23 +162,36 @@ const AnalyticsDashboard = () => {
 
       <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
         {/* Header with Title and Reset */}
-        <header className="flex items-center justify-between mb-8">
+        <header className="flex items-center justify-between mb-8" data-tour="header">
           <h1 className="text-2xl md:text-3xl font-bold font-game tracking-wider neon-text">
             ANALYTICS
           </h1>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={resetStats}
-            className="gap-2 text-destructive hover:text-destructive"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Reset Stats
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleRestartTour}
+              className="gap-2"
+              title="Restart guided tour"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Tour</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={resetStats}
+              className="gap-2 text-destructive hover:text-destructive"
+              data-tour="reset-button"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="hidden sm:inline">Reset Stats</span>
+            </Button>
+          </div>
         </header>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6  mx-auto justify-center sm:flex-row flex-col">
+        <div className="flex gap-2 mb-6  mx-auto justify-center sm:flex-row flex-col" data-tour="tabs">
           <Button
             variant={activeTab === 'game-stats' ? 'default' : 'outline'}
             onClick={() => setActiveTab('game-stats')}
@@ -137,7 +214,7 @@ const AnalyticsDashboard = () => {
         {activeTab === 'game-stats' ? (
           <>
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" data-tour="stats-overview">
           <Card className="hud-panel border-blue-300 bg-blue-50">
             <CardContent className="pt-6 text-center">
               <Trophy className="w-8 h-8 mx-auto mb-2 text-blue-600" />
@@ -174,7 +251,7 @@ const AnalyticsDashboard = () => {
         {/* Charts Grid */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Win/Loss Distribution */}
-          <Card className="hud-panel">
+          <Card className="hud-panel" data-tour="win-loss-chart">
             <CardHeader>
               <CardTitle className="text-sm font-game tracking-wider">Win/Loss Distribution</CardTitle>
             </CardHeader>
@@ -216,7 +293,7 @@ const AnalyticsDashboard = () => {
           </Card>
 
           {/* Entropy Over Time */}
-          <Card className="hud-panel">
+          <Card className="hud-panel" data-tour="entropy-chart">
             <CardHeader>
               <CardTitle className="text-sm font-game tracking-wider">Entropy Reached per Game</CardTitle>
             </CardHeader>
@@ -264,7 +341,7 @@ const AnalyticsDashboard = () => {
           </Card>
 
           {/* Total Time Played per Game */}
-          <Card className="hud-panel">
+          <Card className="hud-panel" data-tour="duration-chart">
             <CardHeader>
               <CardTitle className="text-sm font-game tracking-wider">Total Time Played per Game</CardTitle>
             </CardHeader>
@@ -328,7 +405,7 @@ const AnalyticsDashboard = () => {
           </Card>
 
           {/* Recent Games Performance */}
-          <Card className="hud-panel">
+          <Card className="hud-panel" data-tour="scores-chart">
             <CardHeader>
               <CardTitle className="text-sm font-game tracking-wider">Recent Game Scores</CardTitle>
             </CardHeader>
@@ -435,6 +512,14 @@ const AnalyticsDashboard = () => {
         ) : (
           <UserAnalyticsDashboard />
         )}
+
+        {/* Guided Tour */}
+        <GuidedTour
+          steps={tourSteps}
+          storageKey="analytics-tour-completed"
+          onComplete={() => console.log('Tour completed!')}
+          onSkip={() => console.log('Tour skipped')}
+        />
       </div>
     </div>
   );
