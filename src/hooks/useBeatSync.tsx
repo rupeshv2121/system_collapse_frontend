@@ -1,6 +1,6 @@
 /**
  * Beat Synchronization Hook
- * Manages beat-synchronized visual effects and theme transitions
+ * Manages beat-synchronized visual effects based on music beats
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -13,12 +13,14 @@ interface BeatSyncState {
   beatPulse: boolean;
   flashIntensity: number;
   scatterAmount: number;
+  beatIntensity: number;
+  gridShake: number;
+  glowIntensity: number;
 }
 
-// Beat timings configuration (in seconds)
-const BEAT_DROP_TIME = 22;
-const PRE_DROP_START = 20.5;
-const EXPLOSION_START = 21.5;
+// Beat detection configuration
+const BEAT_INTERVAL = 0.5; // Detect beats every ~0.5 seconds (120 BPM)
+const BEAT_SENSITIVITY = 0.15; // How long a beat effect lasts
 
 export const useBeatSync = (audioRef: React.RefObject<HTMLAudioElement>) => {
   const [syncState, setSyncState] = useState<BeatSyncState>({
@@ -29,52 +31,59 @@ export const useBeatSync = (audioRef: React.RefObject<HTMLAudioElement>) => {
     beatPulse: false,
     flashIntensity: 0,
     scatterAmount: 0,
+    beatIntensity: 0,
+    gridShake: 0,
+    glowIntensity: 0,
   });
 
   const animationFrameRef = useRef<number>();
   const lastBeatTimeRef = useRef(0);
+  const beatStartTimeRef = useRef(0);
 
-  // Sync with audio current time
+  // Sync with audio and detect beats
   const syncWithAudio = useCallback(() => {
     if (!audioRef.current) return;
 
     const currentTime = audioRef.current.currentTime;
-    const isPreDrop = currentTime >= PRE_DROP_START && currentTime < EXPLOSION_START;
-    const isExploding = currentTime >= EXPLOSION_START && currentTime < BEAT_DROP_TIME;
-    const isBeatDropped = currentTime >= BEAT_DROP_TIME;
-
-    // Calculate flash intensity for beat drop
-    let flashIntensity = 0;
-    if (currentTime >= BEAT_DROP_TIME && currentTime < BEAT_DROP_TIME + 0.3) {
-      // Flash effect at beat drop
-      const flashProgress = (currentTime - BEAT_DROP_TIME) / 0.3;
-      flashIntensity = 1 - flashProgress;
-    }
-
-    // Calculate scatter amount during explosion phase
-    let scatterAmount = 0;
-    if (isExploding) {
-      const explosionProgress = (currentTime - EXPLOSION_START) / (BEAT_DROP_TIME - EXPLOSION_START);
-      scatterAmount = Math.sin(explosionProgress * Math.PI) * 100; // Peak scatter in middle
-    }
-
-    // Beat pulse detection (on regular beats)
-    let beatPulse = false;
     const timeSinceLastBeat = currentTime - lastBeatTimeRef.current;
-    if (timeSinceLastBeat >= 0.5) {
-      // Trigger beat pulse every ~0.5 seconds (120 BPM)
+
+    // Beat detection
+    let beatPulse = false;
+    let beatIntensity = 0;
+
+    if (timeSinceLastBeat >= BEAT_INTERVAL) {
+      // New beat detected
       beatPulse = true;
+      beatIntensity = 1;
       lastBeatTimeRef.current = currentTime;
+      beatStartTimeRef.current = currentTime;
     }
+
+    // Calculate beat intensity decay
+    const timeSinceBeatStart = currentTime - beatStartTimeRef.current;
+    if (timeSinceBeatStart < BEAT_SENSITIVITY) {
+      beatIntensity = Math.max(0, 1 - timeSinceBeatStart / BEAT_SENSITIVITY);
+    } else {
+      beatIntensity = 0;
+      beatPulse = false;
+    }
+
+    // Grid shake and glow intensity follow beat
+    const gridShake = beatIntensity * 8; // 0-8px shake
+    const glowIntensity = beatIntensity;
+    const flashIntensity = beatIntensity * 0.3;
 
     setSyncState({
       currentTime,
-      isBeatDropped,
-      isPreDrop,
-      isExploding,
+      isBeatDropped: false,
+      isPreDrop: false,
+      isExploding: false,
       beatPulse,
       flashIntensity,
-      scatterAmount,
+      scatterAmount: 0,
+      beatIntensity,
+      gridShake,
+      glowIntensity,
     });
 
     animationFrameRef.current = requestAnimationFrame(syncWithAudio);

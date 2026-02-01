@@ -15,6 +15,9 @@ interface GameGridProps {
   sanity: number;
   onTileClick: (tileId: number) => void;
   beatPulse?: boolean;
+  beatIntensity?: number;
+  gridShake?: number;
+  glowIntensity?: number;
   isExploding?: boolean;
   scatterAmount?: number;
   isBeatDropped?: boolean;
@@ -22,7 +25,7 @@ interface GameGridProps {
   isCollapsing?: boolean;
 }
 
-const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, isExploding, scatterAmount, isBeatDropped, isPreDrop, isCollapsing }: GameGridProps) => {
+const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, beatIntensity = 0, gridShake = 0, glowIntensity = 0, isExploding, scatterAmount, isBeatDropped, isPreDrop, isCollapsing }: GameGridProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
 
   // Grid chaos effects
@@ -34,6 +37,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
     const styles: React.CSSProperties = {
       filter: `blur(${blur}px) hue-rotate(${hueShift}deg)`,
       opacity: phaseConfig.visualEffects.opacity,
+      transform: undefined,
     };
 
     // Add scatter variables for explosion effect
@@ -46,14 +50,14 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
     }
     
     return styles;
-  }, [phase, entropy, sanity, phaseConfig, isExploding, scatterAmount]);
+  }, [phase, entropy, sanity, phaseConfig, gridShake, isExploding, scatterAmount]);
 
   const gridAnimationClass = useMemo(() => {
     const classes = [];
     
     if (isCollapsing) classes.push('animate-vibrate-intense');
     else {
-      if (beatPulse && isBeatDropped) classes.push('animate-beat-pulse');
+      if (beatPulse && beatIntensity > 0) classes.push('animate-beat-pulse');
       if (isExploding) classes.push('animate-explosion-scatter');
       if (phase >= 5) classes.push('animate-warp');
       if (phase >= 4 && entropy > 80) classes.push('animate-jitter');
@@ -61,7 +65,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
     }
     
     return classes.join(' ');
-  }, [phase, entropy, sanity, beatPulse, isExploding, isCollapsing]);
+  }, [phase, entropy, sanity, beatPulse, beatIntensity, isExploding, isCollapsing]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -75,6 +79,11 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
           phase === 4 && "bg-purple-400/30",
           phase === 5 && "bg-gradient-to-r from-red-400/40 via-purple-400/40 to-blue-400/40 animate-color-drift"
         )}
+        style={{
+          opacity: Math.max(0.4, 0.4 + glowIntensity * 0.6),
+          transform: glowIntensity > 0 ? `scale(${1 + glowIntensity * 0.1})` : undefined,
+          boxShadow: glowIntensity > 0 ? `0 0 ${20 + glowIntensity * 30}px rgb(255, 0, 255, ${glowIntensity * 0.4}), 0 0 ${40 + glowIntensity * 50}px rgb(0, 255, 255, ${glowIntensity * 0.2})` : undefined,
+        }}
       />
       
       {/* Main grid container */}
@@ -95,6 +104,8 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
             sanity={sanity}
             onClick={onTileClick}
             beatPulse={beatPulse}
+            beatIntensity={beatIntensity}
+            gridShake={gridShake}
             isExploding={isExploding}
             scatterAmount={scatterAmount}
             isBeatDropped={isBeatDropped}
