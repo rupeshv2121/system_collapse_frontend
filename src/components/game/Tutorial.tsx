@@ -34,7 +34,7 @@ const InteractiveTileDemo = ({ phase }: { phase: number }) => {
     { id: 'yellow', color: 'bg-yellow-400', name: 'YELLOW' },
   ];
 
-  const handleTileClick = (tileId: string, tileName: string) => {
+  const handleTileClick = (tileId: string, _tileName: string) => {
     setClickedTile(tileId);
     
     if (phase === 1) {

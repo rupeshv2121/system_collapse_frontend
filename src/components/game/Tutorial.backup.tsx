@@ -22,7 +22,8 @@ interface TutorialProps {
 }
 
 // Interactive Demo Components
-const InteractiveTileDemo = ({ phase }: { phase: number }) => {
+// @ts-ignore - Component kept for reference
+const _InteractiveTileDemo = ({ phase }: { phase: number }) => {
   const [clickedTile, setClickedTile] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>('');
 
@@ -33,7 +34,7 @@ const InteractiveTileDemo = ({ phase }: { phase: number }) => {
     { id: 'yellow', color: 'bg-yellow-400', name: 'YELLOW' },
   ];
 
-  const handleTileClick = (tileId: string, tileName: string) => {
+  const handleTileClick = (tileId: string, _tileName: string) => {
     setClickedTile(tileId);
     
     if (phase === 1) {

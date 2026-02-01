@@ -21,7 +21,7 @@ interface HUDProps {
   collapseCount?: number;
 }
 
-const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount = 0 }: HUDProps) => {
+const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount: _collapseCount = 0 }: HUDProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
   const maxTime = phaseConfig.timerDuration;
   const timerPercent = (timeRemaining / maxTime) * 100;

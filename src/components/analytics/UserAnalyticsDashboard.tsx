@@ -569,13 +569,9 @@ export const UserAnalyticsDashboard = () => {
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Trait Evolution Over Games</h4>
             {userData.sessions.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={userData.sessions.slice(-20).map((session, index, array) => {
+                <LineChart data={userData.sessions.slice(-20).map((_session, index, array) => {
                   // Calculate cumulative metrics up to this point
                   const sessionsUpToNow = array.slice(0, index + 1);
-                  
-                  // Performance: Cumulative win rate
-                  const winsUpToNow = sessionsUpToNow.filter(s => s.win).length;
-                  const performance = (winsUpToNow / sessionsUpToNow.length) * 100;
                   
                   // Risk Tolerance: Based on average entropy reached
                   const avgEntropyUpToNow = sessionsUpToNow.reduce((sum, s) => sum + s.maxEntropyReached, 0) / sessionsUpToNow.length;
@@ -852,7 +848,7 @@ const StatCard = ({ icon, label, value, color }: any) => (
   </Card>
 );
 
-const TraitBar = ({ label, value, icon, compact, color }: any) => (
+const TraitBar = ({ label, value, icon, compact, color: _color }: any) => (
   <div className={compact ? 'space-y-1' : 'space-y-2'}>
     <div className="flex justify-between text-sm">
       <span className="text-gray-700 flex items-center gap-1">
