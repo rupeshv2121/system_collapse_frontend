@@ -6,6 +6,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { Progress } from '@/components/ui/progress';
+import { useError } from '@/contexts/ErrorContext';
 import { useUserData } from '@/hooks/useUserData';
 import { cn } from '@/lib/utils';
 import {
@@ -21,7 +22,7 @@ import {
   Users,
   Zap
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -34,19 +35,36 @@ import {
 
 export const UserAnalyticsDashboard = () => {
   const { userData, isLoading, error } = useUserData();
+  const { showNetworkError, showServerError } = useError();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState('');
   const [shareError, setShareError] = useState('');
   const [isShareSending, setIsShareSending] = useState(false);
   const [shareSuccess, setShareSuccess] = useState('');
 
+  // Redirect to dedicated error pages for network/server errors
+  useEffect(() => {
+    if (error) {
+      if (error.type === 'network') {
+        showNetworkError();
+      } else if (error.type === 'server') {
+        showServerError();
+      }
+    }
+  }, [error, showNetworkError, showServerError]);
+
   if (error) {
-    return (
-      <ErrorDisplay
-        message={error.message}
-        type={error.type}
-      />
-    );
+    // Only show inline error for non-network/server errors
+    if (error.type !== 'network' && error.type !== 'server') {
+      return (
+        <ErrorDisplay
+          message={error.message}
+          type={error.type}
+        />
+      );
+    }
+    // For network/server errors, return null as useEffect will navigate
+    return null;
   }
 
   if (isLoading) {
@@ -147,28 +165,58 @@ export const UserAnalyticsDashboard = () => {
       setShareError('');
       setShareSuccess('');
 
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${BACKEND_URL}/api/email/share-profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: trimmedEmail,
-          subject,
-          content: body,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to send email');
+      // Check network connection
+      if (!navigator.onLine) {
+        showNetworkError();
+        return;
       }
 
-      setShareSuccess('Email sent successfully.');
-      setShareEmail('');
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      
+      // Create abort controller for timeout
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 10000);
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/email/share-profile`, {
+          method: 'POST',
+          signal: abortController.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: trimmedEmail,
+            subject,
+            content: body,
+          }),
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          if (response.status >= 500) {
+            showServerError();
+            return;
+          }
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to send email');
+        }
+
+        setShareSuccess('Email sent successfully.');
+        setShareEmail('');
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        showServerError();
+        return;
+      }
+      if (err instanceof TypeError) {
+        showServerError();
+        return;
+      }
       setShareError('Failed to send email. Please try again.');
     } finally {
       setIsShareSending(false);

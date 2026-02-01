@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { useError } from '@/contexts/ErrorContext';
 import { ApiError, userDataApi } from '@/lib/userDataApi';
 import { TileColor } from '@/types/game';
 import { BehaviorMetrics, DEFAULT_USER_DATA, DominantBehavior, GameSession, PlayStyle, PsychologicalArchetype, UserDataSchema } from '@/types/userData';
@@ -17,6 +18,7 @@ export const useUserData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ message: string; type: "network" | "server" | "auth" | "generic" } | null>(null);
   const { user } = useAuth();
+  const { showNetworkError, showServerError } = useError();
   const savedSessionsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -61,6 +63,14 @@ export const useUserData = () => {
       } catch (err) {
         console.error('Failed to load user data:', err);
         if (err instanceof ApiError) {
+          // Navigate to dedicated error pages for network/server errors
+          if (err.type === "network") {
+            showNetworkError();
+            return;
+          } else if (err.type === "server") {
+            showServerError();
+            return;
+          }
           setError({ message: err.message, type: err.type });
         } else {
           setError({ message: "Failed to load user data", type: "generic" });
@@ -71,7 +81,7 @@ export const useUserData = () => {
     };
 
     loadData();
-  }, [user]);
+  }, [user, showNetworkError, showServerError]);
 
   const saveUserData = useCallback(async (data: UserDataSchema) => {
     try {

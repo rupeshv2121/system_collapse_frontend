@@ -2,6 +2,7 @@ import { Navbar } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useError } from '@/contexts/ErrorContext';
 import { useUserData } from '@/hooks/useUserData';
 import { supabase } from '@/lib/supabase';
 import { Activity, Calendar, Crown, Mail, Trophy, User as UserIcon, Zap } from 'lucide-react';
@@ -12,6 +13,7 @@ import { UserAnalyticsDashboard } from '@/components/analytics/UserAnalyticsDash
 const Profile = () => {
   const { user, signOut, updateUsername: updateUsernameContext } = useAuth();
   const { userData } = useUserData();
+  const { showNetworkError, showServerError } = useError();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -52,6 +54,12 @@ const Profile = () => {
     }
 
     try {
+      // Check network connection
+      if (!navigator.onLine) {
+        showNetworkError();
+        return;
+      }
+
       // Get auth token
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
@@ -63,29 +71,53 @@ const Profile = () => {
 
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
       
-      // Update profile via backend API
-      const response = await fetch(`${BACKEND_URL}/api/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          username: username.trim(),
-        }),
-      });
+      // Create abort controller for timeout
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 10000);
+      
+      try {
+        // Update profile via backend API
+        const response = await fetch(`${BACKEND_URL}/api/profile`, {
+          method: 'PUT',
+          signal: abortController.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            username: username.trim(),
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to update username' }));
-        toast.error(errorData.error || 'Failed to update username');
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          if (response.status >= 500) {
+            showServerError();
+            return;
+          }
+          const errorData = await response.json().catch(() => ({ error: 'Failed to update username' }));
+          toast.error(errorData.error || 'Failed to update username');
+          return;
+        }
+
+        toast.success('Username updated successfully!');
+        updateUsernameContext(username.trim());
+        setEditing(false);
+        loadProfile();
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        showServerError();
         return;
       }
-
-      toast.success('Username updated successfully!');
-      updateUsernameContext(username.trim());
-      setEditing(false);
-      loadProfile();
-    } catch (error) {
+      if (error instanceof TypeError) {
+        showServerError();
+        return;
+      }
       toast.error('An error occurred');
       console.error('Error:', error);
     }
