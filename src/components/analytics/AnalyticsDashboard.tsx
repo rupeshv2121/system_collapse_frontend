@@ -87,7 +87,7 @@ const AnalyticsDashboard = () => {
   , [stats.gameResults]);
 
   const winRate = stats.totalGamesPlayed > 0 
-    ? ((stats.gamesWon / stats.totalGamesPlayed) * 100).toFixed(1)
+    ? ((stats.gamesWon / stats.totalGamesPlayed) * 100).toFixed(2)
     : 0;
 
   return (
@@ -116,7 +116,7 @@ const AnalyticsDashboard = () => {
         </header>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6  mx-auto justify-center sm:flex-row flex-col">
           <Button
             variant={activeTab === 'game-stats' ? 'default' : 'outline'}
             onClick={() => setActiveTab('game-stats')}
@@ -182,17 +182,18 @@ const AnalyticsDashboard = () => {
             </CardHeader>
             <CardContent>
               {stats.totalGamesPlayed > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={250} className="text-xs">
                   <PieChart>
                     <Pie
                       data={winLossData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
+                      innerRadius={40}
+                      outerRadius={70}
                       paddingAngle={5}
                       dataKey="value"
                       label={({ name, value }) => `${name}: ${value}`}
+                      labelStyle={{ fontSize: '12px' }}
                     >
                       {winLossData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -224,21 +225,21 @@ const AnalyticsDashboard = () => {
             <CardContent>
               {entropyData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={entropyData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                  <LineChart data={entropyData} margin={{ top: 10, right: 5, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
                       stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12}
-                      height={50}
-                      label={{ value: 'Game Number', position: 'insideBottom', offset: 0, fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={10}
+                      height={30}
+                      tick={{ fontSize: 10 }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12} 
+                      fontSize={10} 
                       domain={[0, 100]}
-                      width={80}
-                      label={{ value: 'Entropy %', angle: -90, position: 'center', dx: -10, fill: 'hsl(var(--muted-foreground))' }}
+                      width={40}
+                      tick={{ fontSize: 10 }}
                     />
                     <Tooltip 
                       contentStyle={{ 
@@ -272,20 +273,20 @@ const AnalyticsDashboard = () => {
             <CardContent>
               {durationData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={durationData}>
+                  <LineChart data={durationData} margin={{ top: 10, right: 5, left: -15, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
                       stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12}
-                      height={50}
-                      label={{ value: 'Game Number', position: 'insideBottom', offset: 0, fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={10}
+                      height={30}
+                      tick={{ fontSize: 10 }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12} 
-                      width={90}
-                      label={{ value: 'Time (seconds)', angle: -90, position: 'center', dx: -10, fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={10} 
+                      width={45}
+                      tick={{ fontSize: 10 }}
                     />
                     <Tooltip 
                       content={({ active, payload }) => {
@@ -336,20 +337,20 @@ const AnalyticsDashboard = () => {
             <CardContent>
               {recentGames.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={recentGames} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
+                  <BarChart data={recentGames} margin={{ top: 20, right: 5, left: -15, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
                       stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12}
-                      height={50}
-                      label={{ value: 'Game Number', position: 'insideBottom', offset: 0, fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={10}
+                      height={30}
+                      tick={{ fontSize: 10 }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12}
-                      width={80}
-                      label={{ value: 'Score', angle: -90, position: 'center', dx: -10, fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={10}
+                      width={40}
+                      tick={{ fontSize: 10 }}
                     />
                     <Tooltip 
                       content={({ active, payload }) => {
