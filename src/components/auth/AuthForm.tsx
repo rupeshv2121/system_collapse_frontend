@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { InlineErrorDisplay } from '@/components/ui/error-display';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,36 +11,43 @@ export const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast.error(error.message || 'Failed to sign in');
+        const { error: authError } = await signIn(email, password);
+        if (authError) {
+          const errorMsg = authError.message || 'Failed to sign in';
+          setError(errorMsg);
+          toast.error(errorMsg);
         } else {
           toast.success('Successfully signed in!');
           navigate('/');
         }
       } else {
         if (!username.trim()) {
-          toast.error('Username is required');
+          const errorMsg = 'Username is required';
+          setError(errorMsg);
+          toast.error(errorMsg);
           setLoading(false);
           return;
         }
-        const { error } = await signUp(email, password, username);
-        if (error) {
+        const { error: authError } = await signUp(email, password, username);
+        if (authError) {
+          let errorMsg = authError.message || 'Failed to sign up';
           // Check for rate limit error
-          if (error.message?.includes('email rate limit') || error.message?.includes('over_email_send_rate_limit')) {
-            toast.error('Email rate limit exceeded. Please disable email confirmation in Supabase settings or wait a few minutes.');
-          } else {
-            toast.error(error.message || 'Failed to sign up');
+          if (authError.message?.includes('email rate limit') || authError.message?.includes('over_email_send_rate_limit')) {
+            errorMsg = 'Email rate limit exceeded. Please disable email confirmation in Supabase settings or wait a few minutes.';
           }
+          setError(errorMsg);
+          toast.error(errorMsg);
         } else {
           toast.success('Successfully signed up! You can now sign in.');
           setIsLogin(true);
@@ -48,8 +56,10 @@ export const AuthForm = () => {
           setUsername('');
         }
       }
-    } catch (error) {
-      toast.error('An unexpected error occurred');
+    } catch (err) {
+      const errorMsg = 'An unexpected error occurred';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -67,6 +77,13 @@ export const AuthForm = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <InlineErrorDisplay
+                message={error}
+                type="auth"
+              />
+            )}
+            
             {!isLogin && (
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
