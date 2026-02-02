@@ -44,7 +44,6 @@ const Leaderboard = () => {
       setTopWinners(winners);
     } catch (err) {
       if (err instanceof ApiError) {
-        // Navigate to dedicated error pages
         if (err.type === "network") {
           showNetworkError();
           return;

@@ -23,7 +23,6 @@ const ServerError = () => {
       clearTimeout(timeoutId);
 
       if (response.ok) {
-        // Server is back, reload the page
         window.location.reload();
       } else {
         alert("Backend server is still not responding. Please check the server status.");

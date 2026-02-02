@@ -62,7 +62,6 @@ export const useUserData = () => {
         }
       } catch (err) {
         if (err instanceof ApiError) {
-          // Navigate to dedicated error pages for network/server errors
           if (err.type === "network") {
             showNetworkError();
             return;

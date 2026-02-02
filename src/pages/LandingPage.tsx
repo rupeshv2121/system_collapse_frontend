@@ -4,7 +4,6 @@ import { Activity, BarChart3, Brain, ChevronRight, Eye, Gamepad2, TrendingUp, Us
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Animated background tiles with chaos effect
 const AnimatedTile = ({ 
   delay, 
   color, 
@@ -48,26 +47,23 @@ const AnimatedTile = ({
   );
 };
 
-// Generate random tiles for chaotic background
 const generateTiles = () => {
   const tiles = [];
   const colors = ['text-red-500', 'text-blue-500', 'text-green-500', 'text-yellow-500', 'text-purple-500', 'text-pink-500', 'text-cyan-500', 'text-orange-500', 'text-indigo-500', 'text-rose-500'];
   
-  // Generate 40-50 tiles scattered across the screen
   for (let i = 0; i < 45; i++) {
     tiles.push({
       id: i,
       color: colors[Math.floor(Math.random() * colors.length)],
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
-      size: Math.floor(Math.random() * 60) + 40, // 40-100px
+      size: Math.floor(Math.random() * 60) + 40,
       delay: Math.random() * 10,
     });
   }
   return tiles;
 };
 
-// Animated Title with letter-by-letter hover effect
 const AnimatedTitle = () => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -119,7 +115,6 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [backgroundTiles] = useState(generateTiles());
 
-  // Core features configuration
   const coreFeatures = useMemo(() => [
     {
       icon: Zap,
@@ -163,7 +158,6 @@ const LandingPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 ">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Animated background tiles - chaotic system breakdown visual */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {backgroundTiles.map((tile) => (
             <AnimatedTile

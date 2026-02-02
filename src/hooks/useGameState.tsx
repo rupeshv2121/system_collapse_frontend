@@ -1,8 +1,3 @@
-/**
- * Core game state management hook
- * Handles all game logic, phase transitions, and scoring
- */
-
 import {
     ClickRecord,
     COLORS,
@@ -51,7 +46,7 @@ const getInitialState = (): GameState => {
     timeRemaining: INITIAL_TIME,
     clickHistory: [],
     currentInstruction: instructionColor,
-    secretCorrectColor: instructionColor, // Initially matches instruction
+    secretCorrectColor: instructionColor,
     tiles: generateTiles(),
     isPlaying: false,
     roundStartTime: Date.now(),
@@ -132,7 +127,6 @@ export const useGameState = () => {
     []
   );
 
-  // Handle tile click
   const handleTileClick = useCallback(
     (tileId: number) => {
       setGameState((prev) => {
@@ -149,7 +143,6 @@ export const useGameState = () => {
         const scoreChange = calculateScoreChange(clickedColor, prev);
         const wasCorrect = scoreChange > 0;
 
-        // Create click record
         const clickRecord: ClickRecord = {
           timestamp: Date.now(),
           color: clickedColor,
@@ -158,7 +151,6 @@ export const useGameState = () => {
           responseTime,
         };
 
-        // Update entropy based on phase and behavior
         let entropyIncrease = 2 + prev.phase;
         if (responseTime < 1000) entropyIncrease += 1;
         if (!wasCorrect) entropyIncrease += 2;
@@ -167,7 +159,7 @@ export const useGameState = () => {
         const newPhase = calculatePhase(newEntropy);
 
         // Update sanity - increase drain with each collapse cycle
-        const collapsePenalty = prev.collapseCount * 0.5; // Additional 0.5 sanity loss per collapse cycle
+        const collapsePenalty = prev.collapseCount * 0.5;
         let sanityChange = wasCorrect ? 0.5 : -(PHASE_CONFIGS[prev.phase].sanityDrainRate + collapsePenalty);
         const newSanity = Math.max(0, Math.min(100, prev.sanity + sanityChange));
 
@@ -229,7 +221,6 @@ export const useGameState = () => {
     [calculateScoreChange, calculatePhase]
   );
 
-  // Start game
   const startGame = useCallback(() => {
     gameStartTimeRef.current = Date.now();
     hintsIgnoredRef.current = 0;
@@ -240,7 +231,6 @@ export const useGameState = () => {
     });
   }, []);
 
-  // End game
   const endGame = useCallback(
     (won: boolean) => {
       setGameState((prev) => {

@@ -1,8 +1,3 @@
-/**
- * Game statistics management with database persistence
- * Game data is fetched from backend and synced with localStorage
- */
-
 import { supabase } from '@/lib/supabase';
 import { GamePhase, GameStats, INITIAL_STATS } from '@/types/game';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,7 +8,6 @@ export const useGameStats = () => {
   const [stats, setStats] = useState<GameStats>(INITIAL_STATS);
   const [loading, setLoading] = useState(true);
 
-  // Load stats from database on mount
   useEffect(() => {
     const loadStatsFromDatabase = async () => {
       try {
@@ -50,7 +44,6 @@ export const useGameStats = () => {
         if (response.ok) {
           const gameHistory = await response.json();
           
-          // Convert database records to GameStats format
           const calculatedStats = calculateStatsFromHistory(gameHistory);
           setStats(calculatedStats);
           

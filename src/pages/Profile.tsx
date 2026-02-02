@@ -32,7 +32,6 @@ const Profile = () => {
 
     setIsSending(true);
     try {
-      // Check network connection
       if (!navigator.onLine) {
         showNetworkError();
         return;
@@ -154,7 +153,6 @@ This email was sent from System Drift Game
         return;
       }
 
-      // Get auth token
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
 
@@ -165,12 +163,10 @@ This email was sent from System Drift Game
 
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-      // Create abort controller for timeout
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort(), 10000);
 
       try {
-        // Update profile via backend API
         const response = await fetch(`${BACKEND_URL}/api/profile`, {
           method: 'PUT',
           signal: abortController.signal,

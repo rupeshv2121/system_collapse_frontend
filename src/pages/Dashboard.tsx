@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 const TUTORIAL_SEEN_KEY = "rule-collapse-tutorial-seen";
 
-// Animated background tiles with chaos effect
 const AnimatedTile = ({ 
   delay, 
   color, 
@@ -53,12 +52,10 @@ const AnimatedTile = ({
   );
 };
 
-// Generate random tiles for chaotic background
 const generateTiles = () => {
   const tiles = [];
   const colors = ['text-red-500', 'text-blue-500', 'text-green-500', 'text-yellow-500', 'text-purple-500', 'text-pink-500', 'text-cyan-500', 'text-orange-500', 'text-indigo-500', 'text-rose-500'];
   
-  // Generate 40-50 tiles scattered across the screen
   for (let i = 0; i < 45; i++) {
     tiles.push({
       id: i,
@@ -72,7 +69,6 @@ const generateTiles = () => {
   return tiles;
 };
 
-// Animated Title Component
 const AnimatedDashboardTitle = () => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -139,21 +135,18 @@ const Demo = () => {
     return Math.round((userData.stats.wins / userData.stats.totalGames) * 100);
   }, [userData.stats.totalGames, userData.stats.wins]);
 
-  // Left sidebar stats configuration
   const leftStats = useMemo(() => [
     { icon: Trophy, label: 'High Score', value: userData.stats.highestScore, color: 'blue', isText: false },
     { icon: Target, label: 'Win Rate', value: `${winRate.toFixed(2)}%`, color: 'purple', isText: false },
     { icon: Activity, label: 'Total Games', value: userData.stats.totalGames, color: 'green', isText: false },
   ], [userData.stats.highestScore, userData.stats.totalGames, winRate]);
 
-  // Right sidebar stats configuration
   const rightStats = useMemo(() => [
     { icon: Award, label: 'Play Style', value: userData.playerProfile.playStyle, color: 'indigo', isText: true },
     { icon: Flame, label: 'Win Streak', value: userData.stats.currentWinStreak, color: 'pink' },
     { icon: Zap, label: 'Collapses', value: userData.stats.collapseCount, color: 'orange' },
   ], [userData.playerProfile.playStyle, userData.stats.currentWinStreak, userData.stats.collapseCount]);
 
-  // Quick stats configuration
   const quickStats = useMemo(() => [
     { icon: Trophy, label: 'Total Wins', value: userData.stats.wins, color: 'green' },
     { icon: TrendingUp, label: 'Best Streak', value: userData.stats.longestWinStreak, color: 'amber' },
@@ -212,7 +205,6 @@ const Demo = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative overflow-hidden pb-8 sm:pb-0">
       <audio ref={audioRef} src="/audio/music.mp3" loop preload="auto" />
-      {/* Animated background tiles - chaotic system breakdown visual */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {backgroundTiles.map((tile) => (
           <AnimatedTile
@@ -336,7 +328,6 @@ const Demo = () => {
               })}
             </div>
 
-            {/* Quick Stats Summary */}
             <Card className="bg-white/70 backdrop-blur-sm border-blue-200 p-4 max-w-2xl mx-auto">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 {quickStats.map((stat) => {
