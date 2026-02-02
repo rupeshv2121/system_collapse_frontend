@@ -63,6 +63,8 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 - Survive until sanity reaches 0 OR time runs out
 - Higher score = better adaptation to System Drift
 
+![Alt Text](./public/result.jpeg)
+
 ### Psychological Tracking
 The game measures 6 behavioral traits:
 - **Risk Tolerance**: Willingness to deviate from instructions
@@ -506,6 +508,7 @@ useUserData updates psychological profile
 - Achievement badges
 - Email share modal
 - Exportable statistics
+
 ![Alt Text](./public/badges.jpeg)
 
 **Features**:
