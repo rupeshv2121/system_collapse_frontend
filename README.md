@@ -40,6 +40,8 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 - **Psychological Profiling**: Tracks player behavior patterns
 - **Real-time Analytics**: Visualizes performance metrics
 
+![Alt Text](./public/dashboard.jpeg)
+
 ---
 
 ## 🎮 Game Concept
