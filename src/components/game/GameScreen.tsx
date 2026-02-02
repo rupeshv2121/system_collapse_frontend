@@ -532,8 +532,8 @@ export const GameScreen = () => {
     const won = score > 200 && collapseCount >= 3;
     
     return (
-      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center pt-16">
-        <div className="text-center space-y-4 sm:space-y-6 p-4 sm:p-8 max-w-2xl w-full my-auto">
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center">
+        <div className="text-center space-y-4 sm:space-y-6 p-4 sm:p-8 max-w-2xl w-full">
           {score === 0 && entropy === 0 ? (
             // Start screen
             <>
