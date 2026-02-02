@@ -757,7 +757,7 @@ const { data, error } = await supabase
 
 ---
 
-## 🎨 Styling System
+## Styling System
 
 ### Tailwind CSS Configuration
 
@@ -822,7 +822,7 @@ const { data, error } = await supabase
 
 ---
 
-## 💻 Development Workflow
+## Development Workflow
 
 ### Running the App
 
@@ -842,7 +842,7 @@ npm run lint
 
 ---
 
-## � Testing
+## Testing
 
 ### Test Infrastructure
 
@@ -908,7 +908,7 @@ test('increments score on correct click', () => {
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Build
 
@@ -1001,7 +1001,7 @@ No polyfills required for modern browsers. Vite automatically handles compatibil
 
 ---
 
-## ⚡ Performance
+## Performance
 
 ### Optimization Strategies
 
@@ -1047,7 +1047,7 @@ npx vite-bundle-visualizer
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues & Solutions
 
@@ -1146,7 +1146,7 @@ npm run dev -- --port 5174
 
 ---
 
-## �🤝 Contributing
+## Contributing
 
 ### Development Setup
 
@@ -1177,7 +1177,7 @@ npm run dev -- --port 5174
 
 ---
 
-## 📝 Additional Resources
+## Additional Resources
 
 ### Key Dependencies Documentation
 
@@ -1193,7 +1193,7 @@ npm run dev -- --port 5174
 
 ---
 
-## 🆘 Support
+## Support
 
 For issues, questions, or contributions:
 1. Check existing issues in the repository
@@ -1203,13 +1203,13 @@ For issues, questions, or contributions:
 
 ---
 
-## 📄 License
+## License
 
 This project is part of a hackathon submission. All rights reserved by the development team.
 
 ---
 
-## 📌 Version Information
+## Version Information
 
 **Current Version**: 1.0.0
 **Last Updated**: February 2026
