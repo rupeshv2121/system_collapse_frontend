@@ -59,6 +59,8 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 
 ![Alt Text](./public/game.jpeg)
 
+![Alt Text](./public/collapse.jpeg)
+
 ### Winning Conditions
 - Survive until sanity reaches 0 OR time runs out
 - Higher score = better adaptation to System Drift
