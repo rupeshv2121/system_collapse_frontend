@@ -144,7 +144,7 @@ const InteractiveTileDemo = ({ phase }: { phase: number }) => {
 
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
-    title: 'Welcome to Rule Collapse',
+    title: 'Welcome to System Drift',
     description: 'An experimental game where rules intentionally decay. What starts as a simple color-matching game will evolve into chaos. Trust nothing. Question everything.',
     icon: <Zap className="w-8 h-8 text-primary" />,
   },

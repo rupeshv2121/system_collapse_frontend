@@ -73,7 +73,7 @@ export const AuthForm = () => {
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
           <p className="text-gray-600 text-center mb-6">
-            {isLogin ? 'Sign in to continue your journey' : 'Join the Rule Collapse experience'}
+            {isLogin ? 'Sign in to continue your journey' : 'Join the System Drift experience'}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

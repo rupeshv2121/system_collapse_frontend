@@ -72,7 +72,7 @@ const AnimatedTitle = () => {
   const [isHovered, setIsHovered] = useState(false);
   
   const word1 = "System";
-  const word2 = "Collapse";
+  const word2 = "Drift";
   
   return (
     <h1 
@@ -148,7 +148,7 @@ const LandingPage = () => {
     {
       icon: Activity,
       title: 'Adaptive Rules',
-      description: "Game rules evolve dynamically based on phase progression. What's \"correct\" changes as the system collapses, testing your adaptability.",
+      description: "Game rules evolve dynamically based on phase progression. What's \"correct\" changes as the system drifts, testing your adaptability.",
       bullets: [
         'Phase 1: Follow instructions for points',
         'Phase 2: Hints appear, complexity grows',
@@ -391,7 +391,7 @@ const LandingPage = () => {
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-12 py-6  text-md sm:text-xl rounded-xl shadow-lg hover:shadow-xl transition-all "
           >
             <Gamepad2 className="w-6 h-6 mr-3" />
-            Enter System Collapse
+            Enter System Drift
             <ChevronRight className="w-6 h-6 ml-3" />
           </Button>
         </div>
@@ -401,7 +401,7 @@ const LandingPage = () => {
       <footer className="border-t border-gray-200 py-8 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto text-center text-gray-600">
           <p>Built with ❤️ by Raptors Team for Hackathon 2026</p>
-          <p className="text-sm mt-2">System Collapse - Where chaos meets consciousness</p>
+          <p className="text-sm mt-2">System Drift - Where chaos meets consciousness</p>
         </div>
       </footer>
     </div>
