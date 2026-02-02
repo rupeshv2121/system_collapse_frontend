@@ -1,4 +1,4 @@
-# System Drift Frontend 🎮
+# System Drift Frontend (DOCUMENTATION) 🎮
 
 A psychological puzzle game that challenges players' adaptability and pattern recognition through evolving rule systems. Built with React, TypeScript, and modern web technologies.
 
