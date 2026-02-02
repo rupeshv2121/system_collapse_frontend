@@ -77,7 +77,7 @@ const AnimatedDashboardTitle = () => {
   const [isHovered, setIsHovered] = useState(false);
   
   const word1 = "SYSTEM";
-  const word2 = "COLLAPSE";
+  const word2 = "DRIFT";
   
   return (
     <h1 

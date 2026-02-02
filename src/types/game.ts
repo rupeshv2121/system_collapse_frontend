@@ -1,5 +1,5 @@
 /**
- * Core game type definitions for Rule Collapse
+ * Core game type definitions for System Drift
  */
 
 export type TileColor = "red" | "blue" | "green" | "yellow";

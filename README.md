@@ -55,7 +55,7 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 
 ### Winning Conditions
 - Survive until sanity reaches 0 OR time runs out
-- Higher score = better adaptation to rule collapse
+- Higher score = better adaptation to System Drift
 
 ### Psychological Tracking
 The game measures 6 behavioral traits:

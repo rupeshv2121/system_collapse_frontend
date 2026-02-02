@@ -72,7 +72,7 @@ const AnimatedTitle = () => {
   const [isHovered, setIsHovered] = useState(false);
   
   const word1 = "System";
-  const word2 = "Collapse";
+  const word2 = "Drift";
   
   return (
     <h1 
