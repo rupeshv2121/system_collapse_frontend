@@ -57,6 +57,8 @@ A psychological puzzle game that challenges players' adaptability and pattern re
    - **Phase 4**: Time pressure and contradictions
    - **Phase 5**: Full chaos - rules are unpredictable
 
+![Alt Text](./public/game.jpeg)
+
 ### Winning Conditions
 - Survive until sanity reaches 0 OR time runs out
 - Higher score = better adaptation to System Drift
@@ -93,7 +95,9 @@ The game measures 6 behavioral traits:
   - Psychological trait evolution graphs with 6-trait line chart
   - Achievement tracking with progress indicators
   - Email sharing for user statistics
+![Alt Text](./public/analytics.jpeg)
 - **Global Leaderboard**: Top players by score with skeleton loading states
+![Alt Text](./public/leaderboard.jpeg)
 - **Game Statistics Charts**: Entropy, sanity loss, and score trends with axis labels
 - **Performance Tracking**: Historical data visualization
 
@@ -493,12 +497,14 @@ useUserData updates psychological profile
 ### Analytics Components
 
 #### `UserAnalyticsDashboard.tsx`
+![Alt Text](./public/profile.jpeg)
 **Purpose**: User profile and statistics
 - Game statistics cards (games played, win rate, avg score)
 - Psychological trait evolution graph (6 traits over 20 games)
 - Achievement badges
 - Email share modal
 - Exportable statistics
+![Alt Text](./public/badges.jpeg)
 
 **Features**:
 - 6-line graph showing trait development:
