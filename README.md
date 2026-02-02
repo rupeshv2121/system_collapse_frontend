@@ -1222,12 +1222,4 @@ This project is part of a hackathon submission. All rights reserved by the devel
 
 ---
 
-## 📌 Version Information
-
-**Current Version**: 1.0.0
-**Last Updated**: February 2026
-**Minimum Node Version**: 18.0.0
-
----
-
 **Built with ❤️ by Commit & Conquer using React, TypeScript, and modern web technologies**
