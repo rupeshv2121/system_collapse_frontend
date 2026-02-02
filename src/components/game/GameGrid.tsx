@@ -23,9 +23,10 @@ interface GameGridProps {
   isBeatDropped?: boolean;
   isPreDrop?: boolean;
   isCollapsing?: boolean;
+  isResetting?: boolean;
 }
 
-const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, beatIntensity = 0, gridShake = 0, glowIntensity = 0, isExploding, scatterAmount, isBeatDropped, isPreDrop, isCollapsing }: GameGridProps) => {
+const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, beatIntensity = 0, gridShake = 0, glowIntensity = 0, isExploding, scatterAmount, isBeatDropped, isPreDrop, isCollapsing, isResetting }: GameGridProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
 
   // Grid chaos effects
@@ -53,6 +54,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
   }, [phase, entropy, sanity, phaseConfig, gridShake, isExploding, scatterAmount]);
 
   const gridAnimationClass = useMemo(() => {
+    if (isResetting) return '';
     const classes = [];
     
     if (isCollapsing) classes.push('animate-vibrate-intense');
@@ -65,7 +67,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
     }
     
     return classes.join(' ');
-  }, [phase, entropy, sanity, beatPulse, beatIntensity, isExploding, isCollapsing]);
+  }, [phase, entropy, sanity, beatPulse, beatIntensity, isExploding, isCollapsing, isResetting]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -92,7 +94,8 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
         className={cn(
           "relative grid grid-cols-4 gap-4 p-5 min-w-[280px] w-full",
           "bg-white/50 backdrop-blur-sm rounded-xl border border-blue-300",
-          gridAnimationClass
+          gridAnimationClass,
+          isResetting && "transition-none"
         )}
       >
         {tiles.map((tile) => (
@@ -110,6 +113,7 @@ const GameGrid = memo(({ tiles, phase, entropy, sanity, onTileClick, beatPulse, 
             scatterAmount={scatterAmount}
             isBeatDropped={isBeatDropped}
             isPreDrop={isPreDrop}
+            isResetting={isResetting}
           />
         ))}
 

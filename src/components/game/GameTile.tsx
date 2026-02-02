@@ -20,9 +20,10 @@ interface GameTileProps {
   scatterAmount?: number;
   isBeatDropped?: boolean;
   isPreDrop?: boolean;
+  isResetting?: boolean;
 }
 
-const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, beatIntensity = 0, gridShake = 0, isExploding, scatterAmount, isBeatDropped, isPreDrop }: GameTileProps) => {
+const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, beatIntensity = 0, gridShake = 0, isExploding, scatterAmount, isBeatDropped, isPreDrop, isResetting }: GameTileProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
 
   // Calculate chaos-based styles
@@ -87,6 +88,7 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, beatI
 
   // Animation classes based on phase
   const animationClass = useMemo(() => {
+    if (isResetting) return '';
     const classes = [];
     
     // Vibration animations
@@ -107,7 +109,7 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, beatI
     if (phase >= 3 && entropy > 60) classes.push('animate-warp');
     
     return classes.join(' ');
-  }, [phase, entropy, tile.id, tile.isShaking, beatPulse, beatIntensity, isExploding, isPreDrop, isBeatDropped]);
+  }, [phase, entropy, tile.id, tile.isShaking, beatPulse, beatIntensity, isExploding, isPreDrop, isBeatDropped, isResetting]);
 
   // Color class mapping
   const colorClass = {
@@ -129,6 +131,7 @@ const GameTile = memo(({ tile, phase, entropy, sanity, onClick, beatPulse, beatI
         phase >= 4 && 'hover:animate-pulse-glow',
         phase >= 5 && sanity < 30 && 'animate-flicker',
         'transition-all duration-150 active:scale-95 active:brightness-125',
+        isResetting && 'transition-none',
         'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background'
       )}
       aria-label={`${tile.color} tile`}
