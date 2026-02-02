@@ -18,7 +18,6 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 - [API Integration](#-api-integration)
 - [Styling System](#-styling-system)
 - [Development Workflow](#-development-workflow)
-- [Testing](#-testing)
 - [Deployment](#-deployment)
 - [Browser Compatibility](#-browser-compatibility)
 - [Performance](#-performance)
@@ -772,7 +771,7 @@ const { data, error } = await supabase
 
 ---
 
-## 🎨 Styling System
+## Styling System
 
 ### Tailwind CSS Configuration
 
@@ -837,7 +836,7 @@ const { data, error } = await supabase
 
 ---
 
-## 💻 Development Workflow
+## Development Workflow
 
 ### Running the App
 
@@ -857,73 +856,7 @@ npm run lint
 
 ---
 
-## � Testing
-
-### Test Infrastructure
-
-**Testing Tools**:
-- **Vitest** - Fast unit test runner (Vite-native)
-- **Testing Library** - Component testing utilities
-- **@testing-library/react** - React-specific testing helpers
-
-### Running Tests
-
-```bash
-# Run all tests
-npm run test
-
-# Watch mode (re-run on file changes)
-npm run test:watch
-
-# Coverage report
-npm run test:coverage
-```
-
-### Test Structure
-
-```
-src/
-├── components/
-│   └── __tests__/
-│       ├── GameTile.test.tsx
-│       └── AuthForm.test.tsx
-├── hooks/
-│   └── __tests__/
-│       └── useGameState.test.tsx
-└── lib/
-    └── __tests__/
-        └── utils.test.ts
-```
-
-### Writing Tests
-
-**Component Test Example**:
-```typescript
-import { render, screen, fireEvent } from '@testing-library/react';
-import { GameTile } from '../GameTile';
-
-test('renders tile with correct color', () => {
-  const tile = { id: 1, color: 'red' };
-  render(<GameTile tile={tile} onClick={vi.fn()} />);
-  expect(screen.getByRole('button')).toHaveClass('bg-red-500');
-});
-```
-
-**Hook Test Example**:
-```typescript
-import { renderHook, act } from '@testing-library/react';
-import { useGameState } from '../useGameState';
-
-test('increments score on correct click', () => {
-  const { result } = renderHook(() => useGameState());
-  act(() => result.current.startGame());
-  // Test game logic
-});
-```
-
----
-
-## 🚀 Deployment
+## Deployment
 
 ### Production Build
 
@@ -1016,7 +949,7 @@ No polyfills required for modern browsers. Vite automatically handles compatibil
 
 ---
 
-## ⚡ Performance
+## Performance
 
 ### Optimization Strategies
 
@@ -1062,7 +995,7 @@ npx vite-bundle-visualizer
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues & Solutions
 
@@ -1161,7 +1094,7 @@ npm run dev -- --port 5174
 
 ---
 
-## �🤝 Contributing
+## Contributing
 
 ### Development Setup
 
@@ -1192,7 +1125,7 @@ npm run dev -- --port 5174
 
 ---
 
-## 📝 Additional Resources
+## Additional Resources
 
 ### Key Dependencies Documentation
 
@@ -1208,7 +1141,7 @@ npm run dev -- --port 5174
 
 ---
 
-## 🆘 Support
+## Support
 
 For issues, questions, or contributions:
 1. Check existing issues in the repository
@@ -1218,7 +1151,7 @@ For issues, questions, or contributions:
 
 ---
 
-## 📄 License
+## License
 
 This project is part of a hackathon submission. All rights reserved by the development team.
 
