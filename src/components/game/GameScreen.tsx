@@ -30,10 +30,12 @@ export const GameScreen = () => {
   });
   const [isGameOverBlast, setIsGameOverBlast] = useState(false);
   const [showGameOverOverlay, setShowGameOverOverlay] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
   const [playTimeSeconds, setPlayTimeSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [isGameTourOpen, setIsGameTourOpen] = useState(false);
   const [isGamePausedForTour, setIsGamePausedForTour] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(0.5);
   
   const prevPhaseRef = useRef(phase);
   const prevCollapseCountRef = useRef(collapseCount);
@@ -48,6 +50,7 @@ export const GameScreen = () => {
   const playStartRef = useRef<number | null>(null);
   const pausedTimeRef = useRef<number>(0);
   const pauseStartRef = useRef<number | null>(null);
+  const resetTimeoutRef = useRef<number | null>(null);
 
   // Define mobile tour steps (for screens < 768px)
   const mobileTourSteps: TourStep[] = [
@@ -357,12 +360,13 @@ export const GameScreen = () => {
     return undefined;
   }, [isPlaying, score, entropy]);
 
-  // Handle muting the background music
+  // Handle muting and volume control for background music
   useEffect(() => {
     if (bgMusicRef.current) {
       bgMusicRef.current.muted = isMuted;
+      bgMusicRef.current.volume = musicVolume;
     }
-  }, [isMuted]);
+  }, [isMuted, musicVolume]);
 
   // Auto-start game on mount
   useEffect(() => {
@@ -427,8 +431,26 @@ export const GameScreen = () => {
     setTimerActive(false);
     pauseStartRef.current = null;
     pausedTimeRef.current = 0;
+    setIsGameOverBlast(false);
+    setShowGameOverOverlay(false);
+    setIsResetting(true);
+    if (resetTimeoutRef.current) {
+      window.clearTimeout(resetTimeoutRef.current);
+    }
+    resetTimeoutRef.current = window.setTimeout(() => {
+      setIsResetting(false);
+      resetTimeoutRef.current = null;
+    }, 300);
     startGame();
   }, [initAudio, startGame]);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) {
+        window.clearTimeout(resetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Global playtime tracker (starts on first tile click)
   useEffect(() => {
@@ -583,7 +605,7 @@ export const GameScreen = () => {
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
-                  onClick={handleStartGame}
+                  onClick={() => window.location.reload()}
                   size="lg"
                   className="gap-2 font-game tracking-wider neon-glow"
                 >
@@ -614,18 +636,6 @@ export const GameScreen = () => {
       {/* Floating Control Buttons - Only show when game is playing */}
       {isPlaying && (
         <div className="fixed top-20 right-4 z-[60] flex flex-col gap-2">
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              initAudio();
-              toggleMute();
-            }}
-            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-            title={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </Button>
           {/* Hide game guide button on mobile since tour is disabled on small screens */}
           {!isMobile && (
             <Button 
@@ -638,6 +648,36 @@ export const GameScreen = () => {
               <HelpCircle className="w-5 h-5" />
             </Button>
           )}
+
+          {/* Volume Control with Slider */}
+          <div className="group relative flex flex-col items-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                initAudio();
+                toggleMute();
+              }}
+              className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+              title={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
+            <div className="absolute top-full pt-1 h-32 w-10 opacity-0 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:pointer-events-auto">
+              <div className="h-full w-full rounded-lg bg-background/80 backdrop-blur-sm border border-primary/30 shadow-lg flex items-center justify-center">
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={musicVolume}
+                  onChange={(event) => setMusicVolume(Number(event.target.value))}
+                  className="h-24 w-6 [writing-mode:vertical-rl] rotate-180 accent-primary"
+                  aria-label="Volume"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -819,6 +859,7 @@ export const GameScreen = () => {
                 isBeatDropped={beatSync.isBeatDropped}
                 isPreDrop={beatSync.isPreDrop}
                 isCollapsing={isCollapsing}
+                isResetting={isResetting}
               />
             </div>
           </div>
@@ -866,19 +907,6 @@ export const GameScreen = () => {
         loop
         preload="auto"
       />
-
-      {/* RGB Glow overlay for beat intensity (on grid background) */}
-      {beatSync.glowIntensity > 0 && isPlaying && (
-        <div className="fixed inset-0 pointer-events-none z-[95]">
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: `radial-gradient(circle at center, rgba(255, 0, 255, ${beatSync.glowIntensity * 0.1}), rgba(0, 255, 255, ${beatSync.glowIntensity * 0.05}), transparent)`,
-              opacity: beatSync.glowIntensity,
-            }}
-          />
-        </div>
-      )}
 
       {/* Collapse Animation Overlay */}
       {isCollapsing && (
