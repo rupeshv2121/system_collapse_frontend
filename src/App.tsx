@@ -69,7 +69,7 @@ const App = () => (
                 path="/tutorial"
                 element={
                   <ProtectedRoute>
-                    <Tutorial/>
+                    <Tutorial onComplete={() => {}} onSkip={() => {}} />
                   </ProtectedRoute>
                 }
               />
