@@ -237,7 +237,7 @@ const AnalyticsDashboard = () => {
                       outerRadius={70}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, value }) => `${value == 1 ? 'win' : 'loss'}: ${value}`}
+                      label={({ name, value }) => `${name.toLowerCase()}: ${value}`}
 
                     >
                       {winLossData.map((entry, index) => (

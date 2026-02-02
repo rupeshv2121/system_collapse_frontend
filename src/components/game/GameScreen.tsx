@@ -532,8 +532,8 @@ export const GameScreen = () => {
     const won = score > 200 && collapseCount >= 3;
     
     return (
-      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center p-4">
-        <div className="text-center space-y-6 p-4 sm:p-8 max-w-2xl w-full mx-auto">
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center pt-16">
+        <div className="text-center space-y-4 sm:space-y-6 p-4 sm:p-8 max-w-2xl w-full my-auto">
           {score === 0 && entropy === 0 ? (
             // Start screen
             <>
@@ -550,33 +550,33 @@ export const GameScreen = () => {
               </h2>
               <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-xs sm:max-w-sm mx-auto">
                 <div className="hud-panel p-4 bg-blue-50 border-blue-200">
-                  <div className="text-xs text-gray-700">Final Score</div>
-                  <div className="text-2xl font-bold hud-value text-gray-900">{score}</div>
+                  <div className="text-xs text-gray-700 text-center">Final Score</div>
+                  <div className="text-2xl font-bold hud-value text-gray-900 text-center">{score}</div>
                 </div>
                 <div className="hud-panel p-4 bg-blue-50 border-blue-200">
-                  <div className="text-xs text-gray-700">Phase Reached</div>
-                  <div className="text-2xl font-bold text-blue-600">{phaseConfig.name}</div>
+                  <div className="text-xs text-gray-700 text-center">Phase Reached</div>
+                  <div className="text-2xl font-bold text-blue-600 text-center">{phaseConfig.name}</div>
                 </div>
                 <div className="hud-panel p-4 bg-blue-50 border-blue-200">
-                  <div className="text-xs text-gray-700">Final Entropy</div>
-                  <div className="text-2xl font-bold text-orange-600">{Math.round(entropy)}%</div>
+                  <div className="text-xs text-gray-700 text-center">Final Entropy</div>
+                  <div className="text-2xl font-bold text-orange-600 text-center">{Math.round(entropy)}%</div>
                 </div>
                 <div className="hud-panel p-4 bg-blue-50 border-blue-200">
-                  <div className="text-xs text-gray-700">Remaining Sanity</div>
+                  <div className="text-xs text-gray-700 text-center">Remaining Sanity</div>
                   <div className={cn(
-                    "text-2xl font-bold",
+                    "text-2xl font-bold text-center",
                     sanity > 30 ? "text-blue-600" : "text-red-600"
                   )}>
                     {Math.round(sanity)}%
                   </div>
                 </div>
                 <div className="hud-panel p-4 bg-orange-50 border-orange-300">
-                  <div className="text-xs text-gray-700">Collapse Cycles</div>
-                  <div className="text-2xl font-bold text-orange-600">{collapseCount}</div>
+                  <div className="text-xs text-gray-700 text-center">Collapse Cycles</div>
+                  <div className="text-2xl font-bold text-orange-600 text-center">{collapseCount}</div>
                 </div>
                 <div className="hud-panel p-4 bg-blue-50 border-blue-200">
-                  <div className="text-xs text-gray-700">Total Play Time</div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xs text-gray-700 text-center">Total Play Time</div>
+                  <div className="text-2xl font-bold text-gray-900 text-center">
                     {formatPlayTime(playTimeSeconds)}
                   </div>
                 </div>
@@ -649,23 +649,25 @@ export const GameScreen = () => {
         style={backgroundStyle}
       >
         {/* Animated background elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className={cn(
-            "absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20",
-            "bg-primary animate-float"
-          )} />
-          <div className={cn(
-            "absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20",
-            "bg-secondary animate-float",
-            "animation-delay-1000"
-          )} style={{ animationDelay: '1s' }} />
-          {phase >= 3 && (
+        {isPlaying && (
+          <div className="absolute inset-0 pointer-events-none">
             <div className={cn(
-              "absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-2xl opacity-30",
-              "bg-destructive animate-pulse"
+              "absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20",
+              "bg-primary animate-float"
             )} />
-          )}
-        </div>
+            <div className={cn(
+              "absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20",
+              "bg-secondary animate-float",
+              "animation-delay-1000"
+            )} style={{ animationDelay: '1s' }} />
+            {phase >= 3 && (
+              <div className={cn(
+                "absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-2xl opacity-30",
+                "bg-destructive animate-pulse"
+              )} />
+            )}
+          </div>
+        )}
 
         {/* Main content */}
         <div className="relative z-10 container mx-auto px-4 py-2 md:py-4 lg:py-6 max-w-7xl min-h-screen md:min-h-0">
@@ -688,7 +690,7 @@ export const GameScreen = () => {
         {isPlaying && (
           <div
             className={cn(
-              "md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5 pt-16",
+              "md:hidden fixed left-0 right-0 z-[120] bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5",
               isGameOverBlast && "animate-explosion-scatter"
             )}
             style={isGameOverBlast ? getBlastStyle() : undefined}
