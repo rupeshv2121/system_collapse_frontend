@@ -238,7 +238,7 @@ This email was sent from System Drift Game
           <div className="flex items-center justify-center gap-3 mb-4">
             <UserIcon className="w-12 h-12 text-blue-600" />
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-500 bg-clip-text text-transparent">
-              Player Profile
+              Your Profile
             </h1>
           </div>
           <p className="text-gray-700 text-lg">
