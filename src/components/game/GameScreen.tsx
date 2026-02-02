@@ -532,8 +532,8 @@ export const GameScreen = () => {
     const won = score > 200 && collapseCount >= 3;
     
     return (
-      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center">
-        <div className="text-center space-y-6 p-8 max-w-2xl w-full">
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 animate-fade-in flex items-center justify-center p-4">
+        <div className="text-center space-y-6 p-4 sm:p-8 max-w-2xl w-full mx-auto">
           {score === 0 && entropy === 0 ? (
             // Start screen
             <>
@@ -543,12 +543,12 @@ export const GameScreen = () => {
             // Game over screen
             <>
               <h2 className={cn(
-                "text-4xl md:text-5xl font-bold font-game tracking-wider",
+                "text-3xl sm:text-4xl md:text-5xl font-bold font-game tracking-wider",
                 won ? "text-green-600" : "text-red-600"
               )}>
                 {won ? 'SYSTEM SURVIVED' : 'COLLAPSE COMPLETE'}
               </h2>
-              <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-xs sm:max-w-sm mx-auto">
                 <div className="hud-panel p-4 bg-blue-50 border-blue-200">
                   <div className="text-xs text-gray-700">Final Score</div>
                   <div className="text-2xl font-bold hud-value text-gray-900">{score}</div>
@@ -688,7 +688,7 @@ export const GameScreen = () => {
         {isPlaying && (
           <div
             className={cn(
-              "md:hidden fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5",
+              "md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5 pt-16",
               isGameOverBlast && "animate-explosion-scatter"
             )}
             style={isGameOverBlast ? getBlastStyle() : undefined}
