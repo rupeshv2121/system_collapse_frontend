@@ -141,9 +141,9 @@ const Demo = () => {
 
   // Left sidebar stats configuration
   const leftStats = useMemo(() => [
-    { icon: Trophy, label: 'High Score', value: userData.stats.highestScore, color: 'blue' },
-    { icon: Target, label: 'Win Rate', value: `${winRate.toFixed(2)}%`, color: 'purple' },
-    { icon: Activity, label: 'Total Games', value: userData.stats.totalGames, color: 'green' },
+    { icon: Trophy, label: 'High Score', value: userData.stats.highestScore, color: 'blue', isText: false },
+    { icon: Target, label: 'Win Rate', value: `${winRate.toFixed(2)}%`, color: 'purple', isText: false },
+    { icon: Activity, label: 'Total Games', value: userData.stats.totalGames, color: 'green', isText: false },
   ], [userData.stats.highestScore, userData.stats.totalGames, winRate]);
 
   // Right sidebar stats configuration
@@ -235,7 +235,7 @@ const Demo = () => {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 lg:gap-8 lg:grid-cols-[200px_1fr_200px] items-center">
             {/* Left sidebar - small stats */}
-            <div className="space-y-4 order-2 lg:order-1">
+            <div className="space-y-4 order-2 lg:order-1 hidden lg:block">
               {leftStats.map((stat) => {
                 const Icon = stat.icon;
                 return (
@@ -302,7 +302,7 @@ const Demo = () => {
             </div>
 
             {/* Right sidebar - small stats */}
-            <div className="space-y-4 order-3">
+            <div className="space-y-4 order-3 hidden lg:block">
               {rightStats.map((stat) => {
                 const Icon = stat.icon;
                 return (
@@ -320,9 +320,25 @@ const Demo = () => {
 
           {/* Bottom section */}
           <div className="mt-8 sm:mt-12 space-y-6">
+            {/* Mobile/Tablet Stats - Combined sidebars */}
+            <div className="lg:hidden grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
+              {[...leftStats, ...rightStats].map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className={`bg-white/70 backdrop-blur-sm border border-${stat.color}-200 rounded-lg p-3 shadow-sm hover:shadow-md hover:border-${stat.color}-400 transition-all group cursor-default`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className={`w-4 h-4 text-${stat.color}-600 group-hover:scale-110 transition-transform`} />
+                      <div className="text-xs text-gray-600">{stat.label}</div>
+                    </div>
+                    <div className={`${stat.isText ? 'text-sm' : 'text-xl'} font-bold text-${stat.color}-600 group-hover:text-${stat.color}-700 transition-colors truncate`}>{stat.value}</div>
+                  </div>
+                );
+              })}
+            </div>
+
             {/* Quick Stats Summary */}
             <Card className="bg-white/70 backdrop-blur-sm border-blue-200 p-4 max-w-2xl mx-auto">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 {quickStats.map((stat) => {
                   const Icon = stat.icon;
                   return (

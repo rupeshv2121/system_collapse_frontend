@@ -20,9 +20,10 @@ interface HUDProps {
   showPhase?: boolean;
   collapseCount?: number;
   enableTourTargets?: boolean;
+  isMobile?: boolean;
 }
 
-const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount = 0, enableTourTargets = false }: HUDProps) => {
+const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSeconds, beatPulse, isBeatDropped, showPhase = true, collapseCount = 0, enableTourTargets = false, isMobile = false }: HUDProps) => {
   const phaseConfig = PHASE_CONFIGS[phase];
   const maxTime = phaseConfig.timerDuration;
   const timerPercent = (timeRemaining / maxTime) * 100;
@@ -56,22 +57,15 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
 
   return (
     <div className={cn(
-      "grid gap-3",
+      isMobile ? "grid grid-cols-2 gap-1.5" : "grid gap-3",
       beatPulse && isBeatDropped && "animate-beat-pulse"
     )}>
-      {/* Play Time */}
-      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-timer' })}>
-        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Play Time</div>
-        <div className="text-center">
-          <span className="hud-value text-lg text-gray-900">{formattedPlayTime}</span>
-        </div>
-      </div>
-
       {/* Score */}
-      <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-score' })}>
-        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Score</div>
+      <div className={cn("hud-panel text-center bg-blue-50 border-blue-300", isMobile ? "p-1.5" : "p-3")} {...(enableTourTargets && { 'data-tour': 'game-score' })}>
+        <div className={cn("text-gray-700 uppercase tracking-wider mb-0.5", isMobile ? "text-[9px]" : "text-xs")}>Score</div>
         <div className={cn(
-          "hud-value text-2xl text-gray-900",
+          "hud-value text-gray-900",
+          isMobile ? "text-base" : "text-2xl",
           score < 0 && "text-red-600",
           score > 50 && "text-green-600"
         )}>
@@ -79,8 +73,16 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
         </div>
       </div>
 
+      {/* Play Time */}
+      <div className={cn("hud-panel bg-blue-50 border-blue-300", isMobile ? "p-1.5" : "p-3 col-span-2 md:col-span-1")} {...(enableTourTargets && { 'data-tour': 'game-timer' })}>
+        <div className={cn("text-gray-700 uppercase tracking-wider mb-0.5 text-center", isMobile ? "text-[9px]" : "text-xs")}>Time</div>
+        <div className="text-center">
+          <span className={cn("hud-value text-gray-900", isMobile ? "text-base" : "text-lg")}>{formattedPlayTime}</span>
+        </div>
+      </div>
+
       {showPhase && (
-        <div className="hud-panel p-3 text-center bg-blue-50 border-blue-300">
+        <div className={cn("hud-panel p-3 text-center bg-blue-50 border-blue-300", isMobile ? "p-1.5" : "p-3")} {...(enableTourTargets && { 'data-tour': 'game-phase' })}>
           <div className="text-xs text-gray-700 uppercase tracking-wider mb-1">Phase</div>
           <div className={cn(
             "font-bold text-sm",
@@ -96,29 +98,30 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       )}
 
       {/* Entropy */}
-      <div className="hud-panel p-3 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-entropy' })}>
-        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Entropy</div>
-        <div className="flex items-center gap-2">
+      <div className={cn("hud-panel bg-blue-50 border-blue-300", isMobile ? "p-1.5" : "p-3")} {...(enableTourTargets && { 'data-tour': 'game-entropy' })}>
+        <div className={cn("text-gray-700 uppercase tracking-wider mb-0.5 text-center", isMobile ? "text-[9px]" : "text-xs")}>Entropy</div>
+        <div className="flex items-center gap-1.5">
           <Progress 
             value={entropy} 
-            className="h-2 flex-1 bg-gray-200 border border-gray-300"
+            className={cn("flex-1 bg-gray-200 border border-gray-300", isMobile ? "h-1.5" : "h-2")}
             indicatorClassName={entropyColor}
           />
-          <span className="hud-value text-sm w-8 text-gray-900">{Math.round(entropy)}</span>
+          <span className={cn("hud-value text-gray-900", isMobile ? "text-xs w-6" : "text-sm w-8")}>{Math.round(entropy)}</span>
         </div>
       </div>
 
       {/* Sanity */}
-      <div className="hud-panel p-3 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-sanity' })}>
-        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Sanity</div>
-        <div className="flex items-center gap-2">
+      <div className={cn("hud-panel bg-blue-50 border-blue-300", isMobile ? "p-1.5" : "p-3")} {...(enableTourTargets && { 'data-tour': 'game-sanity' })}>
+        <div className={cn("text-gray-700 uppercase tracking-wider mb-0.5 text-center", isMobile ? "text-[9px]" : "text-xs")}>Sanity</div>
+        <div className="flex items-center gap-1.5">
           <Progress 
             value={sanity} 
-            className="h-2 flex-1 bg-gray-200 border border-gray-300"
+            className={cn("flex-1 bg-gray-200 border border-gray-300", isMobile ? "h-1.5" : "h-2")}
             indicatorClassName={sanityColor}
           />
           <span className={cn(
-            "hud-value text-sm w-8 text-gray-900",
+            "hud-value text-gray-900",
+            isMobile ? "text-xs w-6" : "text-sm w-8",
             sanity < 30 && "text-red-600 animate-pulse"
           )}>
             {Math.round(sanity)}
@@ -127,16 +130,17 @@ const HUD = memo(({ score, phase, entropy, sanity, timeRemaining, playTimeSecond
       </div>
 
       {/* Timer */}
-      <div className="hud-panel p-3 col-span-2 md:col-span-1 bg-blue-50 border-blue-300" {...(enableTourTargets && { 'data-tour': 'game-round-timer' })}>
-        <div className="text-xs text-gray-700 uppercase tracking-wider mb-1 text-center">Time</div>
-        <div className="flex items-center gap-2">
+      <div className={cn("hud-panel bg-blue-50 border-blue-300", isMobile ? "p-1.5 col-span-2" : "p-3 col-span-2 md:col-span-1")} {...(enableTourTargets && { 'data-tour': 'game-round-timer' })}>
+        <div className={cn("text-gray-700 uppercase tracking-wider mb-0.5 text-center", isMobile ? "text-[9px]" : "text-xs")}>Time</div>
+        <div className="flex items-center gap-1.5">
           <Progress 
             value={timerPercent} 
-            className="h-3 flex-1 bg-gray-200 border border-gray-300"
+            className={cn("flex-1 bg-gray-200 border border-gray-300", isMobile ? "h-1.5" : "h-3")}
             indicatorClassName={cn(timerColor, timerPercent < 30 && "animate-pulse")}
           />
           <span className={cn(
-            "hud-value text-lg w-10 text-gray-900",
+            "hud-value text-gray-900",
+            isMobile ? "text-xs w-8" : "text-lg w-10",
             timerPercent < 30 && "text-red-600 animate-pulse"
           )}>
             {timeRemaining.toFixed(1)}

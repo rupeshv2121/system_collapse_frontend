@@ -640,8 +640,8 @@ export const GameScreen = () => {
 
       <div 
         className={cn(
-          "min-h-screen bg-background grid-pattern relative",
-          isPlaying ? "overflow-auto" : "overflow-hidden"
+          "min-h-screen bg-background grid-pattern relative overflow-x-hidden",
+          isPlaying ? "overflow-y-auto" : "overflow-hidden"
         )}
         style={backgroundStyle}
       >
@@ -665,7 +665,7 @@ export const GameScreen = () => {
         </div>
 
         {/* Main content */}
-        <div className="relative z-10 container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
+        <div className="relative z-10 container mx-auto px-4 py-2 md:py-4 lg:py-6 max-w-7xl min-h-screen md:min-h-0">
 
         {/* Pause Overlay when tour is active */}
         {isGamePausedForTour && (
@@ -681,32 +681,57 @@ export const GameScreen = () => {
           </div>
         )}
 
-        {/* HUD - Above instruction on mobile, right side on medium+ screens */}
-        <div
-          className={cn(
-            "mb-4 md:hidden max-w-md mx-auto",
-            isGameOverBlast && "animate-explosion-scatter"
-          )}
-          style={isGameOverBlast ? getBlastStyle() : undefined}
-          data-tour="game-score game-entropy game-sanity game-timer"
-        >
-          <HUD 
-            score={score}
-            phase={phase}
-            entropy={entropy}
-            sanity={sanity}
-            timeRemaining={timeRemaining}
-            playTimeSeconds={playTimeSeconds}
-            beatPulse={beatSync.beatPulse}
-            isBeatDropped={beatSync.isBeatDropped}
-            collapseCount={collapseCount}
-          />
-        </div>
+        {/* HUD - Fixed at top on mobile, right side on medium+ screens */}
+        {isPlaying && (
+          <div
+            className={cn(
+              "md:hidden fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5",
+              isGameOverBlast && "animate-explosion-scatter"
+            )}
+            style={isGameOverBlast ? getBlastStyle() : undefined}
+          >
+            <div className="max-w-md mx-auto space-y-1">
+              {/* Instruction on mobile - compact */}
+              <div data-tour="game-instruction" className="mb-1">
+                <div className="hud-panel p-1.5 text-center bg-gradient-to-r from-blue-50 to-purple-50 border-blue-300">
+                  <div className="text-[9px] text-gray-600 uppercase tracking-wider mb-0.5">Instruction</div>
+                  <div className={cn(
+                    "font-bold text-sm",
+                    currentInstruction.includes('GREEN') && "text-green-600",
+                    currentInstruction.includes('BLUE') && "text-blue-600",
+                    currentInstruction.includes('RED') && "text-red-600",
+                    currentInstruction.includes('YELLOW') && "text-yellow-600"
+                  )}>
+                    {currentInstruction}
+                  </div>
+                </div>
+              </div>
+              {/* HUD Stats */}
+              <div data-tour="game-score game-entropy game-sanity game-timer">
+                <HUD 
+                  score={score}
+                  phase={phase}
+                  entropy={entropy}
+                  sanity={sanity}
+                  timeRemaining={timeRemaining}
+                  playTimeSeconds={playTimeSeconds}
+                  beatPulse={beatSync.beatPulse}
+                  isBeatDropped={beatSync.isBeatDropped}
+                  collapseCount={collapseCount}
+                  isMobile={true}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Spacer for fixed HUD on mobile */}
+        {isPlaying && <div className="md:hidden h-24" />}
 
-        {/* Instruction - stays at top */}
+        {/* Instruction - stays at top (hidden on mobile, shown on tablet+) */}
         <div
           className={cn(
-            "mb-4 lg:mb-3 max-w-lg mx-auto",
+            "mb-2 md:mb-4 lg:mb-3 max-w-lg mx-auto hidden md:block",
             isGameOverBlast && "animate-explosion-scatter"
           )}
           style={isGameOverBlast ? getBlastStyle() : undefined}
@@ -723,11 +748,11 @@ export const GameScreen = () => {
         </div>
 
         {/* Game Layout - Phase + Hint left, Grid center, HUD right for large screens */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-center gap-4 md:gap-6 lg:gap-8">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-center gap-0 md:gap-6 lg:gap-8">
           {/* Left column - Phase box above System Hint */}
           <div
             className={cn(
-              "md:order-1 md:w-56 lg:w-64 xl:w-72 order-2 w-full space-y-4",
+              "md:order-1 md:w-56 lg:w-64 xl:w-72 order-2 w-full space-y-4 hidden md:block",
               isGameOverBlast && "animate-explosion-scatter"
             )}
             style={isGameOverBlast ? getBlastStyle() : undefined}
@@ -773,7 +798,7 @@ export const GameScreen = () => {
             style={isGameOverBlast ? getBlastStyle() : undefined}
             data-tour="game-grid"
           >
-            <div className="w-full max-w-md md:w-[350px] lg:w-[400px]">
+            <div className="w-full px-3 max-w-[min(85vw,320px)] sm:max-w-sm md:max-w-md md:w-[300px] lg:w-[400px] mt-[11rem] md:mt-0">
               <GameGrid 
                 tiles={tiles}
                 phase={phase}
