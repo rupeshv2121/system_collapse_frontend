@@ -2,6 +2,8 @@
 
 A psychological puzzle game that challenges players' adaptability and pattern recognition through evolving rule systems. Built with React, TypeScript, and modern web technologies.
 
+**Backend Repository:** [https://github.com/rupeshv2121/system_collapse_backend](https://github.com/rupeshv2121/system_collapse_backend)
+
 ## 📖 Table of Contents
 
 - [Overview](#-overview)
