@@ -43,7 +43,6 @@ const Leaderboard = () => {
       setGlobalLeaderboard(global);
       setTopWinners(winners);
     } catch (err) {
-      console.error("Error loading leaderboard:", err);
       if (err instanceof ApiError) {
         // Navigate to dedicated error pages
         if (err.type === "network") {

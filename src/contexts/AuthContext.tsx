@@ -65,7 +65,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUsername(user?.email?.split('@')[0] || '');
       }
     } catch (error) {
-      console.error('Error loading username:', error);
     }
   };
 

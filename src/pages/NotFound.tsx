@@ -1,6 +1,6 @@
+import { Navbar } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Navbar } from '@/components/NavLink';
 import { AlertCircle, Home } from 'lucide-react';
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -10,7 +10,6 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
   return (

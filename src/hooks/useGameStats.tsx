@@ -27,7 +27,6 @@ export const useGameStats = () => {
         });
       }
     } catch (error) {
-      console.error('Failed to load game stats:', error);
     }
   }, []);
 
@@ -36,7 +35,6 @@ export const useGameStats = () => {
     try {
       localStorage.setItem(STATS_KEY, JSON.stringify(newStats));
     } catch (error) {
-      console.error('Failed to save game stats:', error);
     }
   }, []);
 

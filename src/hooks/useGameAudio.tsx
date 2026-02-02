@@ -76,9 +76,8 @@ export const useGameAudio = () => {
       const phaseVolume = Math.min(baseVolume * (1 + (phase - 1) * 0.1), 1);
       audio.volume = phaseVolume;
       
-      audio.play().catch(err => console.warn('Tile click audio play failed:', err));
+      audio.play().catch(err => {});
     } catch (error) {
-      console.warn('Tile click audio playback failed:', error);
     }
   }, [isMuted, isAudioEnabled]);
 
@@ -127,7 +126,6 @@ export const useGameAudio = () => {
       impactOsc.start(now + 0.5);
       impactOsc.stop(now + 1.3);
     } catch (error) {
-      console.warn('Phase transition sound failed:', error);
     }
   }, [isMuted, isAudioEnabled]);
 
@@ -158,9 +156,8 @@ export const useGameAudio = () => {
       const audio = gameEndAudioRef.current;
       audio.currentTime = 0;
       audio.volume = 1;
-      audio.play().catch(err => console.warn('Game end audio play failed:', err));
+      audio.play().catch(err => {});
     } catch (error) {
-      console.warn('Game end audio playback failed:', error);
     }
   }, [isMuted, isAudioEnabled]);
 
@@ -172,9 +169,8 @@ export const useGameAudio = () => {
       const audio = phaseCycleAudioRef.current;
       audio.currentTime = 0;
       audio.volume = 1;
-      audio.play().catch(err => console.warn('Phase cycle audio play failed:', err));
+      audio.play().catch(err => {});
     } catch (error) {
-      console.warn('Phase cycle audio playback failed:', error);
     }
   }, [isMuted, isAudioEnabled]);
 

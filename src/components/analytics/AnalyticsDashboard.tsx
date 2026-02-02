@@ -487,11 +487,9 @@ const AnalyticsDashboard = () => {
           storageKey="analytics-tour-completed"
           isOpen={isTourOpen}
           onComplete={() => {
-            console.log('Tour completed!');
             setIsTourOpen(false);
           }}
           onSkip={() => {
-            console.log('Tour skipped');
             setIsTourOpen(false);
           }}
           onClose={() => setIsTourOpen(false)}

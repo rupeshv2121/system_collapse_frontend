@@ -12,7 +12,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public type: "network" | "server" | "auth" | "generic" = "generic",
-    public statusCode?: number
+    public statusCode?: number,
   ) {
     super(message);
     this.name = "ApiError";
@@ -36,7 +36,7 @@ async function apiCall<T>(
   if (!navigator.onLine) {
     throw new ApiError(
       "No internet connection detected. Please check your network connection and try again.",
-      "network"
+      "network",
     );
   }
 
@@ -69,19 +69,23 @@ async function apiCall<T>(
         if (response.status === 401 || response.status === 403) {
           throw new ApiError("Authentication failed", "auth", response.status);
         }
-        
+
         if (response.status >= 500) {
-          throw new ApiError("Server error - please try again later", "server", response.status);
+          throw new ApiError(
+            "Server error - please try again later",
+            "server",
+            response.status,
+          );
         }
 
         const error = await response
           .json()
           .catch(() => ({ error: response.statusText }));
-        
+
         throw new ApiError(
           error.error || `API call failed: ${response.statusText}`,
           "generic",
-          response.status
+          response.status,
         );
       }
 
@@ -95,7 +99,7 @@ async function apiCall<T>(
     if (error instanceof Error && error.name === "AbortError") {
       throw new ApiError(
         "Backend server is not responding - please check if the server is running.",
-        "server"
+        "server",
       );
     }
 
@@ -115,20 +119,20 @@ async function apiCall<T>(
         // User has internet but can't reach backend - backend is down
         throw new ApiError(
           "Unable to connect to backend server. The server may be offline or unreachable.",
-          "server"
+          "server",
         );
       }
     }
-    
+
     // Re-throw ApiError instances
     if (error instanceof ApiError) {
       throw error;
     }
-    
+
     // Generic errors
     throw new ApiError(
       error instanceof Error ? error.message : "An unexpected error occurred",
-      "generic"
+      "generic",
     );
   }
 }
@@ -162,7 +166,6 @@ export const userDataApi = {
 
       return { success: true };
     } catch (error) {
-      console.error("Error saving user data:", error);
       return { success: false, error };
     }
   },
@@ -215,7 +218,6 @@ export const userDataApi = {
 
       return { success: true };
     } catch (error) {
-      console.error("Error saving game session:", error);
       return { success: false, error };
     }
   },
@@ -284,7 +286,9 @@ export const userDataApi = {
           entropyHistory: stats.map((s: any) => s.final_entropy).slice(0, 20),
           sanityHistory: stats.map((s: any) => s.final_sanity).slice(0, 20),
           scoreHistory: stats.map((s: any) => s.final_score).slice(0, 20),
-          durationHistory: stats.map((s: any) => s.total_time || 0).slice(0, 20),
+          durationHistory: stats
+            .map((s: any) => s.total_time || 0)
+            .slice(0, 20),
           phaseReachCounts: stats.reduce(
             (acc: any, s: any) => {
               acc[s.phase_reached] = (acc[s.phase_reached] || 0) + 1;
@@ -293,8 +297,10 @@ export const userDataApi = {
             { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
           ),
           averageSessionDuration:
-            stats.reduce((sum: number, s: any) => sum + (s.total_time || 0), 0) /
-            totalGames,
+            stats.reduce(
+              (sum: number, s: any) => sum + (s.total_time || 0),
+              0,
+            ) / totalGames,
           performanceTrend: "stable" as any,
         };
 
@@ -341,17 +347,40 @@ export const userDataApi = {
         }
 
         // Calculate analytics from actual game data
-        const entropyResistance = stats.length > 0
-          ? Math.min(100, Math.max(0, 100 - (stats.reduce((sum: number, s: any) => sum + s.final_entropy, 0) / stats.length)))
-          : 50;
-        
-        const sanityManagement = stats.length > 0
-          ? Math.round(stats.reduce((sum: number, s: any) => sum + s.final_sanity, 0) / stats.length)
-          : 50;
-        
-        const recoveryAbility = stats.length > 0
-          ? Math.min(100, Math.max(0, (stats.filter((s: any) => s.won).length / stats.length) * 100))
-          : 50;
+        const entropyResistance =
+          stats.length > 0
+            ? Math.min(
+                100,
+                Math.max(
+                  0,
+                  100 -
+                    stats.reduce(
+                      (sum: number, s: any) => sum + s.final_entropy,
+                      0,
+                    ) /
+                      stats.length,
+                ),
+              )
+            : 50;
+
+        const sanityManagement =
+          stats.length > 0
+            ? Math.round(
+                stats.reduce((sum: number, s: any) => sum + s.final_sanity, 0) /
+                  stats.length,
+              )
+            : 50;
+
+        const recoveryAbility =
+          stats.length > 0
+            ? Math.min(
+                100,
+                Math.max(
+                  0,
+                  (stats.filter((s: any) => s.won).length / stats.length) * 100,
+                ),
+              )
+            : 50;
 
         userData.analytics = {
           entropyResistance,
@@ -366,7 +395,6 @@ export const userDataApi = {
 
       return userData;
     } catch (error) {
-      console.error("Error loading user data:", error);
       return null;
     }
   },

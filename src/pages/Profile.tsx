@@ -110,7 +110,6 @@ This email was sent from System Drift Game
         return;
       }
       toast.error('Failed to share score. Please try again.');
-      console.error('Share error:', error);
     } finally {
       setIsSending(false);
     }
@@ -132,13 +131,11 @@ This email was sent from System Drift Game
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error loading profile:', error);
       } else {
         setProfile(data);
         setUsername(data?.username || user.email?.split('@')[0] || '');
       }
     } catch (error) {
-      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
@@ -216,7 +213,6 @@ This email was sent from System Drift Game
         return;
       }
       toast.error('An error occurred');
-      console.error('Error:', error);
     }
   };
 

@@ -162,19 +162,9 @@ export const GameScreen = () => {
 
   // Debug: Check tour elements
   useEffect(() => {
-    if (isPlaying) {
-      console.log('🎯 TOUR DEBUG:');
-      console.log('Screen width:', window.innerWidth, 'isMobile:', isMobile);
-      console.log('Tour steps:', gameTourSteps.length);
-      
+    if (isPlaying) {     
       gameTourSteps.forEach((step, index) => {
         const element = document.querySelector(step.target);
-        console.log(`Step ${index + 1} (${step.title}):`, {
-          target: step.target,
-          found: !!element,
-          visible: element ? window.getComputedStyle(element).display !== 'none' : false,
-          element: element
-        });
       });
     }
   }, [isPlaying, isMobile, gameTourSteps]);
@@ -247,7 +237,6 @@ export const GameScreen = () => {
         shaper.disconnect();
         gain.disconnect();
       } catch (error) {
-        console.warn('Music audio graph cleanup failed:', error);
       }
 
       ctx.close().catch(() => undefined);
@@ -465,7 +454,7 @@ export const GameScreen = () => {
       if (musicContextRef.current?.state === 'suspended') {
         musicContextRef.current.resume().catch(() => undefined);
       }
-      bgMusicRef.current.play().catch(err => console.warn('Audio play failed:', err));
+      bgMusicRef.current.play().catch(err => {});
       hasPlayedFirstTile.current = true;
     }
     // Start playtime on first tile click
@@ -989,11 +978,9 @@ export const GameScreen = () => {
           storageKey="game-tour-completed"
           isOpen={isGameTourOpen}
           onComplete={() => {
-            console.log('Game tour completed!');
             handleGameTourClose();
           }}
           onSkip={() => {
-            console.log('Game tour skipped');
             handleGameTourClose();
           }}
           onClose={handleGameTourClose}

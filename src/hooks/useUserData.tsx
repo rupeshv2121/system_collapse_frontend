@@ -61,7 +61,6 @@ export const useUserData = () => {
           }
         }
       } catch (err) {
-        console.error('Failed to load user data:', err);
         if (err instanceof ApiError) {
           // Navigate to dedicated error pages for network/server errors
           if (err.type === "network") {
@@ -98,9 +97,7 @@ export const useUserData = () => {
       }
       
       setUserData(updated);
-    } catch (error) {
-      console.error('Failed to save user data:', error);
-    }
+    } catch (error) {    }
   }, [user]);
 
   const analyzePlayStyle = useCallback((behavior: BehaviorMetrics, systemMemory: any): PlayStyle => {
@@ -296,7 +293,7 @@ export const useUserData = () => {
           ...newSession,
           behaviorMetrics: sessionData.behaviorMetrics,
           systemMemory: newSystemMemory,
-        }).catch(err => console.error('Failed to save session:', err));
+        }).catch(err => {});
       }
 
       return updated;
