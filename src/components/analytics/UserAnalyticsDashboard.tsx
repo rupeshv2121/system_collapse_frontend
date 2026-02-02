@@ -574,7 +574,7 @@ export const UserAnalyticsDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="p-4 bg-purple-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-2">Variety</div>
               <TraitBar label="" value={behaviorMetrics.varietyScore} variant="purple" compact />

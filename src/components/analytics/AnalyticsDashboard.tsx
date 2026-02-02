@@ -61,12 +61,6 @@ const AnalyticsDashboard = () => {
       position: 'bottom',
     },
     {
-      target: '[data-tour="tabs"]',
-      title: 'Two Types of Analytics',
-      content: 'Switch between Game Statistics (performance data) and User Profile (psychological analysis based on your gameplay patterns).',
-      position: 'bottom',
-    },
-    {
       target: '[data-tour="stats-overview"]',
       title: 'Quick Stats Overview',
       content: 'At a glance: Total games played, your win rate percentage, average entropy reached, and your best win streak.',
