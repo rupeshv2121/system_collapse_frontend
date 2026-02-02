@@ -197,7 +197,7 @@ system_collapse_frontend/
 │   │   ├── useBeatSync.tsx     # Music synchronization
 │   │   ├── useUserData.tsx     # Backend data fetching
 │   │   ├── use-toast.tsx       # Toast notifications
-│   │   └── use-mobile.tsx      # Mobile detection
+│   │  
 │   │
 │   ├── lib/                # Utility libraries
 │   │   ├── supabase.ts         # Supabase client
