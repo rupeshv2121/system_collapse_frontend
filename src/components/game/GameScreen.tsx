@@ -120,17 +120,17 @@ export const GameScreen = () => {
       title: 'The Game Grid 🎮',
       content: 'Click on the colored tiles according to the instruction. Each click affects your score, entropy, and sanity.',
       position: 'top',
-    },
-    {
-      target: '[data-tour="game-timer"]',
-      title: 'Round Timer ⏱️',
-      content: 'Time remaining for this round. Make a move before it runs out to avoid sanity loss!',
-      position: 'left',
-    },
+    },    
     {
       target: '[data-tour="game-score"]',
       title: 'Your Score 🎯',
       content: 'Earn points by making correct clicks. The scoring rules evolve through different phases of the game.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="game-timer"]',
+      title: 'Total Play Time ⏱️',
+      content: 'Total time you\'ve been playing this session. Track your progress and improve your speed!',
       position: 'left',
     },
     {
@@ -626,15 +626,18 @@ export const GameScreen = () => {
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </Button>
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={handleStartGameTour}
-            className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
-            title="Game Guide"
-          >
-            <HelpCircle className="w-5 h-5" />
-          </Button>
+          {/* Hide game guide button on mobile since tour is disabled on small screens */}
+          {!isMobile && (
+            <Button 
+              variant="outline"
+              size="icon"
+              onClick={handleStartGameTour}
+              className="bg-background/80 backdrop-blur-sm border-primary/30 text-foreground hover:bg-primary/20 hover:border-primary shadow-lg"
+              title="Game Guide"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </Button>
+          )}
         </div>
       )}
 
@@ -694,7 +697,7 @@ export const GameScreen = () => {
           >
             <div className="max-w-md mx-auto space-y-1">
               {/* Instruction on mobile - compact */}
-              <div data-tour="game-instruction" className="mb-1">
+              <div className="mb-1">
                 <div className="hud-panel p-1.5 text-center bg-gradient-to-r from-blue-50 to-purple-50 border-blue-300">
                   <div className="text-[9px] text-gray-600 uppercase tracking-wider mb-0.5">Instruction</div>
                   <div className={cn(
@@ -732,12 +735,12 @@ export const GameScreen = () => {
 
         {/* Instruction - stays at top (hidden on mobile, shown on tablet+) */}
         <div
+          data-tour="game-instruction"
           className={cn(
             "mb-2 md:mb-4 lg:mb-3 max-w-lg mx-auto hidden md:block",
             isGameOverBlast && "animate-explosion-scatter"
           )}
           style={isGameOverBlast ? getBlastStyle() : undefined}
-          data-tour="game-instruction"
         >
           <InstructionDisplay 
             instruction={currentInstruction}
@@ -985,8 +988,8 @@ export const GameScreen = () => {
         </div>
       )}
 
-      {/* Game Guided Tour */}
-      {isPlaying && (
+      {/* Game Guided Tour - Disabled on mobile screens */}
+      {isPlaying && !isMobile && (
         <GuidedTour
           steps={gameTourSteps}
           storageKey="game-tour-completed"
