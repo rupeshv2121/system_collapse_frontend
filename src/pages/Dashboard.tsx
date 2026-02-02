@@ -210,7 +210,7 @@ const Demo = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative overflow-hidden pb-8 sm:pb-0">
       <audio ref={audioRef} src="/audio/music.mp3" loop preload="auto" />
       {/* Animated background tiles - chaotic system breakdown visual */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -355,19 +355,6 @@ const Demo = () => {
                 })}
               </div>
             </Card>
-            
-            {/* Leaderboard Button */}
-            <div className="text-center">
-              <Button
-                onClick={() => navigate("/leaderboard")}
-                variant="outline"
-                data-click-sfx="true"
-                className="text-gray-600 hover:text-blue-600 border-2 border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all px-6 py-3 rounded-xl"
-              >
-                <Trophy className="w-5 h-5 mr-2" />
-                View Leaderboard
-              </Button>
-            </div>
           </div>
         </div>
       </div>

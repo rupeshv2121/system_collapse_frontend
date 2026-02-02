@@ -104,8 +104,8 @@ const AnalyticsDashboard = () => {
 
   // Prepare chart data
   const winLossData = useMemo(() => [
-    {  value: stats.gamesWon, fill: 'hsl(var(--success))' },
-    {  value: stats.gamesLost, fill: 'hsl(var(--destructive))' },
+    { name: 'Wins', value: stats.gamesWon, fill: 'hsl(var(--success))' },
+    { name: 'Losses', value: stats.gamesLost, fill: 'hsl(var(--destructive))' },
   ], [stats.gamesWon, stats.gamesLost]);
 
   const entropyData = useMemo(() => 
@@ -152,7 +152,7 @@ const AnalyticsDashboard = () => {
         <div className="absolute bottom-1/3 left-1/4 w-64 h-64 rounded-full blur-3xl opacity-10 bg-secondary animate-float" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
         {/* Header with Title and Reset */}
         <header className="flex items-center justify-between mb-8" data-tour="header">
           <h1 className="text-2xl md:text-3xl font-bold font-game tracking-wider neon-text">
@@ -192,7 +192,7 @@ const AnalyticsDashboard = () => {
         </header>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" data-tour="stats-overview">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8" data-tour="stats-overview">
           <Card className="hud-panel border-blue-300 bg-blue-50 shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <Trophy className="w-8 h-8 mx-auto mb-2 text-blue-600" />
@@ -219,15 +219,15 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Win/Loss Distribution */}
           <Card className="hud-panel shadow-md hover:shadow-lg transition-shadow" data-tour="win-loss-chart">
             <CardHeader className="text-center">
               <CardTitle className="text-sm md:text-base font-game tracking-wider">Win/Loss Distribution</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center items-center">
+            <CardContent className="flex justify-center items-center min-h-[350px]">
               {stats.totalGamesPlayed > 0 ? (
-                <ResponsiveContainer width="100%" height={300} className="text-xs">
+                <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={winLossData}
@@ -237,7 +237,7 @@ const AnalyticsDashboard = () => {
                       outerRadius={70}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
+                      label={({ name, value }) => `${name.toLowerCase()}: ${value}`}
 
                     >
                       {winLossData.map((entry, index) => (
@@ -254,9 +254,10 @@ const AnalyticsDashboard = () => {
                     />
                     <Legend 
                       verticalAlign="bottom" 
-                      height={36}
+                      height={40}
                       iconType="circle"
-                      wrapperStyle={{ fontSize: '12px' }}
+                      wrapperStyle={{ fontSize: '14px', fontWeight: '500' }}
+                      iconSize={10}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -273,10 +274,10 @@ const AnalyticsDashboard = () => {
             <CardHeader className="text-center">
               <CardTitle className="text-sm md:text-base font-game tracking-wider">Entropy Reached per Game</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center items-center">
+            <CardContent className="flex justify-center items-center min-h-[350px]">
               {entropyData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={entropyData} margin={{ top: 10, right: 10, left: 20, bottom: 20 }}>
+                  <LineChart data={entropyData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
@@ -324,10 +325,10 @@ const AnalyticsDashboard = () => {
             <CardHeader className="text-center">
               <CardTitle className="text-sm md:text-base font-game tracking-wider">Total Time Played per Game</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center items-center">
+            <CardContent className="flex justify-center items-center min-h-[350px]">
               {durationData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={durationData} margin={{ top: 10, right: 10, left: 25, bottom: 20 }}>
+                  <LineChart data={durationData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 
@@ -390,10 +391,10 @@ const AnalyticsDashboard = () => {
             <CardHeader className="text-center">
               <CardTitle className="text-sm md:text-base font-game tracking-wider">Recent Game Scores</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center items-center">
+            <CardContent className="flex justify-center items-center min-h-[350px]">
               {recentGames.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={recentGames} margin={{ top: 20, right: 10, left: 20, bottom: 20 }}>
+                  <BarChart data={recentGames} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="game" 

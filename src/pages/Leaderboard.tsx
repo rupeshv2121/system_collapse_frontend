@@ -289,7 +289,7 @@ const Leaderboard = () => {
               <div className="bg-blue-50 border border-blue-300 rounded-lg p-3 sm:p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
                   <Trophy className="w-5 h-5 sm:w-8 sm:h-8 text-amber-500" />
-                  <h3 className="text-gray-900 font-bold text-sm sm:text-lg">Total Players :  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                  <h3 className="text-gray-900 font-bold text-sm sm:text-lg">Total Players  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
                   {globalLeaderboard.length}
                 </p></h3>
                 </div>
