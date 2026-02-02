@@ -85,10 +85,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) throw error;
-
-      // Profile will be created automatically by database trigger
-      // No need to manually insert
-
       return { error: null };
     } catch (error) {
       return { error: error as Error };

@@ -116,13 +116,13 @@ export type PsychologicalArchetype =
   | "experimental-mind";
 
 export interface AdvancedAnalytics {
-  entropyResistance: number; // How well they handle chaos
-  sanityManagement: number; // How they maintain sanity
-  phaseTransitionSuccess: number; // Success rate across phases
-  colorBias: Record<TileColor, number>; // Preference for each color
-  timeOfDayPerformance: Record<string, number>; // Performance by hour
-  decisionFatigue: number; // Performance degradation over time
-  recoveryAbility: number; // Bounce back from mistakes
+  entropyResistance: number;
+  sanityManagement: number;
+  phaseTransitionSuccess: number;
+  colorBias: Record<TileColor, number>;
+  timeOfDayPerformance: Record<string, number>;
+  decisionFatigue: number;
+  recoveryAbility: number;
 }
 
 export interface UserDataSchema {
@@ -156,11 +156,10 @@ export interface UserDataSchema {
   analytics: AdvancedAnalytics;
 
   // Metadata
-  version: string; // Schema version for migrations
+  version: string;
   lastUpdated: number;
 }
 
-// Default/Initial values
 export const DEFAULT_USER_DATA: UserDataSchema = {
   userId: "",
   createdAt: 0,

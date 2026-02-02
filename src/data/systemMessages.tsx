@@ -1,8 +1,3 @@
-/**
- * System narration messages organized by phase
- * These create the philosophical, unsettling atmosphere
- */
-
 import { GamePhase } from '@/types/game';
 
 export const SYSTEM_MESSAGES: Record<GamePhase, string[]> = {

@@ -27,7 +27,6 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
 
 NavLink.displayName = "NavLink";
 
-// Enhanced Navbar Component
 const Navbar = () => {
   const { user, username, signOut } = useAuth();
   const location = useLocation();

@@ -1,12 +1,6 @@
-/**
- * Game Audio System with Phase-Based Distortion
- * Uses Web Audio API for synthesized sounds that evolve with chaos
- */
-
 import { GamePhase, TileColor } from '@/types/game';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Audio context singleton
 let audioContext: AudioContext | null = null;
 
 const getAudioContext = (): AudioContext => {
@@ -17,12 +11,6 @@ const getAudioContext = (): AudioContext => {
 };
 
 // Color to frequency mapping (pentatonic scale for pleasant sounds)
-const COLOR_FREQUENCIES: Record<TileColor, number> = {
-  red: 440,    // A4
-  blue: 523,   // C5
-  green: 587,  // D5
-  yellow: 659, // E5
-};
 
 export const useGameAudio = () => {
   const [isMuted, setIsMuted] = useState(false);
@@ -129,26 +117,19 @@ export const useGameAudio = () => {
     }
   }, [isMuted, isAudioEnabled]);
 
-  // Start background music
   const startBackgroundMusic = useCallback(() => {
     // Background music is now handled by audio element in GameScreen
-    // This function is kept for compatibility but does nothing
   }, []);
 
-  // Stop background music
   const stopBackgroundMusic = useCallback(() => {
     // Background music is now handled by audio element in GameScreen
-    // This function is kept for compatibility but does nothing
   }, []);
 
-  // Update background music based on phase
   const updateMusicForPhase = useCallback((phase: GamePhase, _entropy: number, _sanity: number) => {
     // Background music is now handled by audio element in GameScreen
-    // This function is kept for compatibility but does nothing
     currentPhaseRef.current = phase;
   }, []);
 
-  // Play game over sound
   const playGameOver = useCallback((_won: boolean) => {
     if (isMuted || !isAudioEnabled || !gameEndAudioRef.current) return;
 
@@ -161,7 +142,6 @@ export const useGameAudio = () => {
     }
   }, [isMuted, isAudioEnabled]);
 
-  // Play phase cycle completion sound
   const playPhaseCycleChange = useCallback(() => {
     if (isMuted || !isAudioEnabled || !phaseCycleAudioRef.current) return;
 
@@ -174,7 +154,6 @@ export const useGameAudio = () => {
     }
   }, [isMuted, isAudioEnabled]);
 
-  // Toggle mute
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => !prev);
   }, []);

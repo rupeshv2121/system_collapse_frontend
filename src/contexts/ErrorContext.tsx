@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface ErrorContextType {
   showNetworkError: () => void;
@@ -33,7 +33,6 @@ export const ErrorProvider = ({ children }: { children: React.ReactNode }) => {
     const handleOnline = () => {
       if (currentError === 'network') {
         clearError();
-        // Optionally navigate back
         window.location.reload();
       }
     };

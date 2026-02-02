@@ -1,7 +1,3 @@
-/**
- * Core game type definitions for System Drift
- */
-
 export type TileColor = "red" | "blue" | "green" | "yellow";
 
 export type GamePhase = 1 | 2 | 3 | 4 | 5;
@@ -31,7 +27,7 @@ export interface GameState {
   timeRemaining: number;
   clickHistory: ClickRecord[];
   currentInstruction: TileColor;
-  secretCorrectColor: TileColor; // The actual color that gives points (may differ from instruction)
+  secretCorrectColor: TileColor;
   tiles: TileState[];
   isPlaying: boolean;
   roundStartTime: number;
@@ -40,8 +36,8 @@ export interface GameState {
   uniqueColorsClicked: Set<TileColor>;
   gameStartTime: number;
   timerStarted: boolean;
-  collapseCount: number; // Number of times entropy has cycled from 0-100
-  isCollapsing: boolean; // Currently in collapse animation
+  collapseCount: number;
+  isCollapsing: boolean;
 }
 
 export interface GameStats {
