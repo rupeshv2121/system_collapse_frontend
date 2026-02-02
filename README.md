@@ -1,10 +1,10 @@
-# System Drift Frontend (DOCUMENTATION) 🎮
+# System Drift Frontend (DOCUMENTATION) 
 
 A psychological puzzle game that challenges players' adaptability and pattern recognition through evolving rule systems. Built with React, TypeScript, and modern web technologies.
 
 **Backend Repository:** [https://github.com/rupeshv2121/system_collapse_backend](https://github.com/rupeshv2121/system_collapse_backend)
 
-## 📖 Table of Contents
+## Table of Contents
 
 - [Overview](#-overview)
 - [Game Concept](#-game-concept)
@@ -29,7 +29,7 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 
 ---
 
-## 🎯 Overview
+## Overview
 
 **System Drift** is a React-based single-player game where rules progressively break down, testing the player's ability to adapt to changing systems. Players click colored tiles following instructions that become increasingly unreliable as "entropy" increases, representing the collapse of the game's rule system.
 
@@ -40,9 +40,11 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 - **Psychological Profiling**: Tracks player behavior patterns
 - **Real-time Analytics**: Visualizes performance metrics
 
+![Alt Text](./public/dashboard.jpeg)
+
 ---
 
-## 🎮 Game Concept
+## Game Concept
 
 ### The Core Loop
 
@@ -55,9 +57,13 @@ A psychological puzzle game that challenges players' adaptability and pattern re
    - **Phase 4**: Time pressure and contradictions
    - **Phase 5**: Full chaos - rules are unpredictable
 
+![Alt Text](./public/game.jpeg)
+
 ### Winning Conditions
 - Survive until sanity reaches 0 OR time runs out
 - Higher score = better adaptation to System Drift
+
+![Alt Text](./public/result.jpeg)
 
 ### Psychological Tracking
 The game measures 6 behavioral traits:
@@ -70,38 +76,42 @@ The game measures 6 behavioral traits:
 
 ---
 
-## ✨ Features
+## Features
 
-### 🎨 User Interface
+### User Interface
 - **Responsive Design**: Works on desktop and mobile
 - **Light Theme**: Clean blue/gray color scheme
 - **Smooth Animations**: Tile rotations, shaking, and phase transitions
 - **Audio Integration**: Background music and sound effects with beat synchronization
 - **Toast Notifications**: Real-time feedback using Sonner
 
-### 🔐 Authentication
+### Authentication
 - Email/password sign-up and sign-in
 - Supabase authentication integration
 - Protected routes for authenticated users
 - Persistent sessions
 
-### 📊 Analytics & Leaderboards
+### Analytics & Leaderboards
 - **User Analytics Dashboard**:
   - Game statistics (total games, win rate, average score)
   - Psychological trait evolution graphs with 6-trait line chart
   - Achievement tracking with progress indicators
   - Email sharing for user statistics
+
+![Alt Text](./public/analytics.jpeg)
 - **Global Leaderboard**: Top players by score with skeleton loading states
+
+![Alt Text](./public/leaderboard.jpeg)
 - **Game Statistics Charts**: Entropy, sanity loss, and score trends with axis labels
 - **Performance Tracking**: Historical data visualization
 
-### 🎯 Game Features
+### Game Features
 - **Interactive Tutorial**: First-time user onboarding
 - **Guided Tours**: In-game help system
 - **Hints System**: Optional assistance during gameplay
 - **Audio Controls**: Volume management
 
-### 🛠️ Developer Features
+### Developer Features
 - **Error Handling System**: Network and server error detection with dedicated pages
 - **Global Error Context**: Centralized error management with automatic navigation
 - **Loading States**: Skeleton loaders for asynchronous operations
@@ -110,7 +120,7 @@ The game measures 6 behavioral traits:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Core Framework
 - **React 19.2** - UI library
@@ -151,7 +161,7 @@ The game measures 6 behavioral traits:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 system_collapse_frontend/
@@ -240,7 +250,7 @@ system_collapse_frontend/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -301,7 +311,7 @@ system_collapse_frontend/
 
 ---
 
-## 🏗️ Architecture Deep Dive
+## Architecture Deep Dive
 
 ### Application Flow
 
@@ -365,7 +375,7 @@ useUserData updates psychological profile
 
 ---
 
-## 🧩 Component Documentation
+## Component Documentation
 
 ### Core Game Components
 
@@ -491,12 +501,15 @@ useUserData updates psychological profile
 ### Analytics Components
 
 #### `UserAnalyticsDashboard.tsx`
+![Alt Text](./public/profile.jpeg)
 **Purpose**: User profile and statistics
 - Game statistics cards (games played, win rate, avg score)
 - Psychological trait evolution graph (6 traits over 20 games)
 - Achievement badges
 - Email share modal
 - Exportable statistics
+
+![Alt Text](./public/badges.jpeg)
 
 **Features**:
 - 6-line graph showing trait development:
@@ -543,7 +556,7 @@ Pre-built accessible components using Radix UI:
 
 ---
 
-## 🔄 State Management
+## State Management
 
 ### Authentication State
 
@@ -673,7 +686,7 @@ const recordSession = useMutation({
 
 ---
 
-## 🌐 API Integration
+## API Integration
 
 ### Backend API
 
@@ -1206,14 +1219,6 @@ For issues, questions, or contributions:
 ## License
 
 This project is part of a hackathon submission. All rights reserved by the development team.
-
----
-
-## Version Information
-
-**Current Version**: 1.0.0
-**Last Updated**: February 2026
-**Minimum Node Version**: 18.0.0
 
 ---
 
