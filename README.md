@@ -95,9 +95,10 @@ The game measures 6 behavioral traits:
   - Psychological trait evolution graphs with 6-trait line chart
   - Achievement tracking with progress indicators
   - Email sharing for user statistics
-  
+
 ![Alt Text](./public/analytics.jpeg)
 - **Global Leaderboard**: Top players by score with skeleton loading states
+
 ![Alt Text](./public/leaderboard.jpeg)
 - **Game Statistics Charts**: Entropy, sanity loss, and score trends with axis labels
 - **Performance Tracking**: Historical data visualization
