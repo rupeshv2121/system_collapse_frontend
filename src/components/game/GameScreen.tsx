@@ -646,23 +646,25 @@ export const GameScreen = () => {
         style={backgroundStyle}
       >
         {/* Animated background elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className={cn(
-            "absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20",
-            "bg-primary animate-float"
-          )} />
-          <div className={cn(
-            "absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20",
-            "bg-secondary animate-float",
-            "animation-delay-1000"
-          )} style={{ animationDelay: '1s' }} />
-          {phase >= 3 && (
+        {isPlaying && (
+          <div className="absolute inset-0 pointer-events-none">
             <div className={cn(
-              "absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-2xl opacity-30",
-              "bg-destructive animate-pulse"
+              "absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20",
+              "bg-primary animate-float"
             )} />
-          )}
-        </div>
+            <div className={cn(
+              "absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20",
+              "bg-secondary animate-float",
+              "animation-delay-1000"
+            )} style={{ animationDelay: '1s' }} />
+            {phase >= 3 && (
+              <div className={cn(
+                "absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-2xl opacity-30",
+                "bg-destructive animate-pulse"
+              )} />
+            )}
+          </div>
+        )}
 
         {/* Main content */}
         <div className="relative z-10 container mx-auto px-4 py-2 md:py-4 lg:py-6 max-w-7xl min-h-screen md:min-h-0">
@@ -685,7 +687,7 @@ export const GameScreen = () => {
         {isPlaying && (
           <div
             className={cn(
-              "md:hidden fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5",
+              "md:hidden fixed left-0 right-0 z-[120] bg-background/95 backdrop-blur-sm shadow-lg px-2 py-1.5",
               isGameOverBlast && "animate-explosion-scatter"
             )}
             style={isGameOverBlast ? getBlastStyle() : undefined}
