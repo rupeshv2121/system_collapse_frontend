@@ -1,4 +1,4 @@
-# Changelog - System Collapse Frontend
+# Changelog - System Drift Frontend
 
 ## [Unreleased] - February 2026
 

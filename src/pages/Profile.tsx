@@ -40,12 +40,11 @@ const Profile = () => {
 
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-      const subject = `${username}'s Gaming Stats from System Collapse`;
+      const subject = `${username}'s Gaming Stats from System Drift`;
       const content = `
 Hello!
 
-${username} has shared their gaming statistics with you from System Collapse:
-
+${username} has shared their gaming statistics with you from System Drift:
 📊 Performance Stats:
 ━━━━━━━━━━━━━━━━━━━━
 • Total Games Played: ${userData.stats.totalGames}
@@ -61,7 +60,7 @@ ${username} has shared their gaming statistics with you from System Collapse:
 Keep playing and improving your skills!
 
 ---
-This email was sent from System Collapse Game
+This email was sent from System Drift Game
       `.trim();
 
       const abortController = new AbortController();

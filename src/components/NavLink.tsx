@@ -63,7 +63,7 @@ const Navbar = () => {
               <div className="absolute inset-0 blur-xl transition-all" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-              System Collapse
+              System Drift
             </span>
           </Link>
 

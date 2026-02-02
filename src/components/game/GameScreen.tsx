@@ -69,12 +69,6 @@ export const GameScreen = () => {
       content: 'Click on the colored tiles according to the instruction. Each click affects your score, entropy, and sanity.',
       position: 'bottom',
     },
-    // {
-    //   target: '[data-tour="game-phase"]',
-    //   title: 'Current Phase 🎭',
-    //   content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
-    //   position: 'bottom',
-    // },
     {
       target: '[data-tour="game-hint"]',
       title: 'System Hints 💡',
@@ -100,7 +94,7 @@ export const GameScreen = () => {
     {
       target: '[data-tour="game-phase"]',
       title: 'Current Phase 🎭',
-      content: 'Shows which phase of system collapse you\'re in. Each phase has different rules and behavior.',
+      content: 'Shows which phase of system drift you\'re in. Each phase has different rules and behavior.',
       position: 'right',
     },
     {

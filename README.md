@@ -1,4 +1,4 @@
-# System Collapse Frontend 🎮
+# System Drift Frontend 🎮
 
 A psychological puzzle game that challenges players' adaptability and pattern recognition through evolving rule systems. Built with React, TypeScript, and modern web technologies.
 
@@ -29,7 +29,7 @@ A psychological puzzle game that challenges players' adaptability and pattern re
 
 ## 🎯 Overview
 
-**System Collapse** is a React-based single-player game where rules progressively break down, testing the player's ability to adapt to changing systems. Players click colored tiles following instructions that become increasingly unreliable as "entropy" increases, representing the collapse of the game's rule system.
+**System Drift** is a React-based single-player game where rules progressively break down, testing the player's ability to adapt to changing systems. Players click colored tiles following instructions that become increasingly unreliable as "entropy" increases, representing the collapse of the game's rule system.
 
 ### Key Mechanics:
 - **5 Progressive Phases**: Rules evolve from simple to chaotic
