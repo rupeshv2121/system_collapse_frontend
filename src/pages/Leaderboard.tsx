@@ -104,43 +104,43 @@ const Leaderboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 grid-pattern">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Trophy className="w-12 h-12 text-amber-500" />
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-600 via-blue-600 to-blue-500 bg-clip-text text-transparent">
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+            <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-amber-500" />
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-600 via-blue-600 to-blue-500 bg-clip-text text-transparent">
               Leaderboard
             </h1>
           </div>
-          <p className="text-gray-700 text-lg">
+          <p className="text-gray-700 text-sm sm:text-lg">
             Compete with players worldwide and climb to the top!
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex justify-center gap-2 sm:gap-4 mb-4 sm:mb-8">
           <button
             onClick={() => setActiveTab("score")}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all ${
               activeTab === "score"
                 ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
                 : "bg-blue-100 text-blue-700 hover:bg-blue-200"
             }`}
           >
-            <TrendingUp className="w-5 h-5" />
-            Top Scores
+            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Top </span>Scores
           </button>
           <button
             onClick={() => setActiveTab("wins")}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all ${
               activeTab === "wins"
                 ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
                 : "bg-blue-100 text-blue-700 hover:bg-blue-200"
             }`}
           >
-            <Award className="w-5 h-5" />
-            Top Winners
+            <Award className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Top </span>Winners
           </button>
         </div>
 
@@ -162,45 +162,50 @@ const Leaderboard = () => {
         ) : (
           <div className="max-w-4xl mx-auto">
             {activeTab === "score" ? (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {globalLeaderboard.map((entry, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-4 p-4 rounded-lg border backdrop-blur-sm transition-all hover:scale-[1.02] ${getRankBgClass(
+                    className={`flex items-center gap-2 sm:gap-4 p-2.5 sm:p-4 rounded-lg border backdrop-blur-sm transition-all hover:scale-[1.02] ${getRankBgClass(
                       index + 1,
                     )}`}
                   >
                     {/* Rank */}
-                    <div className="flex items-center justify-center w-12">
-                      {getRankIcon(index + 1)}
+                    <div className="flex items-center justify-center w-8 sm:w-12">
+                      {index < 3 ? (
+                        index === 0 ? <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-amber-500" /> :
+                        <Medal className={`w-4 h-4 sm:w-6 sm:h-6 ${index === 1 ? 'text-gray-400' : 'text-orange-600'}`} />
+                      ) : (
+                        <span className="text-gray-600 font-bold text-sm sm:text-lg">#{index + 1}</span>
+                      )}
                     </div>
 
                     {/* Username */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-gray-900 font-bold text-lg truncate">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <p className="text-gray-900 font-bold text-sm sm:text-lg truncate">
                           {entry.username}
                         </p>
                         {entry.won && (
-                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full border border-green-300">
+                          <span className="px-1.5 sm:px-2 py-0.5 bg-green-100 text-green-700 text-[10px] sm:text-xs rounded-full border border-green-300">
                             Winner
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-gray-600 text-xs sm:text-sm">
                         Phase {entry.phase} • Entropy: {entry.entropy.toFixed(2)}
                       </p>
                     </div>
 
                     {/* Score */}
                     <div className="text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        <Zap className="w-5 h-5 text-amber-500" />
-                        <p className="text-2xl font-bold text-gray-900">
+                      <div className="flex items-center gap-1 sm:gap-2 justify-end">
+                        <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+                        <p className="text-lg sm:text-2xl font-bold text-gray-900">
                           {entry.score.toLocaleString()}
                         </p>
                       </div>
-                      <p className="text-gray-600 text-xs">
+                      <p className="text-gray-600 text-[10px] sm:text-xs">
                         {new Date(entry.playedAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -217,36 +222,41 @@ const Leaderboard = () => {
                 )}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {topWinners.map((winner, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-4 p-4 rounded-lg border backdrop-blur-sm transition-all hover:scale-[1.02] ${getRankBgClass(
+                    className={`flex items-center gap-2 sm:gap-4 p-2.5 sm:p-4 rounded-lg border backdrop-blur-sm transition-all hover:scale-[1.02] ${getRankBgClass(
                       index + 1,
                     )}`}
                   >
                     {/* Rank */}
-                    <div className="flex items-center justify-center w-12">
-                      {getRankIcon(index + 1)}
+                    <div className="flex items-center justify-center w-8 sm:w-12">
+                      {index < 3 ? (
+                        index === 0 ? <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-amber-500" /> :
+                        <Medal className={`w-4 h-4 sm:w-6 sm:h-6 ${index === 1 ? 'text-gray-400' : 'text-orange-600'}`} />
+                      ) : (
+                        <span className="text-gray-600 font-bold text-sm sm:text-lg">#{index + 1}</span>
+                      )}
                     </div>
 
                     {/* Username */}
                     <div className="flex-1">
-                      <p className="text-gray-900 font-bold text-lg">
+                      <p className="text-gray-900 font-bold text-sm sm:text-lg">
                         {winner.username}
                       </p>
-                      <p className="text-gray-600 text-sm">Elite Champion</p>
+                      <p className="text-gray-600 text-xs sm:text-sm">Elite Champion</p>
                     </div>
 
                     {/* Wins */}
                     <div className="text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        <Trophy className="w-5 h-5 text-amber-500" />
-                        <p className="text-2xl font-bold text-gray-900">
+                      <div className="flex items-center gap-1 sm:gap-2 justify-end">
+                        <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+                        <p className="text-lg sm:text-2xl font-bold text-gray-900">
                           {winner.wins}
                         </p>
                       </div>
-                      <p className="text-gray-600 text-xs">
+                      <p className="text-gray-600 text-[10px] sm:text-xs">
                         {winner.wins === 1 ? "Victory" : "Victories"}
                       </p>
                     </div>
@@ -267,7 +277,7 @@ const Leaderboard = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-8 max-w-4xl mx-auto">
           {loading ? (
             <>
               <StatCardSkeleton />
@@ -276,32 +286,32 @@ const Leaderboard = () => {
             </>
           ) : (
             <>
-              <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 backdrop-blur-sm">
-                <div className="flex items-center gap-3 mb-2">
-                  <Trophy className="w-8 h-8 text-amber-500" />
-                  <h3 className="text-gray-900 font-bold text-lg">Total Players</h3>
-                </div>
-                <p className="text-3xl font-bold text-blue-600">
+              <div className="bg-blue-50 border border-blue-300 rounded-lg p-3 sm:p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                  <Trophy className="w-5 h-5 sm:w-8 sm:h-8 text-amber-500" />
+                  <h3 className="text-gray-900 font-bold text-sm sm:text-lg">Total Players :  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
                   {globalLeaderboard.length}
-                </p>
+                </p></h3>
+                </div>
+               
               </div>
 
-              <div className="bg-green-50 border border-green-300 rounded-lg p-6 backdrop-blur-sm">
-                <div className="flex items-center gap-3 mb-2">
-                  <Award className="w-8 h-8 text-green-600" />
-                  <h3 className="text-gray-900 font-bold text-lg">Total Wins</h3>
+              <div className="bg-green-50 border border-green-300 rounded-lg p-3 sm:p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                  <Award className="w-5 h-5 sm:w-8 sm:h-8 text-green-600" />
+                  <h3 className="text-gray-900 font-bold text-sm sm:text-lg">Total Wins</h3>
                 </div>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">
                   {globalLeaderboard.filter((e) => e.won).length}
                 </p>
               </div>
 
-              <div className="bg-amber-50 border border-amber-300 rounded-lg p-6 backdrop-blur-sm">
-                <div className="flex items-center gap-3 mb-2">
-                  <Zap className="w-8 h-8 text-amber-600" />
-                  <h3 className="text-gray-900 font-bold text-lg">Highest Score</h3>
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 sm:p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                  <Zap className="w-5 h-5 sm:w-8 sm:h-8 text-amber-600" />
+                  <h3 className="text-gray-900 font-bold text-sm sm:text-lg">Highest Score</h3>
                 </div>
-                <p className="text-3xl font-bold text-amber-600">
+                <p className="text-2xl sm:text-3xl font-bold text-amber-600">
                   {globalLeaderboard[0]?.score.toLocaleString() || "0"}
                 </p>
               </div>
