@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorProvider } from "@/contexts/ErrorContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Tutorial from "./components/game/Tutorial";
 import Analytics from "./pages/Analytics.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
@@ -61,6 +62,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+               <Route
+                path="/tutorial"
+                element={
+                  <ProtectedRoute>
+                    <Tutorial/>
                   </ProtectedRoute>
                 }
               />

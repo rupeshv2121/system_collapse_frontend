@@ -1,8 +1,3 @@
-/**
- * System Hint Panel Component
- * Displays evolving hints and system narration
- */
-
 import { getHintMessage, getSystemMessage } from '@/data/systemMessages';
 import { cn } from '@/lib/utils';
 import { GamePhase } from '@/types/game';

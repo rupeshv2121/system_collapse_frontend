@@ -163,7 +163,7 @@ const Demo = () => {
   const handleStartGame = () => navigate("/game");
   const handleTutorial = () => {
     localStorage.setItem(TUTORIAL_SEEN_KEY, "false");
-    navigate("/game");
+    navigate("/tutorial");
   };
 
   useEffect(() => {

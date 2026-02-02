@@ -1,8 +1,3 @@
-/**
- * Instruction Display Component
- * Shows the current instruction with chaos effects
- */
-
 import { cn } from '@/lib/utils';
 import { GamePhase, TileColor } from '@/types/game';
 import { memo, useMemo } from 'react';

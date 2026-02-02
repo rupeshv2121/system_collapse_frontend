@@ -1,8 +1,3 @@
-/**
- * Game Grid Component
- * Renders the 4x4 tile grid with chaos effects
- */
-
 import { cn } from '@/lib/utils';
 import { GamePhase, PHASE_CONFIGS, TileState } from '@/types/game';
 import { memo, useMemo } from 'react';

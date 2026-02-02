@@ -1,8 +1,3 @@
-/**
- * HUD Component
- * Displays game stats: Score, Phase, Entropy, Sanity, Timer
- */
-
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { GamePhase, PHASE_CONFIGS } from '@/types/game';

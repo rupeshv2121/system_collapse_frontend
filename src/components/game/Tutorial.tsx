@@ -1,12 +1,8 @@
-/**
- * Interactive Tutorial Component
- * Explains game mechanics with real tile clicks
- */
-
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Brain, ChevronLeft, ChevronRight, Eye, Shuffle, Skull, X, Zap } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface TutorialStep {
   title: string;
@@ -211,9 +207,11 @@ const TutorialNew = ({ onComplete, onSkip }: TutorialProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const step = TUTORIAL_STEPS[currentStep];
   const isLastStep = currentStep === TUTORIAL_STEPS.length - 1;
+  const navigate = useNavigate();
 
   const handleNext = useCallback(() => {
     if (isLastStep) {
+      navigate('/dashboard');
       onComplete();
     } else {
       setCurrentStep((prev) => prev + 1);
@@ -244,14 +242,16 @@ const TutorialNew = ({ onComplete, onSkip }: TutorialProps) => {
               </span>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onSkip}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <Link to="/dashboard">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onSkip}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
 
         {/* Content */}

@@ -1,8 +1,3 @@
-/**
- * Game Tile Component
- * Renders individual clickable tiles with chaos effects
- */
-
 import { cn } from '@/lib/utils';
 import { GamePhase, PHASE_CONFIGS, TileState } from '@/types/game';
 import { memo, useMemo } from 'react';

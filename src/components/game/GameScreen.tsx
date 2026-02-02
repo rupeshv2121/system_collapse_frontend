@@ -1,8 +1,3 @@
-/**
- * Main Game Screen Component
- * Orchestrates all game UI elements
- */
-
 import { Button } from '@/components/ui/button';
 import { GuidedTour, TourStep } from '@/components/ui/guided-tour';
 import { useBeatSync } from '@/hooks/useBeatSync';
@@ -163,7 +158,6 @@ export const GameScreen = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Debug: Check tour elements
   useEffect(() => {
     if (isPlaying) {     
       gameTourSteps.forEach((step, index) => {
@@ -351,17 +345,14 @@ export const GameScreen = () => {
     }
   }, [isMuted, musicVolume]);
 
-  // Auto-start game on mount
   useEffect(() => {
     if (!isPlaying && score === 0 && entropy === 0) {
-      // Auto-start the game directly
       handleStartGame();
       setHasSeenTutorial(true);
       localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
     }
-  }, []); // Run only once on mount
+  }, []);
 
-  // Control body overflow to hide scrollbar when overlay is visible
   useEffect(() => {
     if (!isPlaying) {
       document.body.style.overflow = 'hidden';
@@ -369,7 +360,6 @@ export const GameScreen = () => {
       document.body.style.overflow = 'auto';
     }
     
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'auto';
     };
@@ -435,7 +425,6 @@ export const GameScreen = () => {
     };
   }, []);
 
-  // Global playtime tracker (starts on first tile click)
   useEffect(() => {
     let intervalId: number | undefined;
 
@@ -502,8 +491,6 @@ export const GameScreen = () => {
     };
   }, [phase, entropy, phaseConfig]);
 
-  // Container style for explosion/scatter effects
-  // @ts-ignore - Style prepared for future implementation
   const _containerStyle = useMemo(() => {
     const scatterStyles: React.CSSProperties = {};
     
@@ -541,9 +528,7 @@ export const GameScreen = () => {
         <div className="text-center space-y-4 sm:space-y-6 p-4 sm:p-8 max-w-2xl w-full">
           {score === 0 && entropy === 0 ? (
             // Start screen
-            <>
-              
-            </>
+            <></>
           ) : (
             // Game over screen
             <>

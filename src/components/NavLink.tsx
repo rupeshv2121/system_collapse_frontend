@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Activity, Brain, ChevronDown, LogOut, Play, Trophy, User } from "lucide-react";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { Link, NavLinkProps, NavLink as RouterNavLink, useLocation } from "react-router-dom";
 
 interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
@@ -32,12 +32,30 @@ const Navbar = () => {
   const { user, username, signOut } = useAuth();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
     { to: "/game", label: "Game", icon: Play },
     { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { to: "/analytics", label: "Analytics", icon: Activity },
   ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const getUserInitial = () => {
     if (username) {
@@ -96,7 +114,7 @@ const Navbar = () => {
           {/* User Menu */}
           <div className="flex items-center gap-3">
             {/* User Info with Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-100 hover:bg-blue-200 border border-blue-300 transition-all group"

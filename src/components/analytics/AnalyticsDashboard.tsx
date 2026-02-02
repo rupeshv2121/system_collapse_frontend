@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GuidedTour, TourStep } from '@/components/ui/guided-tour';
 import { useGameStats } from '@/hooks/useGameStats';
 import { useUserData } from '@/hooks/useUserData';
-import { Brain, Flame, HelpCircle, RotateCcw, Trophy } from 'lucide-react';
+import { Brain, Flame, HelpCircle, RotateCcw, Trophy, User } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,8 +23,6 @@ import {
   YAxis
 } from 'recharts';
 
-// Custom label renderer for pie chart
-// @ts-ignore - Function may be used in future chart implementations
 const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, name, value }: any) => {
   const RADIAN = Math.PI / 180;
   const radius = outerRadius + 30;
@@ -52,7 +50,6 @@ const AnalyticsDashboard = () => {
   const [activeTab, setActiveTab] = useState<'game-stats' | 'user-profile'>('game-stats');
   const [isTourOpen, setIsTourOpen] = useState(false);
 
-  // Define tour steps - MODIFY THESE to change the guided tour
   const tourSteps: TourStep[] = [
     {
       target: '[data-tour="header"]',
@@ -102,7 +99,6 @@ const AnalyticsDashboard = () => {
     setIsTourOpen(true);
   };
 
-  // Prepare chart data
   const winLossData = useMemo(() => [
     { name: 'Wins', value: stats.gamesWon, fill: 'hsl(var(--success))' },
     { name: 'Losses', value: stats.gamesLost, fill: 'hsl(var(--destructive))' },
@@ -122,7 +118,6 @@ const AnalyticsDashboard = () => {
     }))
   , [stats.durationHistory]);
 
-  // @ts-ignore - Data prepared for future chart implementation
   const _sanityLossData = useMemo(() => 
     stats.sanityLossHistory.map((value, index) => ({
       game: index + 1,
@@ -185,7 +180,7 @@ const AnalyticsDashboard = () => {
               size="sm"
               className="gap-2"
             >
-              <Trophy className="w-4 h-4" />
+              <User className="w-4 h-4" />
               <span className="hidden sm:inline">View Profile</span>
             </Button>
           </div>
