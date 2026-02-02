@@ -1,13 +1,7 @@
-/**
- * API functions for user data synchronization via Backend API
- */
-
 import type { GameSession, UserDataSchema } from "@/types/userData";
 import { supabase } from "./supabase";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-
-// Error types for better error handling
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -65,7 +59,6 @@ async function apiCall<T>(
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        // Check for specific status codes
         if (response.status === 401 || response.status === 403) {
           throw new ApiError("Authentication failed", "auth", response.status);
         }
@@ -95,7 +88,6 @@ async function apiCall<T>(
       throw error;
     }
   } catch (error) {
-    // Handle abort/timeout errors - likely backend is down but not responding
     if (error instanceof Error && error.name === "AbortError") {
       throw new ApiError(
         "Backend server is not responding - please check if the server is running.",
@@ -105,7 +97,6 @@ async function apiCall<T>(
 
     // Network errors (no response from server)
     if (error instanceof TypeError) {
-      // Common network error messages
       const errorMessage = error.message.toLowerCase();
       if (
         errorMessage.includes("fetch") ||
@@ -116,7 +107,6 @@ async function apiCall<T>(
         errorMessage.includes("refused") ||
         errorMessage.includes("unreachable")
       ) {
-        // User has internet but can't reach backend - backend is down
         throw new ApiError(
           "Unable to connect to backend server. The server may be offline or unreachable.",
           "server",
@@ -124,12 +114,10 @@ async function apiCall<T>(
       }
     }
 
-    // Re-throw ApiError instances
     if (error instanceof ApiError) {
       throw error;
     }
 
-    // Generic errors
     throw new ApiError(
       error instanceof Error ? error.message : "An unexpected error occurred",
       "generic",
@@ -138,7 +126,6 @@ async function apiCall<T>(
 }
 
 export const userDataApi = {
-  // Save complete user data to database via backend
   async saveUserData(userData: UserDataSchema) {
     try {
       const {
@@ -146,7 +133,7 @@ export const userDataApi = {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Update profile via backend
+      // Update profile
       await apiCall(`/api/profile`, {
         method: "POST",
         body: JSON.stringify({
@@ -170,7 +157,7 @@ export const userDataApi = {
     }
   },
 
-  // Save a game session via backend
+  // Save a game session
   async saveGameSession(
     session: GameSession & {
       behaviorMetrics: any;
@@ -222,7 +209,7 @@ export const userDataApi = {
     }
   },
 
-  // Load user data from backend
+  // Load user data
   async loadUserData(): Promise<Partial<UserDataSchema> | null> {
     try {
       const {
@@ -230,17 +217,17 @@ export const userDataApi = {
       } = await supabase.auth.getUser();
       if (!user) return null;
 
-      // Load profile from backend
+      // Load profile
       const profile = await apiCall<any>(`/api/profile/${user.id}`, {
         method: "GET",
       });
 
-      // Load stats from backend
+      // Load stats
       const stats = await apiCall<any>(`/api/stats/${user.id}`, {
         method: "GET",
       });
 
-      // Transform backend data to UserDataSchema format
+      // Transform database data to UserDataSchema format
       const userData: Partial<UserDataSchema> = {
         userId: user.id,
         lastPlayedAt: Date.now(),

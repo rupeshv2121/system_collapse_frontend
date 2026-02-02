@@ -1,8 +1,3 @@
-/**
- * Beat Synchronization Hook
- * Manages beat-synchronized visual effects based on music beats
- */
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface BeatSyncState {
@@ -117,6 +112,9 @@ export const useBeatSync = (audioRef: React.RefObject<HTMLAudioElement>) => {
         beatPulse: false,
         flashIntensity: 0,
         scatterAmount: 0,
+        beatIntensity: 0,
+        gridShake: 0,
+        glowIntensity: 0,
       });
     };
 
